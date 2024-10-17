@@ -11,7 +11,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center">
-            <img src="/logo.png" alt="Constituent Circle Logo" className="h-8 w-auto" />
+            <img 
+              src="constituent-circle-logo.png" 
+              alt="Constituent Circle Logo" 
+              width={100}
+              height={100}
+              style={{border: '1px solid red'}}
+              onError={(e) => {
+                console.error('Error loading image:', e);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
           </div>
           <nav>
             <ul className="flex space-x-4">
@@ -30,7 +40,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <footer className="bg-primary text-text-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center">
-            <img src="/logo-white.png" alt="Constituent Circle Logo" className="h-8 w-auto" />
+            <img 
+              src="constituent-circle-logo.png" 
+              alt="Constituent Circle Logo" 
+              width={100} 
+              height={100} 
+              style={{border: '1px solid red'}}
+              onError={(e) => {
+                console.error('Error loading image:', e);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
             <nav>
               <ul className="flex space-x-4">
                 <li><Link href="/" className="hover:text-secondary">Home</Link></li>
