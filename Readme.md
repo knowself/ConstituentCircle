@@ -66,6 +66,14 @@ To set up the development environment locally:
      npm run dev
      ```
 
+   Alternatively, you can use the following command to run the Next.js development server:
+
+   ```bash
+   npx next dev
+   ```
+
+   This command starts the development server and enables hot-reloading for a smoother development experience.
+
 7. **Access the application:**
 
    - Open your browser and navigate to `http://localhost:3000`.
