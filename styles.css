@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global dark mode styles */
+body.dark {
+  background-color: #1a202c;
+  color: #f7fafc;
+}
+
+body.dark a {
+  color: #f7fafc;
+}
+
+body.dark a:hover {
+  color: #4299e1;
+}
+
+body.dark .invert {
+  filter: invert(1);
+}

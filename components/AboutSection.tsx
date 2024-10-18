@@ -2,10 +2,10 @@ import React from 'react';
 
 const AboutSection: React.FC = () => {
   return (
-    <div className="py-20 bg-white">
+    <div className="bg-background-light dark:bg-background-dark text-text-dark dark:text-text-light py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center mb-8 text-primary">About Constituent Circle</h2>
-        <div className="space-y-6 text-text-dark">
+        <h2 className="text-3xl font-bold text-center mb-8 text-primary dark:text-white">About Constituent Circle</h2>
+        <div className="space-y-6 text-text-light dark:text-white">
           <p>
             Constituent Circle creates AI-enabled tools for more effective, opinionated, goal-oriented communications, at scale, for representatives and constituents to be assured they are being heard by each other.
           </p>
