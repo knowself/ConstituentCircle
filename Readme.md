@@ -15,58 +15,7 @@ Constituent Circle is a platform designed to enhance communication between repre
 - **Constituent Profile Management**: Maintain detailed profiles with interaction history.
 - **Analytics Dashboard**: Gain insights into email open rates, response rates, and common constituent concerns.
 
-## Installation
-
-To set up the development environment locally:
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/yourusername/constituent-circle.git
-   ```
-
-2. **Navigate to the project directory:**
-
-   ```bash
-   cd constituent-circle
-   ```
-
-3. **Install backend dependencies:**
-
-   ```bash
-   cd backend
-   npm install
-   ```
-
-4. **Install frontend dependencies:**
-
-   ```bash
-   cd ../frontend
-   npm install
-   ```
-
-5. **Set up environment variables:**
-
-   - Create a `.env` file in both `backend` and `frontend` directories based on the provided `.env.example` files.
-   - Add your API keys, database URLs, and other sensitive information.
-
-6. **Run the development servers:**
-
-   - **Backend:**
-
-     ```bash
-     cd ../backend
-     npm run dev
-     ```
-
-   - **Frontend:**
-
-     ```bash
-     cd ../frontend
-     npm run dev
-     ```
-
-   Alternatively, you can use the following command to run the Next.js development server:
+You use the following command to run the Next.js development server:
 
    ```bash
    npx next dev
@@ -74,7 +23,7 @@ To set up the development environment locally:
 
    This command starts the development server and enables hot-reloading for a smoother development experience.
 
-7. **Access the application:**
+- **To Access the application go to the following URL:**
 
    - Open your browser and navigate to `http://localhost:3000`.
 
