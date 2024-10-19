@@ -19,3 +19,14 @@ body.dark a:hover {
 body.dark .invert {
   filter: invert(1);
 }
+
+/* Smooth scrolling for the whole page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for better accessibility */
+*:focus {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
