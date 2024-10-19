@@ -1,5 +1,4 @@
 import React from 'react';
-import Layout from '../components/Layout';
 
 const BlogPost = ({ title, date, excerpt }: { title: string; date: string; excerpt: string }) => (
   <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -30,16 +29,14 @@ const BlogPage: React.FC = () => {
   ];
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-6 text-gray-900 dark:text-white">Our Blog</h1>
-        <div className="grid gap-8">
-          {blogPosts.map((post, index) => (
-            <BlogPost key={index} {...post} />
-          ))}
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold mb-6 text-gray-900 dark:text-white">Our Blog</h1>
+      <div className="grid gap-8">
+        {blogPosts.map((post, index) => (
+          <BlogPost key={index} {...post} />
+        ))}
       </div>
-    </Layout>
+    </div>
   );
 };
 
