@@ -4,7 +4,7 @@
   "description": "TypeScript and Tailwind CSS project",
   "main": "index.js",
   "scripts": {
-    "build": "next build",
+    "build": "next build --tailwind-config",
     "dev": "npx next dev",
     "start": "next start"
   },
