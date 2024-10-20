@@ -1,6 +1,6 @@
 {
-  "name": "cline-cc",
-  "version": "1.0.0",
+  "name": "constituent-circle",
+  "version": "0.0.1",
   "description": "TypeScript and Tailwind CSS project",
   "main": "index.js",
   "scripts": {
