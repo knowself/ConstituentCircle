@@ -30,3 +30,13 @@ html {
   outline: 2px solid #4299e1;
   outline-offset: 2px;
 }
+
+.header-logo a {
+  outline: none;
+  text-decoration: none;
+}
+
+.header-logo a:focus {
+  outline: none;
+  text-decoration: none;
+}

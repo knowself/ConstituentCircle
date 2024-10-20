@@ -48,12 +48,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <img 
-                src="/constituent-circle-logo.png" 
-                alt="Constituent Circle Logo" 
-                width={100}
-                height={100}
-              />
+              <Link href="/" className="header-logo" style={{ outline: 'none', textDecoration: 'none' }}>
+                <img 
+                  src="/constituent-circle-logo.png" 
+                  alt="Constituent Circle Logo" 
+                  width={100}
+                  height={100}
+                />
+              </Link>
             </div>
             <nav className="hidden md:block">
               <ul className="flex space-x-4 items-center">
