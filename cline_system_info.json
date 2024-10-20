@@ -1,8 +1,0 @@
-{
-  "operating_system": "Windows",
-  "default_shell": "C:\\WINDOWS\\system32\\cmd.exe",
-  "home_directory": "C:/Users/Owner",
-  "current_working_directory": "c:/Users/Owner/Documents/- - - - - - AI Powered Dev/cline-cc",
-  "development_environment": "Windows",
-  "dev_environment_launch_command": "npx next dev"
-}
