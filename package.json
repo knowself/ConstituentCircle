@@ -1,12 +1,18 @@
 {
   "name": "constituent-circle",
   "version": "0.0.1",
+  "private": true,
   "description": "TypeScript and Tailwind CSS project",
   "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "next build",
     "dev": "npx next dev",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest"
   },
   "keywords": [
     "typescript",
@@ -16,17 +22,17 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "22.7.7",
+    "@types/node": "^22.7.7",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
-    "typescript": "5.6.3"
+    "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@types/react": "18.3.11",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "next": "^14.2.15",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
