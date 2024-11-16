@@ -8,8 +8,10 @@ type LayoutProps = {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const storedDarkMode = localStorage.getItem('darkMode');
     setIsDarkMode(storedDarkMode === 'true');
     if (storedDarkMode === 'true') {
@@ -18,6 +20,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       document.body.classList.remove('dark');
     }
   }, []);
+
+  // Prevent hydration mismatch by only rendering theme-dependent content after mount
+  if (!mounted) {
+    return <div className="min-h-screen bg-white" />; // Basic loader
+  }
 
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
