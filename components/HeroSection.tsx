@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 const HeroSection: React.FC = () => {
   return (
@@ -11,9 +12,12 @@ const HeroSection: React.FC = () => {
           AI-enabled tools for effective, opinionated, goal-oriented communications
           between representatives and constituents.
         </p>
-        <button className="bg-secondary hover:bg-opacity-90 text-text-light font-bold py-3 px-6 rounded-lg text-lg sm:text-xl transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
+        <Link 
+          href="/services" 
+          className="inline-block bg-secondary hover:bg-opacity-90 text-text-light font-bold py-3 px-6 rounded-lg text-lg sm:text-xl transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+        >
           Learn More
-        </button>
+        </Link>
       </div>
     </div>
   );
