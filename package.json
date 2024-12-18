@@ -53,6 +53,7 @@
     "@firebase/auth": "^1.8.1",
     "@firebase/firestore": "^4.7.5",
     "@heroicons/react": "^2.2.0",
+    "@sendgrid/mail": "^8.1.4",
     "@twilio/conversations": "^2.6.0",
     "@types/chart.js": "^2.9.41",
     "@types/react-dom": "^18.2.0",
