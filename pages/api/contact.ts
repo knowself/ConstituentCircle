@@ -29,7 +29,7 @@ export default async function handler(
   const msg = {
     to: process.env.CONTACT_EMAIL_TO,
     from: process.env.CONTACT_EMAIL_FROM || process.env.CONTACT_EMAIL_TO, // Use verified sender
-    subject: `New Contact Form Submission from ${name}`,
+    subject: `New Contituent CircleContact Form from ${name}`,
     text: `
 Name: ${name}
 Email: ${email}
