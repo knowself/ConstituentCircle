@@ -4,7 +4,7 @@ AI-Enabled Tools for a Representative Democracy
 
 ## Introduction
 
-Constituent Circle is a platform designed to enhance communication between representatives and their constituents. By leveraging artificial intelligence (AI) and natural language processing (NLP), the platform enables representatives to craft personalized, on-message emails efficiently while maintaining their authentic voice. The goal is to facilitate meaningful, goal-oriented conversations at scale, ensuring that constituents feel heard and represented.
+Constituent Circle is a AI technology platform (CC) designed to enhance communication email, SMS and others between representatives and their constituents. By leveraging artificial intelligence (AI) and natural language processing (NLP), the CC platform enables representatives to craft personalized, on-message communications efficiently while maintaining their authentic voice and personal touch. The goal is to facilitate meaningful, goal-oriented conversations at scale, regardless of the channel, ensuring that constituents feel heard and represented.
 
 ## Features
 

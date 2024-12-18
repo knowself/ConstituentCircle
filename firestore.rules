@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'admin';
+    }
+    
+    function isRepresentative() {
+      return isAuthenticated() && request.auth.token.role == 'representative';
+    }
+    
+    function isStaff() {
+      return isAuthenticated() && request.auth.token.role == 'staff';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Validation functions
+    function isValidEmail(email) {
+      return email.matches('^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$');
+    }
+
+    function isValidPhone(phone) {
+      return phone.matches('^\\+?[1-9]\\d{1,14}$');
+    }
+
+    function isValidTimestamp(timestamp) {
+      return timestamp is timestamp && timestamp.seconds > 0;
+    }
+
+    // Rate limiting helper
+    function notRateLimited() {
+      return request.time > resource.data.lastRequest + duration.value(60, 's');
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId && 
+        isValidEmail(request.resource.data.email);
+      allow update: if (isOwner(userId) || isAdmin()) && 
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Representatives collection
+    match /representatives/{repId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && 
+        isValidPhone(request.resource.data.contactInfo.phone) &&
+        isValidEmail(request.resource.data.contactInfo.email) &&
+        isValidTimestamp(request.resource.data.term.start) &&
+        isValidTimestamp(request.resource.data.term.end);
+      allow update: if (isAdmin() || (isRepresentative() && isOwner(repId))) && notRateLimited();
+      allow delete: if isAdmin();
+      
+      // Constituent messages subcollection
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (isOwner(repId) || isStaff());
+        allow create: if isAuthenticated() && notRateLimited();
+        allow update, delete: if isOwner(repId) || isAdmin();
+      }
+    }
+
+    // Communications collection
+    match /communications/{commId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isStaff() || 
+        (isRepresentative() && resource.data.representativeId == request.auth.uid)
+      );
+      allow create: if isAuthenticated() && (isAdmin() || isRepresentative()) &&
+        request.resource.data.content.size() <= 50000;
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (isRepresentative() && resource.data.representativeId == request.auth.uid)
+      ) && notRateLimited();
+      allow delete: if isAdmin();
+    }
+
+    // Analytics collection
+    match /analytics/{docId} {
+      allow read: if isAuthenticated() && (isAdmin() || isStaff());
+      allow write: if isAdmin() && notRateLimited();
+    }
+
+    // System settings
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && notRateLimited();
+    }
+  }
+}
