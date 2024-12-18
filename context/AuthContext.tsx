@@ -27,12 +27,27 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, role: Role) => Promise<void>;
+  signUp: (email: string, password: string, role: Role, metadata?: Record<string, any>) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Helper function to convert Firebase User to our UserProfile format
+const convertFirebaseUser = (firebaseUser: FirebaseUser, userData?: UserProfile): FirebaseUser & Partial<UserProfile> => {
+  if (!firebaseUser.email || !firebaseUser.displayName) {
+    throw new Error('Required user fields are missing');
+  }
+
+  return {
+    ...firebaseUser,
+    email: firebaseUser.email,
+    displayName: firebaseUser.displayName,
+    photoURL: firebaseUser.photoURL || undefined,
+    ...userData,
+  } as FirebaseUser & Partial<UserProfile>;
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<(FirebaseUser & Partial<UserProfile>) | null>(null);
@@ -55,10 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             lastLogin: new Date().toISOString()
           }));
           
-          setUser({
-            ...firebaseUser,
-            ...userData,
-          });
+          setUser(convertFirebaseUser(firebaseUser, userData));
         } else {
           setUser(null);
           localStorage.removeItem('userSession');
@@ -100,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, role: Role) => {
+  const signUp = async (email: string, password: string, role: Role, metadata: Record<string, any> = {}) => {
     try {
       setError(null);
       const { user: newUser } = await createUserWithEmailAndPassword(
@@ -115,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: newUser.email,
         displayName: newUser.displayName || email.split('@')[0],
         role,
+        ...metadata,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });

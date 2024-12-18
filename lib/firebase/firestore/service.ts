@@ -30,7 +30,7 @@ import {
 // Generic type for all our models
 type FirestoreModel = UserProfile | Representative | Message | Communication | Analytics | Settings;
 
-class FirestoreError extends Error {
+class CustomFirestoreError extends Error {
   constructor(
     message: string,
     public code: string,
@@ -38,7 +38,7 @@ class FirestoreError extends Error {
     public path: string
   ) {
     super(message);
-    this.name = 'FirestoreError';
+    this.name = 'CustomFirestoreError';
   }
 }
 
@@ -50,15 +50,15 @@ export class FirestoreService<T extends FirestoreModel> {
 
   protected handleError(error: any, operation: string, path: string): never {
     if (error instanceof FirestoreError) {
-      throw new FirestoreError(
+      throw new CustomFirestoreError(
         error.message,
         error.code,
         operation,
         path
       );
     }
-    throw new FirestoreError(
-      'An unexpected error occurred',
+    throw new CustomFirestoreError(
+      error.message || 'Unknown error',
       'unknown',
       operation,
       path

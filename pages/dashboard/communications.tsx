@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
+import { useAuth } from '../../context/AuthContext';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import { useCommunications } from '../../hooks/useCommunications';
-import { CommunicationType, CommunicationChannel, Communication } from '../../lib/firebase/firestore/types';
+import { CommunicationType, CommunicationChannel, CommunicationDirection } from '../../lib/types/communication';
+import { Communication } from '../../lib/firebase/firestore/types';
 import CommunicationComposer from '../../components/communications/CommunicationComposer';
 
 export default function Communications() {
@@ -145,7 +147,7 @@ export default function Communications() {
                         </div>
                         <div className="mt-2 flex items-center justify-between">
                           <div className="flex items-center space-x-3 text-sm text-gray-500">
-                            <span>{new Date(comm.createdAt).toLocaleDateString()}</span>
+                            <span>{comm.createdAt.toDate().toLocaleDateString()}</span>
                             <span>•</span>
                             <span className="capitalize">{comm.type}</span>
                             <span>•</span>

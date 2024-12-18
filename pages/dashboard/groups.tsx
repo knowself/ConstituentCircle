@@ -3,6 +3,7 @@ import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import { useAuth } from '../../context/AuthContext';
 import { ConstituentGroup } from '../../lib/firebase/firestore/types';
+import { Timestamp } from 'firebase/firestore';
 import GroupComposer from '../../components/groups/GroupComposer';
 
 export default function Groups() {
@@ -28,13 +29,13 @@ export default function Groups() {
         district: '5',
       },
       analytics: {
-        totalMembers: 250,
-        activeMembers: 180,
+        totalMembers: 150,
+        activeMembers: 120,
         postsCount: 45,
         engagementRate: 72,
       },
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
     },
     // Add more sample groups
   ]);
@@ -171,3 +172,4 @@ export default function Groups() {
       </DashboardLayout>
     </ProtectedRoute>
   );
+}

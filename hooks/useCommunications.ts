@@ -16,11 +16,13 @@ import {
 } from 'firebase/firestore';
 import {
   Communication,
+  SocialEngagement
+} from '../lib/firebase/firestore/types';
+import {
   CommunicationType,
   CommunicationDirection,
   CommunicationChannel,
-  SocialEngagement
-} from '../lib/firebase/firestore/types';
+} from '../lib/types/communication';
 
 interface UseCommunicationsOptions {
   type?: CommunicationType;
@@ -46,26 +48,23 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
       // Build query based on user role and access permissions
       let baseQuery = query(communicationsRef);
 
-      // For representatives, show all communications in their hierarchy
-      if (user.role === 'representative') {
-        baseQuery = query(
-          communicationsRef,
-          where('representativeId', '==', user.uid)
-        );
+      // For company admins, show all communications
+      if (user.role === 'company_admin') {
+        baseQuery = query(communicationsRef);
       }
-      // For staff, show communications they have access to
-      else if (user.role === 'staff') {
+      // For staff members, show communications they have access to
+      else if (user.role === 'staff_member') {
         baseQuery = query(
           communicationsRef,
           where('representativeId', '==', user.representativeId)
         );
       }
-      // For constituents, show public communications and their direct messages
-      else if (user.role === 'constituent') {
+      // For other users, show public communications and their direct messages
+      else {
         baseQuery = query(
           communicationsRef,
           where('visibility', '==', 'public'),
-          where('district', '==', user.district)
+          where('recipientId', '==', user.uid)
         );
       }
 
@@ -109,7 +108,7 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
       ...data,
       senderId: user.uid,
       senderRole: user.role,
-      representativeId: user.role === 'representative' ? user.uid : user.representativeId,
+      representativeId: user.role === 'company_admin' ? user.uid : user.representativeId,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       status: 'draft',

@@ -3,15 +3,15 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import {
-  MenuIcon,
-  XIcon,
   HomeIcon,
   UserGroupIcon,
-  ChatIcon,
+  ChatBubbleLeftIcon as ChatIcon,
   ChartBarIcon,
-  CogIcon,
-  LogoutIcon,
-} from '@heroicons/react/outline';
+  Cog6ToothIcon as CogIcon,
+  ArrowRightOnRectangleIcon as LogoutIcon,
+  Bars3Icon as MenuIcon,
+  XMarkIcon as XIcon,
+} from '@heroicons/react/24/outline';
 
 interface LayoutProps {
   children: ReactNode;

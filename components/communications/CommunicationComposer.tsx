@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Communication, CommunicationType, CommunicationChannel, CommunicationDirection } from '../../lib/firebase/firestore/types';
+import { Communication } from '../../lib/firebase/firestore/types';
+import { CommunicationType, CommunicationChannel, CommunicationDirection } from '../../lib/types/communication';
+import { Timestamp } from 'firebase/firestore';
 
 interface CommunicationComposerProps {
   initialData?: Partial<Communication>;
@@ -25,7 +27,7 @@ export default function CommunicationComposer({
   );
   const [visibility, setVisibility] = useState(initialData?.visibility || 'private');
   const [scheduledFor, setScheduledFor] = useState<Date | null>(
-    initialData?.scheduledFor ? new Date(initialData.scheduledFor) : null
+    initialData?.scheduledFor ? initialData.scheduledFor.toDate() : null
   );
   const [socialPlatforms, setSocialPlatforms] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -65,10 +67,10 @@ export default function CommunicationComposer({
         direction,
         channel,
         visibility,
-        scheduledFor: scheduledFor ? scheduledFor : undefined,
+        scheduledFor: scheduledFor ? Timestamp.fromDate(scheduledFor) : undefined,
         metadata: {
-          tags: [],
-          socialPlatforms,
+          tags: socialPlatforms,
+          platform: socialPlatforms.join(','),
           aiGenerated: false,
         },
       });
