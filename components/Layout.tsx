@@ -239,7 +239,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <footer className="bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-base text-gray-500 dark:text-gray-300">
-            &copy; {new Date().getFullYear()} Constituent Circle. All rights reserved.
+            &copy; {new Date().getFullYear()} Constituent Circle, LLC. All rights reserved.
           </p>
         </div>
       </footer>
