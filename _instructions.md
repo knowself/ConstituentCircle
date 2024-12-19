@@ -75,6 +75,26 @@ Constituent Circle is an AI technology platform (CC) designed to enhance multi-c
 <!-- REQUIRES-APPROVAL: PROJECT-MANAGER -->
 ## 6-Week Launch Plan (Dec 17, 2024 - Jan 28, 2025)
 
+### Progress Update (Dec 18, 2024)
+
+#### Week 1 (Dec 18-24): Core Communication
+- **Tasks Completed**:
+  - Setup Vercel AI SDK + OpenAI
+  - Implemented Twilio integration
+  - Developed basic email and SMS composer UIs
+  - Integrated AI assistance features, including message improvement and tone adjustment.
+
+- **AI Assistance Integration Milestones**:
+  1. **API Interaction Logic Implementation** (Deadline: Dec 20, 2024) - In progress.
+  2. **Unified API Interface Creation** (Deadline: Dec 22, 2024) - In progress.
+  3. **Response Aggregation Functionality** (Deadline: Dec 24, 2024) - Planned.
+  4. **User Interface Design** (Deadline: Dec 26, 2024) - Planned.
+  5. **Testing and Feedback Mechanism** (Deadline: Dec 28, 2024) - Planned.
+
+#### Next Steps
+- **Testing**: Validate the AI integration with the updated Google AI endpoint.
+- **Continue with Remaining Milestones**: Focus on completing the milestones for the AI assistance integration as outlined in the roadmap.
+
 ### Week 1 (Dec 18-24): Core Communication
 - [ ] Setup Vercel AI SDK + OpenAI
 - [ ] Implement Twilio integration
@@ -85,6 +105,28 @@ Constituent Circle is an AI technology platform (CC) designed to enhance multi-c
   - Tone adjustment
   - Simple templates
 - [ ] Message preview & editing
+
+### Mini Milestones for AI Assistance Integration
+
+1. **API Interaction Logic Implementation**  
+   - Develop the function for sequential API requests and error handling.  
+   - Deadline: Dec 20, 2024  
+
+2. **Unified API Interface Creation**  
+   - Build the API wrapper class/module to manage interactions with both OpenAI and Google AI Studio.  
+   - Deadline: Dec 22, 2024  
+
+3. **Response Aggregation Functionality**  
+   - Implement the function to combine responses from both APIs and prioritize them.  
+   - Deadline: Dec 24, 2024  
+
+4. **User Interface Design**  
+   - Create a user-friendly interface to display aggregated suggestions.  
+   - Deadline: Dec 26, 2024  
+
+5. **Testing and Feedback Mechanism**  
+   - Conduct testing of the integration and implement a feedback loop for users to rate suggestions.  
+   - Deadline: Dec 28, 2024  
 
 ### Week 2 (Dec 25-31): Constituent Base
 - [ ] Firestore constituent model
@@ -215,6 +257,26 @@ Constituent Circle is an AI technology platform (CC) designed to enhance multi-c
 - Deployment guides
 - Integration guides
 <!-- END-PROTECT: DEV-STANDARDS -->
+
+## Instructions for Using Serverless Functions
+
+### Overview
+This document provides instructions for implementing and managing serverless functions within the Constituent Circle platform. Serverless functions allow for executing code in response to events without the need for server management, enhancing scalability and reducing operational overhead.
+
+### Setting Up Cloud Functions
+1. **Choose a Cloud Provider**: Select between AWS Lambda or Google Cloud Functions based on your project requirements.
+2. **Create a Function**: Follow the provider's documentation to create a new cloud function. Specify the trigger (e.g., HTTP request, Pub/Sub message).
+3. **Deploy Your Code**: Upload your function code, ensuring it adheres to the provider's structure and requirements.
+4. **Test the Function**: Use the cloud provider's testing tools to ensure your function behaves as expected.
+
+### Best Practices
+- **Keep Functions Lightweight**: Limit the complexity of each function to ensure quick execution and easy debugging.
+- **Use Environment Variables**: Store sensitive information like API keys in environment variables to keep them secure.
+- **Monitor Performance**: Utilize monitoring tools to track the performance of your cloud functions and set up alerts for any issues.
+
+### Integration with Other Services
+- **Database Integration**: Ensure your functions can interact with Firestore or other databases for data storage and retrieval.
+- **Logging**: Implement logging within your functions to capture important events and errors for troubleshooting purposes.
 
 <!-- BEGIN-PROTECT: VERSION -->
 <!-- LAST-UPDATED: 2024-12-17T19:46:26-05:00 -->
