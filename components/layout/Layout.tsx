@@ -11,6 +11,7 @@ import {
   ArrowRightOnRectangleIcon as LogoutIcon,
   Bars3Icon as MenuIcon,
   XMarkIcon as XIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -37,10 +38,39 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Constituents', href: '/dashboard/constituents', icon: UserGroupIcon },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
     { name: 'Settings', href: '/dashboard/settings', icon: CogIcon },
+    { name: 'Auth', href: '/auth', icon: LockClosedIcon },
   ];
 
   if (!user) {
-    return <div className="min-h-screen">{children}</div>;
+    return (
+      <div className="min-h-screen">
+        <div className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <Link href="/">
+                  <img
+                    className="h-8 w-auto"
+                    src="/constituent-circle-logo.png"
+                    alt="Constituent Circle"
+                  />
+                </Link>
+              </div>
+              <div className="flex items-center">
+                <Link
+                  href="/auth/signin"
+                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200"
+                >
+                  <LockClosedIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                  Sign In
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        <main>{children}</main>
+      </div>
+    );
   }
 
   return (
@@ -71,10 +101,10 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-              <div className="flex-shrink-0 flex items-center px-4">
+              <div className="flex-shrink-0 flex items-center px-4 h-16">
                 <img
                   className="h-8 w-auto"
-                  src="/logo.png"
+                  src="/constituent-circle-logo.png"
                   alt="Constituent Circle"
                 />
               </div>
@@ -136,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center h-16 flex-shrink-0 px-4 bg-white border-b border-gray-200">
             <img
               className="h-8 w-auto"
-              src="/logo.png"
+              src="/constituent-circle-logo.png"
               alt="Constituent Circle"
             />
           </div>
@@ -198,7 +228,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex items-center justify-between h-16">
               <img
                 className="h-8 w-auto"
-                src="/logo.png"
+                src="/constituent-circle-logo.png"
                 alt="Constituent Circle"
               />
               <button

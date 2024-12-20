@@ -13,19 +13,20 @@
  * @module Components/Core
  */
 
-import React, { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { SunIcon, MoonIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../lib/firebase/auth/context';
 
 /**
  * Props for the Layout component
  * @interface LayoutProps
  * @property {ReactNode} children - Child components to be wrapped by the layout
  */
-type LayoutProps = {
+interface LayoutProps {
   children: ReactNode;
-};
+}
 
 /**
  * Navigation link structure
@@ -46,7 +47,7 @@ interface NavLink {
  * @param {LayoutProps} props - Component props
  * @returns {JSX.Element} Rendered layout component
  */
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+export default function Layout({ children }: LayoutProps) {
   // State management for theme and mobile menu
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -117,12 +118,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Logo and brand */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
-                <Image
+                <img
                   src="/constituent-circle-logo.png"
                   alt="Constituent Circle"
-                  width={125}
-                  height={125}
-                  className="h-[125px] w-[125px]"
+                  className="h-8 w-auto"
+                  fetchpriority="high"
                 />
               </Link>
             </div>
@@ -143,32 +143,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
               ))}
               
-              {/* Theme toggle button */}
-              <button
-                onClick={toggleDarkMode}
-                className="p-2 rounded-md text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                aria-label="Toggle dark mode"
-              >
-                {isDarkMode ? (
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                    />
-                  </svg>
-                ) : (
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                    />
-                  </svg>
-                )}
-              </button>
+              {/* Theme toggle and Auth buttons */}
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={toggleDarkMode}
+                  className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                  aria-label="Toggle dark mode"
+                >
+                  {isDarkMode ? (
+                    <SunIcon className="h-5 w-5" />
+                  ) : (
+                    <MoonIcon className="h-5 w-5" />
+                  )}
+                </button>
+                
+                {/* Assuming user is not authenticated */}
+                <Link
+                  href="/auth/signin"
+                  className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                >
+                  <LockClosedIcon className="h-5 w-5" aria-hidden="true" />
+                </Link>
+              </div>
             </div>
 
             {/* Mobile menu button */}
@@ -245,6 +241,4 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </footer>
     </div>
   );
-};
-
-export default Layout;
+}
