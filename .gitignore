@@ -121,3 +121,6 @@ Thumbs.db
 # Project specific
 css-build.log
 .vercel
+
+# Firestore structure
+firestore-structure/serviceAccountKey.json
