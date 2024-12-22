@@ -1,0 +1,80 @@
+{
+  "database": {
+    "permissions": {
+      "fields": {
+        "permissions": "array"
+      },
+      "subcollections": {}
+    },
+    "roles": {
+      "fields": {
+        "roles": "array"
+      },
+      "subcollections": {}
+    }
+  },
+  "roles": {
+    "Administrator": {
+      "fields": {
+        "permissions": "array"
+      },
+      "subcollections": {}
+    },
+    "Constituent": {
+      "fields": {
+        "permissions": "array"
+      },
+      "subcollections": {}
+    },
+    "Representative": {
+      "fields": {
+        "permissions": "array"
+      },
+      "subcollections": {}
+    }
+  },
+  "users": {
+    "Jo2pdLdPc6ZOVArvVDhk": {
+      "fields": {
+        "email": "string",
+        "firstName": "string",
+        "middleNames": "array",
+        "lastName": "string",
+        "prefix": "string",
+        "suffix": "string",
+        "pronoun": "string",
+        "phoneNumber": "string",
+        "profilePictureUrl": "string",
+        "bio": "string",
+        "createdAt": "string",
+        "updatedAt": "string",
+        "active": "string",
+        "role": "string"
+      },
+      "subcollections": {
+        "officeAddress": {
+          "W4NhUCDIE0OxldFhvyMl": {
+            "fields": {
+              "streetAddress": "string",
+              "secondLine": "string",
+              "city": "string",
+              "state": "string",
+              "postalCode": "string",
+              "country": "string"
+            },
+            "subcollections": {}
+          }
+        },
+        "socialMediaLinks": {
+          "kbpeCCASG2qfNI4a6j7m": {
+            "fields": {
+              "x": "string",
+              "facebook": "string"
+            },
+            "subcollections": {}
+          }
+        }
+      }
+    }
+  }
+}

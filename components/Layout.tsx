@@ -121,7 +121,7 @@ export default function Layout({ children }: LayoutProps) {
                 <img
                   src="/constituent-circle-logo.png"
                   alt="Constituent Circle"
-                  className="h-8 w-auto"
+                  style={{ height: '125px', width: 'auto' }}
                   fetchpriority="high"
                 />
               </Link>

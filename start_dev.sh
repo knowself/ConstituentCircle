@@ -45,15 +45,31 @@ restart_server() {
   PID=$!
 }
 
+test_openai_initialization() {
+  echo "Running OpenAI initialization test..."
+  # Check if the OpenAI API key is set
+  if [[ -z "${OPENAI_API_KEY}" ]]; then
+    echo "OpenAI API key is not set. Test failed!"
+    return 1
+  else
+    echo "OpenAI API key is set. Test passed!"
+  fi
+
+  # Here you can add more checks related to OpenAI initialization if needed
+}
+
 # Loop to accept user commands
-# Allows the user to restart the server or quit the script
+# Allows the user to restart the server, run tests, or quit the script
 while true; do
   # Show prompt and get command
-  read -p "Enter (r to restart, q to quit): " command
+  read -p "Enter (r to restart, q to quit, t to run tests): " command
   if [[ -n $command ]]; then
     case $command in
       r)
         restart_server
+        ;;
+      t)
+        test_openai_initialization
         ;;
       q)
         echo "Quitting..."
@@ -61,7 +77,7 @@ while true; do
         exit 0
         ;;
       *)
-        echo "Invalid command. Please enter 'r' to restart or 'q' to quit."
+        echo "Invalid command. Please enter 'r' to restart, 'q' to quit, or 't' to run tests."
         ;;
     esac
   fi
