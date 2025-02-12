@@ -1,14 +1,14 @@
 
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 
-let openAIInstance: OpenAIApi | null = null;
+let openAIInstance: OpenAI | null = null;
 
 export const initOpenAIClient = () => {
   if (!openAIInstance) {
-    const configuration = new Configuration({
+    openAIInstance = new OpenAI({
       apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true
     });
-    openAIInstance = new OpenAIApi(configuration);
   }
   return openAIInstance;
 };
