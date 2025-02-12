@@ -122,7 +122,7 @@ export default function Layout({ children }: LayoutProps) {
                   src="/constituent-circle-logo.png"
                   alt="Constituent Circle"
                   style={{ height: '125px', width: 'auto' }}
-                  fetchpriority="high"
+                  fetchPriority="high"
                 />
               </Link>
             </div>
