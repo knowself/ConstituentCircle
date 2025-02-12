@@ -6,6 +6,7 @@ This document outlines the architecture for managing tasks and processes within 
 ## 2. Components
 - **Task Queue**:  
   - **Bull**: A robust task and job queue library for Node.js that supports delayed jobs, retries, and concurrency.  
+  - **Redis**: Powers real-time features, caching, and session management.
 
 - **Job Scheduler**:  
   - **Agenda**: A lightweight job scheduling library for Node.js that allows for scheduling jobs at specific intervals or times.  

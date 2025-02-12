@@ -80,6 +80,7 @@ You use the following command to run the Next.js development server:
 - **Express.js**: A web framework for building RESTful APIs, facilitating the creation of server-side applications.
 - **TypeScript**: Used in the backend to ensure type safety and improve code maintainability.
 - **Firestore**: A NoSQL cloud database from Firebase, used for storing and syncing data in real-time.
+- **Redis**: In-memory data store for caching, real-time features, and session management.
 - **Nodemailer**: A module for sending emails from Node.js applications, enabling email communication features.
 - **JWT (jsonwebtoken)**: Used for secure authentication and authorization, allowing for the creation of JSON Web Tokens.
 - **Bcrypt**: A library for hashing passwords, ensuring secure storage of user credentials.
