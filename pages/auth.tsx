@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { registerUser, loginUser } from '../firebase'; // Adjust the path as necessary
+import { registerUser, loginUser } from '../lib/firebase'; // Adjust the path as necessary
 
 const AuthPage: React.FC = () => {
   // Registration state
