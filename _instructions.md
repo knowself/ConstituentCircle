@@ -18,7 +18,9 @@ Constituent Circle is an AI technology platform (CC) designed to enhance multi-c
   - Firebase Cloud Functions
   - Vercel Edge Functions (for OpenAI)
   - Twilio API (for SMS)
-- **Database**: Firestore
+- **Database**: 
+  - Firestore (primary data store)
+  - Redis (caching & real-time features)
 - **Authentication**: Firebase Auth
 - **AI**: OpenAI via Vercel AI SDK
 - **Messaging**: 
