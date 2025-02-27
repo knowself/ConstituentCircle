@@ -1,0 +1,90 @@
+I need you to create a single comprehensive commit message which addresses each and every change. Examine each change in detail using git and describe it's essential impact. I will perform the commit.
+======================
+Let's start working on our project. We have a roadmap and milestones acheched in _roadmap.md. Our tech stack is documented there and we will record what we learn in _dev-lessons.md. Each time you get a question from me the human programmer make your top 5 best suggestions for me, after careful consideration, to choose from without making any changes and we will discuss them. Understoood ? Don't make any suggestions now.
+======================
+Review our roadmap in _instructions.md. Let's talk about next steps for work today.
+=======================
+Explore changes below but do not change anything without permission.
+1
+XXXXXXXXXX
+
+Verify and Repeat your understanding.
+===========================
+Let's remember the core principles and project context. Analyze how your recent implementation decisions align with these principles SOLID Principles, Security First, Error Handling, Clean Code, Scalability and remember we must update the documentation within _instructions.md keeping track of our progress.
+===========================
+Let's remember to document xxxxxxxxxxxxxx this remember this list of ideas for future consideration and implementation and update the documentation within _instructions.md keeping track for our future roadmap.
+
+but let's then return to our previous list of upgrades.
+===========================
+can we use vue without much disruption
+
+I like the UI we have begun with, so I don't want that to change
+========================
+
+update devs.sh to the current reality that firebase credentials are being read from a json filewhere
+
+
+simple and complete instructions for installing XFCE and LightDM with xRDP on ubuntu
+
+neofetch
+
+I need to evaluate my tech stack it seems complicated to keep running in development and I fear it will be complicated to keep running in production. I need Vue server for the front end in development, do I need that in vercel production or not, then I need Django for python job management or do I, firebase is my cloud database, celery and redis are for management of long running jobs and flow of jobs in vercel production.
+
+Is there a simpler more seemless and robust architecture for runnning potential long running python jobs in the backend for AI projects on the web with python jobs running against LLM models apis
+
+
+Hybrid Serverless Architecture
+
+Frontend: Static Vue.js build
+Backend: Vercel Functions + Google Cloud Run
+Database: Keep Firebase
+
+Job Queue:
+
+Cloud Pub/Sub Pros:
+Best for LLM workloads
+Flexible scaling
+Full control over long jobs
+Cons:
+More services to manage
+Higher complexity
+
+I want to go with 3 rearrange or eliminate anthing that is not going to be used and completely
+
+update
+_ai_dev_principles.json and _windsurf_memory.json and readme.md
+then update devs.sh for the new tech stack
+
+how do I use devs.sh
+
+npm uninstall -g @codeium/windsurf
+
+                   
+=========
+1) 
+
+working on sending contact form email through firebase cloud function and it's not working let's review in detail
+
+https://us-west1-[YOUR-PROJECT-ID].cloudfunctions.net/sendContactEmail
+
+logs for sendContactEmail
+
+https://console.cloud.google.com/logs/query;query=resource.type%3D%22cloud_function%22%20resource.labels.function_name%3D%22sendContactEmail%22%20severity%3E%3DDEFAULT
+
+
+I need to put a script tag in the homepage before the body 
+Please make a number of suggestions for each question from me to choose from without making any changes
+
+<script src="https://app.simplebotinstall.com/js/chat_plugin.js" data-bot-id="35764"></script>
+
+=====================================
+
+Please run 'wsl --shutdown' in Windows PowerShell (Admin) and restart WSL
+Then start your development server with: npm run dev:ssl
+
+========================
+Terminate process on windows using port 3389
+========================
+1) netstat -ano | findstr :3389 -- find the process id
+2) tasklist | findstr <PID> -- list the process by name
+3) taskkill /F /PID <PID> -- kill process by process id

@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Communication } from '../../lib/firebase/firestore/types';
+import { Communication } from '../../lib/types/communication';
 import { CommunicationType, CommunicationChannel, CommunicationDirection } from '../../lib/types/communication';
-import { Timestamp } from 'firebase/firestore';
+// Remove or replace the PostgrestTimestamptz import
+// Option 1: Remove it if you're not using it specifically
+// Option 2: Use this if you need the specific type:
+// Remove PostgrestTimestamptz import since it's not being used
 
 interface CommunicationComposerProps {
   initialData?: Partial<Communication>;
@@ -27,7 +30,7 @@ export default function CommunicationComposer({
   );
   const [visibility, setVisibility] = useState(initialData?.visibility || 'private');
   const [scheduledFor, setScheduledFor] = useState<Date | null>(
-    initialData?.scheduledFor ? initialData.scheduledFor.toDate() : null
+    initialData?.scheduledFor ? new Date(initialData.scheduledFor) : null
   );
   const [socialPlatforms, setSocialPlatforms] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -67,7 +70,7 @@ export default function CommunicationComposer({
         direction,
         channel,
         visibility,
-        scheduledFor: scheduledFor ? Timestamp.fromDate(scheduledFor) : undefined,
+        scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
         metadata: {
           tags: socialPlatforms,
           platform: socialPlatforms.join(','),
