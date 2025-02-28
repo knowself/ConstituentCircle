@@ -10,7 +10,8 @@ import {
   TemporaryRepRole,
   PermanentRepRole,
   EmploymentType 
-} from '../../lib/firebase/firestore/types';
+} from '../../lib/types/roles';
+
 
 export default function SignUp() {
   const [email, setEmail] = useState('');

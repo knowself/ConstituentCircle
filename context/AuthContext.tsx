@@ -8,7 +8,7 @@ import {
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User, AuthError } from '@supabase/supabase-js';
 
-type Role = 'admin' | 'staff' | 'representative' | 'user';
+import { Role } from '../lib/types/roles';
 
 interface UserProfile {
   id: string;

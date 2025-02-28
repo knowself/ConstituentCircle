@@ -1,20 +1,20 @@
 import { ReactNode, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { useAuth } from '../../lib/firebase/auth';
+import { useAuth } from '../../context/AuthContext';  // Updated to use Supabase auth context
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();  // Updated to use logout instead of signOut
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await logout();  // Updated to use logout from Supabase context
       router.push('/auth/signin');
     } catch (error) {
       console.error('Failed to sign out:', error);
@@ -74,30 +74,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               );
             })}
           </nav>
-
-          {/* User menu */}
-          <div className="border-t border-indigo-800 p-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <img
-                  className="h-8 w-8 rounded-full"
-                  src={user?.photoURL || 'https://via.placeholder.com/40'}
-                  alt={user?.displayName || 'User'}
-                />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-white">
-                  {user?.displayName || user?.email}
-                </p>
-                <button
-                  onClick={handleSignOut}
-                  className="text-xs text-indigo-200 hover:text-white"
-                >
-                  Sign out
-                </button>
-              </div>
+        
+        {/* User menu */}
+        <div className="border-t border-indigo-800 p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <img
+                className="h-8 w-8 rounded-full"
+                src={user?.user_metadata?.avatar_url || 'https://via.placeholder.com/40'}  // Updated to use Supabase user metadata
+                alt={user?.email || 'User'}  // Updated to use Supabase user email
+              />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-white">
+                {user?.email}  // Updated to use Supabase user email
+              </p>
+              <button
+                onClick={handleSignOut}
+                className="text-xs text-indigo-200 hover:text-white"
+              >
+                Sign out
+              </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
 

@@ -27,7 +27,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     const checkUser = async () => {
       try {
         if (!user) {
-          await router.push('/auth/signin');
+          await router.push('/auth/signin');  // Updated from '/auth'
           return;
         }
 

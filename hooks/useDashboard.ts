@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../lib/firebase/auth';
-import {
-  communicationService,
-  analyticsService,
-} from '../lib/firebase/firestore/service';
-import { Communication, Analytics } from '../lib/firebase/firestore/types';
-import { where, orderBy, limit, QueryConstraint } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
+import { DatabaseService } from '../lib/database/service';
+import { Communication } from '../lib/types/communication';
+import { Analytics } from '../lib/types/analytics';
 
 interface DashboardData {
   communications: Communication[];
@@ -17,9 +14,12 @@ interface DashboardData {
 interface UseDashboardOptions {
   communicationLimit?: number;
   analyticsLimit?: number;
-  analyticsType?: Analytics['type'];
+  analyticsType?: 'communication' | 'engagement' | 'demographics';
   analyticsPeriod?: Analytics['period'];
 }
+
+const communicationService = new DatabaseService<Communication>('communications');
+const analyticsService = new DatabaseService<Analytics>('analytics');
 
 export function useDashboard({
   communicationLimit = 5,
@@ -41,27 +41,22 @@ export function useDashboard({
 
       try {
         // Load communications
-        const communicationConstraints: QueryConstraint[] = [
-          where('representativeId', '==', user.uid),
-          orderBy('createdAt', 'desc'),
-          limit(communicationLimit),
-        ];
-
-        const communications = await communicationService.query(
-          communicationConstraints
-        );
+        const communications = await communicationService.query({
+          representative_id: user.id,
+          _limit: communicationLimit,
+          _sort: 'created_at:desc'
+        });
 
         // Load analytics if user has permission
         let analytics: Analytics[] = [];
-        if (user.role === 'admin' || user.role === 'staff') {
-          const analyticsConstraints: QueryConstraint[] = [
-            where('type', '==', analyticsType),
-            where('period', '==', analyticsPeriod),
-            orderBy('createdAt', 'desc'),
-            limit(analyticsLimit),
-          ];
-
-          analytics = await analyticsService.query(analyticsConstraints);
+        const userData = user.user_metadata;
+        if (userData?.role === 'admin' || userData?.role === 'staff') {
+          analytics = await analyticsService.query({
+            type: analyticsType,
+            period: analyticsPeriod,
+            _limit: analyticsLimit,
+            _sort: 'created_at:desc'
+          });
         }
 
         setData({

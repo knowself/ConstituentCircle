@@ -2,8 +2,7 @@ import { useState } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import { useAuth } from '../../context/AuthContext';
-import { ConstituentGroup } from '../../lib/firebase/firestore/types';
-import { Timestamp } from 'firebase/firestore';
+import type { ConstituentGroup } from '../../lib/types/groups';
 import GroupComposer from '../../components/groups/GroupComposer';
 
 export default function Groups() {
@@ -11,10 +10,10 @@ export default function Groups() {
   const [showComposer, setShowComposer] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<ConstituentGroup | null>(null);
   const [groups, setGroups] = useState<ConstituentGroup[]>([
-    // Sample data - replace with real data from your Firestore service
+    // Sample data - replace with real data from your database service
     {
       id: '1',
-      representativeId: user?.uid || '',
+      representativeId: user?.id || '',
       name: 'District 5 Residents',
       description: 'Residents of District 5',
       type: 'geographic',
@@ -34,10 +33,9 @@ export default function Groups() {
         postsCount: 45,
         engagementRate: 72,
       },
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
-    // Add more sample groups
   ]);
 
   const handleCreateGroup = async (data: Partial<ConstituentGroup>) => {
@@ -112,7 +110,7 @@ export default function Groups() {
                     <div>
                       <p className="text-sm font-medium text-gray-500">Members</p>
                       <p className="mt-1 text-2xl font-semibold text-gray-900">
-                        {group.analytics.totalMembers}
+                        {group.analytics?.totalMembers || 0}
                       </p>
                     </div>
                     <div>
@@ -120,14 +118,14 @@ export default function Groups() {
                         Engagement
                       </p>
                       <p className="mt-1 text-2xl font-semibold text-gray-900">
-                        {group.analytics.engagementRate}%
+                        {group.analytics?.engagementRate || 0}%
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-4">
                     <div className="flex space-x-2">
-                      {group.metadata.tags.map((tag) => (
+                      {group.metadata?.tags?.map((tag) => (
                         <span
                           key={tag}
                           className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"

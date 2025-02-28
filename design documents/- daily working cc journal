@@ -35,9 +35,9 @@ Is there a simpler more seemless and robust architecture for runnning potential 
 
 Hybrid Serverless Architecture
 
-Frontend: Static Vue.js build
+Frontend: Next.js
 Backend: Vercel Functions + Google Cloud Run
-Database: Keep Firebase
+Database: Supabase
 
 Job Queue:
 
@@ -88,3 +88,12 @@ Terminate process on windows using port 3389
 1) netstat -ano | findstr :3389 -- find the process id
 2) tasklist | findstr <PID> -- list the process by name
 3) taskkill /F /PID <PID> -- kill process by process id
+======================
+
+Based on the error message and the context provided, I can see that we need to migrate away from Firebase to Supabase in your Next.js application. The current error occurs because we're still trying to use Firebase authentication
+
+are you sure, I thought we did this
+
+Workspace
+
+check your work

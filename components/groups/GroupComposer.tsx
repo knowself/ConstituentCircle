@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ConstituentGroup } from '../../lib/firebase/firestore/types';
+import { ConstituentGroup } from '../../lib/types/groups';
 
 interface GroupComposerProps {
   initialData?: Partial<ConstituentGroup>;

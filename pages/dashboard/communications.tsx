@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import { useCommunications } from '../../hooks/useCommunications';
 import { CommunicationType, CommunicationChannel, CommunicationDirection } from '../../lib/types/communication';
-import { Communication } from '../../lib/firebase/firestore/types';
+import { Communication } from '../../lib/types/communication';
 import CommunicationComposer from '../../components/communications/CommunicationComposer';
 
 export default function Communications() {
@@ -31,24 +31,26 @@ export default function Communications() {
       console.error('Failed to create communication:', err);
     }
   };
-
-  const handleEngagement = async (communicationId: string, type: string) => {
+  const handleEngagement = async (communicationId: string, type: 'reaction' | 'share' | 'comment' | 'post') => {
     try {
       await handleSocialEngagement(communicationId, {
-        type: type as 'post' | 'share' | 'comment' | 'reaction',
-        platform: 'facebook', // Default platform, should be dynamic
+        type,
+        platform: 'facebook',
         analytics: {
           likes: type === 'reaction' ? 1 : 0,
           shares: type === 'share' ? 1 : 0,
           comments: type === 'comment' ? 1 : 0,
-          reach: 0,
+          reach: 0
         },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          source: 'web'
+        }
       });
     } catch (err) {
       console.error('Failed to handle engagement:', err);
     }
   };
-
   return (
     <ProtectedRoute>
       <DashboardLayout>
@@ -147,7 +149,7 @@ export default function Communications() {
                         </div>
                         <div className="mt-2 flex items-center justify-between">
                           <div className="flex items-center space-x-3 text-sm text-gray-500">
-                            <span>{comm.createdAt.toDate().toLocaleDateString()}</span>
+                            <span>{comm.createdAt instanceof Date ? comm.createdAt.toLocaleDateString() : comm.createdAt ? new Date(comm.createdAt).toLocaleDateString() : 'No date'}</span>
                             <span>•</span>
                             <span className="capitalize">{comm.type}</span>
                             <span>•</span>
@@ -157,24 +159,24 @@ export default function Communications() {
                             {comm.analytics?.engagement && (
                               <>
                                 <button
-                                  onClick={() => handleEngagement(comm.id, 'reaction')}
+                                  onClick={() => comm.id && handleEngagement(comm.id, 'reaction')}
                                   className="text-gray-400 hover:text-gray-500"
                                 >
-                                  <span className="text-sm">{comm.analytics.engagement.likes}</span>
+                                  <span className="text-sm">{comm.analytics?.engagement?.likes || 0}</span>
                                   <span className="sr-only">likes</span>
                                 </button>
                                 <button
-                                  onClick={() => handleEngagement(comm.id, 'share')}
+                                  onClick={() => comm.id && handleEngagement(comm.id, 'share')}
                                   className="text-gray-400 hover:text-gray-500"
                                 >
-                                  <span className="text-sm">{comm.analytics.engagement.shares}</span>
+                                  <span className="text-sm">{comm.analytics?.engagement?.shares || 0}</span>
                                   <span className="sr-only">shares</span>
                                 </button>
                                 <button
-                                  onClick={() => handleEngagement(comm.id, 'comment')}
+                                  onClick={() => comm.id && handleEngagement(comm.id, 'comment')}
                                   className="text-gray-400 hover:text-gray-500"
                                 >
-                                  <span className="text-sm">{comm.analytics.engagement.comments}</span>
+                                  <span className="text-sm">{comm.analytics?.engagement?.comments || 0}</span>
                                   <span className="sr-only">comments</span>
                                 </button>
                               </>

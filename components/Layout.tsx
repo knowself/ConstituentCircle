@@ -16,8 +16,9 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { SunIcon, MoonIcon, LockClosedIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '../lib/firebase/auth/context';
+import { SunIcon, MoonIcon, LockClosedIcon, ArrowRightOnRectangleIcon as LogoutIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../context/AuthContext';
+import type { User } from '@supabase/supabase-js';
 
 /**
  * Props for the Layout component
@@ -53,10 +54,22 @@ export default function Layout({ children }: LayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-
-  /**
-   * Initialize theme from local storage and handle hydration
-   */
+  const { user, logout } = useAuth();  // Destructure both user and logout from useAuth
+  // Handle logout function
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/auth/signin');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+  // Update user photo and display name references
+  // Update user metadata access with proper type checking
+  const userAvatar = user?.user_metadata?.avatar_url || 
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}`;
+  const userDisplayName = user?.email || 'User';
+  // Initialize theme from local storage and handle hydration
   useEffect(() => {
     setMounted(true);
     const storedDarkMode = localStorage.getItem('darkMode');
@@ -67,22 +80,15 @@ export default function Layout({ children }: LayoutProps) {
       document.documentElement.classList.remove('dark');
     }
   }, []);
-
-  /**
-   * Close mobile menu on route change
-   */
+  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [router.asPath]);
-
   // Prevent hydration mismatch by only rendering theme-dependent content after mount
   if (!mounted) {
     return <div className="min-h-screen bg-white" />; // Basic loader
   }
-
-  /**
-   * Toggle dark mode and update local storage
-   */
+  // Toggle dark mode and update local storage
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
@@ -93,14 +99,10 @@ export default function Layout({ children }: LayoutProps) {
       document.documentElement.classList.remove('dark');
     }
   };
-
-  /**
-   * Toggle mobile menu visibility
-   */
+  // Toggle mobile menu visibility
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
   // Navigation configuration - extend or modify to update site navigation
   const navigationLinks: NavLink[] = [
     { href: '/', label: 'Home' },
@@ -108,10 +110,8 @@ export default function Layout({ children }: LayoutProps) {
     { href: '/blog', label: 'Blog' },
     { href: '/contact', label: 'Contact' }
   ];
-
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
-      {/* Header section */}
       <header className="bg-white dark:bg-gray-800 shadow-sm py-4">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
@@ -126,7 +126,6 @@ export default function Layout({ children }: LayoutProps) {
                 />
               </Link>
             </div>
-
             {/* Desktop navigation */}
             <div className="hidden md:flex md:items-center md:space-x-8">
               {navigationLinks.map((link) => (
@@ -157,16 +156,28 @@ export default function Layout({ children }: LayoutProps) {
                   )}
                 </button>
                 
-                {/* Assuming user is not authenticated */}
-                <Link
-                  href="/auth/signin"
-                  className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
-                >
-                  <LockClosedIcon className="h-5 w-5" aria-hidden="true" />
-                </Link>
+                {user ? (
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {user.email}
+                    </span>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                    >
+                      <LogoutIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/auth/signin"
+                    className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    <LockClosedIcon className="h-5 w-5" aria-hidden="true" />
+                  </Link>
+                )}
               </div>
             </div>
-
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
               <button
@@ -207,7 +218,6 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
         </nav>
-
         {/* Mobile menu panel */}
         <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden`}>
           <div className="px-2 pt-2 pb-3 space-y-1">
@@ -224,13 +234,20 @@ export default function Layout({ children }: LayoutProps) {
                 {link.label}
               </Link>
             ))}
+            {user && (
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <LogoutIcon className="h-5 w-5 mr-2" />
+                Sign Out
+              </button>
+            )}
           </div>
         </div>
       </header>
-
       {/* Main content */}
       <main className="flex-grow">{children}</main>
-
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">

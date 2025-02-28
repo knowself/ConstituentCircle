@@ -138,13 +138,13 @@ export default function Layout({ children }: LayoutProps) {
                 <div>
                   <img
                     className="inline-block h-10 w-10 rounded-full"
-                    src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`}
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}`}
                     alt=""
                   />
                 </div>
                 <div className="ml-3">
                   <p className="text-base font-medium text-gray-700">
-                    {user.displayName}
+                    {user?.email || 'User'}
                   </p>
                   <button
                     onClick={handleLogout}
@@ -201,13 +201,13 @@ export default function Layout({ children }: LayoutProps) {
             <div>
               <img
                 className="inline-block h-9 w-9 rounded-full"
-                src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`}
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}`}
                 alt=""
               />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-700">
-                {user.displayName}
+                {user?.email || 'User'}
               </p>
               <button
                 onClick={handleLogout}

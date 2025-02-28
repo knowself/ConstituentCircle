@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
-import { useAuth } from '../../lib/firebase/auth';
-import {
-  communicationService,
-  analyticsService,
-} from '../../lib/firebase/firestore/service';
-import { Communication, Analytics } from '../../lib/firebase/firestore/types';
-import { where, orderBy, limit } from 'firebase/firestore';
+import { useAuth } from '../../context/AuthContext';
+import { DatabaseService } from '../../lib/database/service';
+import { Communication } from '../../lib/types/communication';
+import { Analytics } from '../../lib/types/analytics';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -16,27 +13,30 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const communicationService = new DatabaseService<Communication>('communications');
+  const analyticsService = new DatabaseService<Analytics>('analytics');
+
   useEffect(() => {
     async function loadDashboardData() {
       if (!user) return;
 
       try {
         // Load recent communications
-        const communications = await communicationService.query([
-          where('representativeId', '==', user.uid),
-          orderBy('createdAt', 'desc'),
-          limit(5),
-        ]);
+        const communications = await communicationService.query({
+          representative_id: user.id,
+          order: { created_at: 'desc' },
+          limit: 5
+        });
         setRecentCommunications(communications);
 
         // Load analytics
         if (user.role === 'admin' || user.role === 'staff') {
-          const analyticsData = await analyticsService.query([
-            where('type', '==', 'communication'),
-            where('period', '==', 'daily'),
-            orderBy('createdAt', 'desc'),
-            limit(7),
-          ]);
+          const analyticsData = await analyticsService.query({
+            type: 'communication',
+            period: 'daily',
+            order: { created_at: 'desc' },
+            limit: 7
+          });
           setAnalytics(analyticsData);
         }
 
@@ -58,7 +58,7 @@ export default function Dashboard() {
           {/* Welcome section */}
           <div className="bg-white rounded-lg shadow p-6">
             <h1 className="text-2xl font-bold text-gray-900">
-              Welcome back, {user?.displayName || 'User'}
+              Welcome back, {user?.user_metadata?.full_name || 'User'}
             </h1>
             <p className="mt-1 text-gray-500">
               Here's what's happening with your communications
@@ -75,16 +75,16 @@ export default function Dashboard() {
             <>
               {/* Stats overview */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {analytics.slice(0, 4).map((stat, index) => (
+                {Object.entries(analytics[0]?.metrics || {}).slice(0, 4).map(([key, value], index) => (
                   <div
                     key={index}
                     className="bg-white rounded-lg shadow px-5 py-6"
                   >
                     <div className="text-sm font-medium text-gray-500 truncate">
-                      {stat.type}
+                      {key}
                     </div>
                     <div className="mt-1 text-3xl font-semibold text-gray-900">
-                      {Object.values(stat.data)[0]}
+                      {value}
                     </div>
                   </div>
                 ))}
@@ -106,7 +106,7 @@ export default function Dashboard() {
                             {comm.subject}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {new Date(comm.createdAt.seconds * 1000).toLocaleDateString()}
+                            {comm.createdAt ? new Date(comm.createdAt).toLocaleDateString() : 'No date'}
                           </p>
                         </div>
                         <div className="flex items-center">

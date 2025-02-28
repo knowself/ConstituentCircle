@@ -1,27 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { db } from '../lib/firebase/config';
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  limit,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  Timestamp,
-} from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 import {
   Communication,
-  SocialEngagement
-} from '../lib/firebase/firestore/types';
-import {
   CommunicationType,
   CommunicationDirection,
   CommunicationChannel,
+  SocialEngagement
 } from '../lib/types/communication';
 
 interface UseCommunicationsOptions {
@@ -37,62 +22,46 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch communications based on user role and filters
   const fetchCommunications = useCallback(async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      const communicationsRef = collection(db, 'communications');
-      
-      // Build query based on user role and access permissions
-      let baseQuery = query(communicationsRef);
+      let query = supabase
+        .from('communications')
+        .select('*');
 
-      // For company admins, show all communications
-      if (user.role === 'company_admin') {
-        baseQuery = query(communicationsRef);
-      }
-      // For staff members, show communications they have access to
-      else if (user.role === 'staff_member') {
-        baseQuery = query(
-          communicationsRef,
-          where('representativeId', '==', user.representativeId)
-        );
-      }
-      // For other users, show public communications and their direct messages
-      else {
-        baseQuery = query(
-          communicationsRef,
-          where('visibility', '==', 'public'),
-          where('recipientId', '==', user.uid)
-        );
+      // Apply filters based on user role and access permissions
+      if (user.user_metadata?.role === 'admin') {
+        // No additional filters for admin
+      } else if (user.user_metadata?.role === 'staff') {
+        query = query.eq('representative_id', user.id);
+      } else {
+        query = query
+          .eq('visibility', 'public')
+          .eq('recipient_id', user.id);
       }
 
-      // Apply filters
+      // Apply option filters
       if (options.type) {
-        baseQuery = query(baseQuery, where('type', '==', options.type));
+        query = query.eq('type', options.type);
       }
       if (options.direction) {
-        baseQuery = query(baseQuery, where('direction', '==', options.direction));
+        query = query.eq('direction', options.direction);
       }
       if (options.channel) {
-        baseQuery = query(baseQuery, where('channel', '==', options.channel));
+        query = query.eq('channel', options.channel);
       }
 
       // Apply sorting and limit
-      baseQuery = query(
-        baseQuery,
-        orderBy('createdAt', 'desc'),
-        limit(options.limit || 50)
-      );
+      query = query
+        .order('created_at', { ascending: false })
+        .limit(options.limit || 50);
 
-      const snapshot = await getDocs(baseQuery);
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Communication));
+      const { data, error: queryError } = await query;
 
-      setCommunications(data);
+      if (queryError) throw queryError;
+      setCommunications(data || []);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -100,17 +69,16 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
     }
   }, [user, options]);
 
-  // Create a new communication
   const createCommunication = async (data: Partial<Communication>) => {
     if (!user) throw new Error('User not authenticated');
 
-    const newCommunication: Partial<Communication> = {
+    const newCommunication = {
       ...data,
-      senderId: user.uid,
-      senderRole: user.role,
-      representativeId: user.role === 'company_admin' ? user.uid : user.representativeId,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      sender_id: user.id,
+      sender_role: user.user_metadata?.role,
+      representative_id: user.user_metadata?.role === 'admin' ? user.id : user.user_metadata?.representative_id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       status: 'draft',
       metadata: {
         ...data.metadata,
@@ -125,57 +93,48 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
       }
     };
 
-    const docRef = await addDoc(collection(db, 'communications'), newCommunication);
-    return { id: docRef.id, ...newCommunication };
-  };
+    const { data: result, error } = await supabase
+      .from('communications')
+      .insert(newCommunication)
+      .select()
+      .single();
 
-  // Handle social engagement
-  const handleSocialEngagement = async (
-    communicationId: string,
-    engagement: Partial<SocialEngagement>
-  ) => {
-    if (!user) throw new Error('User not authenticated');
-
-    const newEngagement: Partial<SocialEngagement> = {
-      ...engagement,
-      contentId: communicationId,
-      userId: user.uid,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    };
-
-    // Create social engagement record
-    await addDoc(collection(db, 'socialEngagements'), newEngagement);
-
-    // Update communication analytics
-    const communicationRef = doc(db, 'communications', communicationId);
-    await updateDoc(communicationRef, {
-      'analytics.engagement': {
-        likes: engagement.analytics?.likes || 0,
-        shares: engagement.analytics?.shares || 0,
-        comments: engagement.analytics?.comments || 0,
-        reach: engagement.analytics?.reach || 0,
-      },
-      updatedAt: Timestamp.now(),
-    });
-  };
-
-  // Schedule a communication
-  const scheduleCommunication = async (
-    communicationId: string,
-    scheduledFor: Date
-  ) => {
-    const communicationRef = doc(db, 'communications', communicationId);
-    await updateDoc(communicationRef, {
-      scheduledFor: Timestamp.fromDate(scheduledFor),
-      status: 'scheduled',
-      updatedAt: Timestamp.now(),
-    });
+    if (error) throw error;
+    return result;
   };
 
   useEffect(() => {
     fetchCommunications();
   }, [fetchCommunications]);
+
+  const handleSocialEngagement = async (communicationId: string, engagement: SocialEngagement) => {
+    if (!user) throw new Error('User not authenticated');
+
+    const { data: communication, error: fetchError } = await supabase
+      .from('communications')
+      .select('analytics')
+      .eq('id', communicationId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const updatedAnalytics = {
+      ...communication.analytics,
+      engagement: {
+        likes: (communication.analytics?.engagement?.likes || 0) + (engagement.type === 'reaction' ? 1 : 0),
+        shares: (communication.analytics?.engagement?.shares || 0) + (engagement.type === 'share' ? 1 : 0),
+        comments: (communication.analytics?.engagement?.comments || 0) + (engagement.type === 'comment' ? 1 : 0),
+        reach: (communication.analytics?.engagement?.reach || 0)
+      }
+    };
+
+    const { error: updateError } = await supabase
+      .from('communications')
+      .update({ analytics: updatedAnalytics })
+      .eq('id', communicationId);
+
+    if (updateError) throw updateError;
+  };
 
   return {
     communications,
@@ -183,7 +142,6 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
     error,
     createCommunication,
     handleSocialEngagement,
-    scheduleCommunication,
     refresh: fetchCommunications,
   };
 };
