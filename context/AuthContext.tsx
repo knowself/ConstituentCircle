@@ -5,25 +5,21 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  User as FirebaseUser,
-} from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  Timestamp,
-} from 'firebase/firestore';
-import { db } from '../lib/firebase/config';
-import { UserProfile, Role } from '../lib/firebase/firestore/types';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { User, AuthError } from '@supabase/supabase-js';
+
+type Role = 'admin' | 'staff' | 'representative' | 'user';
+
+interface UserProfile {
+  id: string;
+  role: Role;
+  displayName?: string;
+  email: string;
+  metadata?: Record<string, any>;
+}
 
 interface AuthContextType {
-  user: (FirebaseUser & Partial<UserProfile>) | null;
+  user: User | null;
   loading: boolean;
   error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
@@ -34,166 +30,101 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper function to convert Firebase User to our UserProfile format
-const convertFirebaseUser = (firebaseUser: FirebaseUser, userData?: UserProfile): FirebaseUser & Partial<UserProfile> => {
-  if (!firebaseUser.email || !firebaseUser.displayName) {
-    throw new Error('Required user fields are missing');
-  }
-
-  return {
-    ...firebaseUser,
-    email: firebaseUser.email,
-    displayName: firebaseUser.displayName,
-    photoURL: firebaseUser.photoURL || undefined,
-    ...userData,
-  } as FirebaseUser & Partial<UserProfile>;
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<(FirebaseUser & Partial<UserProfile>) | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const auth = getAuth();
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          // Get additional user data from Firestore
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          const userData = userDoc.data() as UserProfile | undefined;
-          
-          // Set user session in localStorage
-          localStorage.setItem('userSession', JSON.stringify({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            lastLogin: new Date().toISOString()
-          }));
-          
-          setUser(convertFirebaseUser(firebaseUser, userData));
-        } else {
-          setUser(null);
-          localStorage.removeItem('userSession');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setError('Failed to load user data');
-      } finally {
-        setLoading(false);
-      }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    // Check for existing session on mount
-    const existingSession = localStorage.getItem('userSession');
-    if (existingSession) {
-      setLoading(true);
-    }
-
-    return () => unsubscribe();
-  }, [auth]);
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      setError(null);
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      
-      // Update last login time in Firestore
-      await setDoc(doc(db, 'users', result.user.uid), {
-        lastLoginAt: Timestamp.now()
-      }, { merge: true });
-
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      setError(getAuthErrorMessage(error.code));
-      throw error;
-    } finally {
-      setLoading(false);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (error) throw error;
+    } catch (error) {
+      throw new Error(getAuthErrorMessage(error as AuthError));
     }
   };
 
   const signUp = async (email: string, password: string, role: Role, metadata: Record<string, any> = {}) => {
     try {
       setError(null);
-      const { user: newUser } = await createUserWithEmailAndPassword(
-        auth,
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
-        password
-      );
-
-      // Create user profile in Firestore
-      await setDoc(doc(db, 'users', newUser.uid), {
-        uid: newUser.uid,
-        email: newUser.email,
-        displayName: newUser.displayName || email.split('@')[0],
-        role,
-        ...metadata,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
+        password,
+        options: {
+          data: {
+            role,
+            ...metadata
+          }
+        }
       });
-    } catch (err) {
-      console.error('Sign up error:', err);
-      setError('Failed to create account');
-      throw err;
+      if (signUpError) throw signUpError;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: user?.id,
+            email,
+            role,
+            ...metadata
+          }
+        ]);
+      
+      if (profileError) throw profileError;
+    } catch (error) {
+      throw new Error(getAuthErrorMessage(error as AuthError));
     }
   };
 
   const logout = async () => {
     try {
-      setLoading(true);
-      await signOut(auth);
-      localStorage.removeItem('userSession');
-      setUser(null);
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      setError('Failed to logout. Please try again.');
-      throw error;
-    } finally {
-      setLoading(false);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      throw new Error(getAuthErrorMessage(error as AuthError));
     }
   };
 
   const updateProfile = async (data: Partial<UserProfile>) => {
-    if (!user) throw new Error('No user logged in');
-
     try {
-      setError(null);
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(
-        userRef,
-        {
-          ...data,
-          updatedAt: Timestamp.now(),
-        },
-        { merge: true }
-      );
-
-      // Update local user state
-      setUser((prev) => prev ? { ...prev, ...data } : null);
-    } catch (err) {
-      console.error('Profile update error:', err);
-      setError('Failed to update profile');
-      throw err;
+      if (!user) throw new Error('No user logged in');
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user.id);
+      
+      if (error) throw error;
+    } catch (error) {
+      throw new Error('Failed to update profile');
     }
   };
 
-  // Helper function to get user-friendly error messages
-  const getAuthErrorMessage = (errorCode: string): string => {
-    switch (errorCode) {
-      case 'auth/invalid-email':
-        return 'Invalid email address';
-      case 'auth/user-disabled':
-        return 'This account has been disabled';
-      case 'auth/user-not-found':
-        return 'No account found with this email';
-      case 'auth/wrong-password':
-        return 'Incorrect password';
-      case 'auth/too-many-requests':
-        return 'Too many failed attempts. Please try again later';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your connection';
+  const getAuthErrorMessage = (error: AuthError): string => {
+    switch (error.message) {
+      case 'Invalid login credentials':
+        return 'Invalid email or password';
+      case 'Email not confirmed':
+        return 'Please verify your email address';
+      case 'User already registered':
+        return 'An account with this email already exists';
       default:
-        return 'An error occurred. Please try again';
+        return error.message;
     }
   };
 
