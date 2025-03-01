@@ -1,11 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 
-// Initialize SendGrid with your API key
-// You'll need to set SENDGRID_API_KEY in your environment variables
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-}
+// Create reusable transporter object using SMTP transport
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,15 +26,15 @@ export default async function handler(
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
-  if (!process.env.SENDGRID_API_KEY || !process.env.CONTACT_EMAIL_TO) {
+  if (!process.env.SMTP_USER || !process.env.CONTACT_EMAIL_TO) {
     console.error('Missing required environment variables');
     return res.status(500).json({ message: 'Server configuration error' });
   }
 
-  const msg = {
+  const mailOptions = {
     to: process.env.CONTACT_EMAIL_TO,
-    from: process.env.CONTACT_EMAIL_FROM || process.env.CONTACT_EMAIL_TO, // Use verified sender
-    subject: `New Contituent CircleContact Form from ${name}`,
+    from: process.env.CONTACT_EMAIL_FROM || process.env.SMTP_USER,
+    subject: `New Constituent Circle Contact Form from ${name}`,
     text: `
 Name: ${name}
 Email: ${email}
@@ -45,7 +50,7 @@ Message: ${message}
   };
 
   try {
-    await sgMail.send(msg);
+    await transporter.sendMail(mailOptions);
     return res.status(200).json({ message: 'Message sent successfully' });
   } catch (error) {
     console.error('Error sending email:', error);
