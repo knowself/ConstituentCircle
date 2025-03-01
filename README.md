@@ -31,7 +31,7 @@ The Constituent Circle platform leverages serverless architecture to enhance sca
 - **Reduced Management Overhead**: Focus on writing code rather than managing servers, allowing for faster development cycles.
 
 ### Integration with Other Services
-- **Database**: Integrate with Firestore or other databases to handle data storage and retrieval seamlessly.  
+- **Database**: Integrate with Supabase to handle data storage and retrieval seamlessly.  
 - **Monitoring**: Use tools like Prometheus and Grafana to monitor cloud functions and ensure system health.
 
 ## Development Setup
