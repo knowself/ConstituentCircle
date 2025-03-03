@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
+import CustomHead from './Head';
 import {
   HomeIcon,
   UserGroupIcon,
@@ -75,6 +76,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <CustomHead />
       {/* Mobile menu */}
       <div className="lg:hidden">
         <div className="fixed inset-0 flex z-40">

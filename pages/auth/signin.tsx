@@ -19,10 +19,11 @@ export default function SignIn() {
 
     try {
       await signIn(email, password);
+      // After successful sign in, redirect to dashboard
+      // The auth state will be handled by the ProtectedRoute component
       router.push('/dashboard');
     } catch (error: any) {
       setError(error.message);
-    } finally {
       setIsLoading(false);
     }
   };

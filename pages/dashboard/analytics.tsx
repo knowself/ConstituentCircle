@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import { useAuth } from '../../context/AuthContext';
@@ -31,6 +31,11 @@ ChartJS.register(
 export default function Analytics() {
   const { user } = useAuth();
   const [timeRange, setTimeRange] = useState('7d');
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Sample data - replace with real data from your analytics service
   const engagementData = {

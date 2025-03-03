@@ -4,22 +4,33 @@ import OpenAI from 'openai';
 let openAIInstance: OpenAI | null = null;
 
 export const initOpenAIClient = () => {
-  if (!openAIInstance) {
-    const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('OpenAI API key is missing. Please set OPENAI_API_KEY environment variable.');
+  try {
+    if (!openAIInstance) {
+      const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+      if (!apiKey) {
+        console.warn('OpenAI API key is missing. Some features may not work properly.');
+        return null;
+      }
+      openAIInstance = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
     }
-    openAIInstance = new OpenAI({
-      apiKey,
-      dangerouslyAllowBrowser: true
-    });
+    return openAIInstance;
+  } catch (error) {
+    console.error('Failed to initialize OpenAI client:', error);
+    return null;
   }
-  return openAIInstance;
 };
 
 export const getOpenAIClient = () => {
   if (!openAIInstance) {
-    throw new Error('OpenAI client not initialized');
+    console.warn('OpenAI client not initialized. Attempting to initialize now.');
+    initOpenAIClient();
+    if (!openAIInstance) {
+      console.error('Failed to initialize OpenAI client on demand.');
+      return null;
+    }
   }
   return openAIInstance;
 };

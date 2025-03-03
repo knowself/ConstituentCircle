@@ -12,15 +12,26 @@ export default function Dashboard() {
   const [analytics, setAnalytics] = useState<Analytics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  const communicationService = new DatabaseService<Communication>('communications');
-  const analyticsService = new DatabaseService<Analytics>('analytics');
+  // Initialize services only when needed to avoid issues during server-side rendering
+  const [communicationService, setCommunicationService] = useState<DatabaseService<Communication> | null>(null);
+  const [analyticsService, setAnalyticsService] = useState<DatabaseService<Analytics> | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    // Initialize services only on the client side
+    setCommunicationService(new DatabaseService<Communication>('communications'));
+    setAnalyticsService(new DatabaseService<Analytics>('analytics'));
+  }, []);
 
   useEffect(() => {
     async function loadDashboardData() {
-      if (!user) return;
+      if (!user || !mounted || !communicationService || !analyticsService) return;
 
       try {
+        console.log('Loading dashboard data for user:', user.id);
+        
         // Load recent communications
         const communications = await communicationService.query({
           representative_id: user.id,
@@ -30,7 +41,10 @@ export default function Dashboard() {
         setRecentCommunications(communications);
 
         // Load analytics
-        if (user.role === 'admin' || user.role === 'staff') {
+        const userRole = user.user_metadata?.role;
+        console.log('User role:', userRole);
+        
+        if (userRole === 'admin' || userRole === 'staff') {
           const analyticsData = await analyticsService.query({
             type: 'communication',
             period: 'daily',
@@ -48,8 +62,10 @@ export default function Dashboard() {
       }
     }
 
-    loadDashboardData();
-  }, [user]);
+    if (user && mounted && communicationService && analyticsService) {
+      loadDashboardData();
+    }
+  }, [user, mounted, communicationService, analyticsService]);
 
   return (
     <ProtectedRoute>
@@ -58,7 +74,7 @@ export default function Dashboard() {
           {/* Welcome section */}
           <div className="bg-white rounded-lg shadow p-6">
             <h1 className="text-2xl font-bold text-gray-900">
-              Welcome back, {user?.user_metadata?.full_name || 'User'}
+              Welcome back, {mounted && user?.user_metadata?.full_name ? user.user_metadata.full_name : 'User'}
             </h1>
             <p className="mt-1 text-gray-500">
               Here's what's happening with your communications
@@ -75,19 +91,25 @@ export default function Dashboard() {
             <>
               {/* Stats overview */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {Object.entries(analytics[0]?.metrics || {}).slice(0, 4).map(([key, value], index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-lg shadow px-5 py-6"
-                  >
-                    <div className="text-sm font-medium text-gray-500 truncate">
-                      {key}
+                {analytics.length > 0 && analytics[0]?.metrics ? (
+                  Object.entries(analytics[0].metrics).slice(0, 4).map(([key, value], index) => (
+                    <div
+                      key={index}
+                      className="bg-white rounded-lg shadow px-5 py-6"
+                    >
+                      <div className="text-sm font-medium text-gray-500 truncate">
+                        {key}
+                      </div>
+                      <div className="mt-1 text-3xl font-semibold text-gray-900">
+                        {value}
+                      </div>
                     </div>
-                    <div className="mt-1 text-3xl font-semibold text-gray-900">
-                      {value}
-                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-4 bg-white rounded-lg shadow px-5 py-6">
+                    <p className="text-gray-500">No analytics data available</p>
                   </div>
-                ))}
+                )}
               </div>
 
               {/* Recent communications */}

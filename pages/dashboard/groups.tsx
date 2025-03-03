@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import { useAuth } from '../../context/AuthContext';
@@ -9,11 +9,16 @@ export default function Groups() {
   const { user } = useAuth();
   const [showComposer, setShowComposer] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<ConstituentGroup | null>(null);
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [groups, setGroups] = useState<ConstituentGroup[]>([
     // Sample data - replace with real data from your database service
     {
       id: '1',
-      representativeId: user?.id || '',
+      representativeId: mounted && user?.id ? user.id : '',
       name: 'District 5 Residents',
       description: 'Residents of District 5',
       type: 'geographic',

@@ -2,9 +2,49 @@
 
 AI-Enabled Tools for a Representative Democracy
 
-## Introduction
+## Our Mission
 
-Constituent Circle is a AI technology platform (CC) designed to enhance communication email, SMS and others between representatives and their constituents. By leveraging artificial intelligence (AI) and natural language processing (NLP), the CC platform enables representatives to craft personalized, on-message communications efficiently while maintaining their authentic voice and personal touch. The goal is to facilitate meaningful, goal-oriented conversations at scale, regardless of the channel, ensuring that constituents feel heard and represented.
+Constituent Circle creates AI-enabled tools for more effective, opinionated, goal-oriented communications, at scale, for representatives and constituents to be assured they are being heard by each other.
+
+The United States is a representative democracy. This means that our government is elected by its citizens. U.S. Citizens vote for their government officials. These officials represent the citizens' ideas and concerns in government.
+
+At least that's the way it's supposed to work. But, as the U.S. has grown people feel less and less well represented by the people elected to represent them here in the U.S. and around the world.
+
+All of us here at Constituent Circle believe in Representative Democracy. We believe as Winston Churchill said in (House of Commons, November 11th, 1947):
+
+> "Many forms of Government have been tried, and will be tried in this world of sin and woe. No one pretends that democracy is perfect or all-wise. Indeed it has been said that democracy is the worst form of Government except for all those other forms that have been tried from time to time."
+
+We have heard and felt the frustrations ourselves in our own families, towns, cities and States. As children of the digital age, as engineers and Do-It-Yourself-ers (DIY), we decided to create a solution of our own.
+
+We believe and have faith there may be many potential solutions to this actual and perceived disconnect between the people and their representatives, that are working and more will be found.
+
+We support any that are working and making a difference but the business of Constituent Circle is to create, refine, and endlessly re-engineer our solution.
+
+Our first focus as a channel of communications is email because the technology to collect, analyze and make suggestions is well understood.
+
+Our vision of enabling representatives to conduct, at scale, effective, opinionated, goal-oriented conversations with thousands, tens of thousands or more individuals and groups is our vision of the kinds of super powers representatives in a representative democracy need.
+
+Now, if either the representative or the constituent is not happy with the results of these new effective communications, at scale, then we all know the ultimate solution. That is the next election.
+
+## The Technology
+
+Combining artificial intelligence (AI) and natural language processing (NLP) can greatly benefit individuals struggling with repetitive or routine writing tasks. By analyzing and learning from existing responses, personalized templates tailored to the user's preference become available when creating new emails. This system empowers representatives to craft on-message emails efficiently while maintaining their own voice.
+
+### How It Works
+
+We create tools that help representatives have more meaningful conversations with their constituents. The tool uses AI to understand the representative's position on various issues, and then provides the representative with information that would help them speak to their constituents in a way that is informed and relevant.
+
+These tools keep track of the representative's schedule, notes, and projects, and provide them with reminders and deadlines. They offer project management capabilities, idea sounding boards, helping them to refine and improve their positions and serve their constituents.
+
+### Example Use Case
+
+Let's take a look at how the tool might help a representative have a more effective conversation with a constituent who is concerned about climate change:
+
+1. The tool would first ask the constituent what their biggest concerns are about climate change.
+2. It would then provide the representative with information about climate change and how it is affecting their district.
+3. The representative could then use this information to have a more informed conversation with the constituent.
+4. The tool would also allow the representative to ask the constituent for their input on how to address climate change in their district.
+5. This would help the representative to get a better understanding of the constituent's priorities and concerns.
 
 ## Features
 
@@ -46,11 +86,11 @@ This script activates the virtual environment and starts the development server.
 
 You use the following command to run the Next.js development server:
 
-   ```bash
-   npx next dev
-   ```
+```bash
+npx next dev
+```
 
-   This command starts the development server and enables hot-reloading for a smoother development experience.
+This command starts the development server and enables hot-reloading for a smoother development experience.
 
 - **To Access the application go to the following URL:**
 

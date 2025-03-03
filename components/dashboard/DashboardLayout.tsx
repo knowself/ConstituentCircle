@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';  // Updated to use Supabase auth context
@@ -11,6 +11,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();  // Updated to use logout instead of signOut
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  
+  // Handle hydration mismatch by only rendering user-dependent content after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -32,6 +38,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Your Profile', href: '/dashboard/profile' },
     { name: 'Settings', href: '/dashboard/settings' },
   ];
+
+  // If not mounted yet, return a minimal layout to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <div className="flex flex-col ml-0">
+          <header className="bg-white shadow">
+            <div className="flex h-16 items-center justify-between px-4"></div>
+          </header>
+          <main className="flex-1 overflow-y-auto bg-gray-100 p-4">
+            {/* Don't render children during server-side rendering to prevent hydration issues */}
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // If no user is available yet, show a loading state
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-medium text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -81,13 +114,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex-shrink-0">
               <img
                 className="h-8 w-8 rounded-full"
-                src={user?.user_metadata?.avatar_url || 'https://via.placeholder.com/40'}  // Updated to use Supabase user metadata
-                alt={user?.email || 'User'}  // Updated to use Supabase user email
+                src={mounted && user?.user_metadata?.avatar_url ? user.user_metadata.avatar_url : 'https://via.placeholder.com/40'}
+                alt={mounted && user?.email ? user.email : 'User'}
               />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-white">
-                {user?.email}  // Updated to use Supabase user email
+                {mounted && user?.email ? user.email : 'User'}
               </p>
               <button
                 onClick={handleSignOut}

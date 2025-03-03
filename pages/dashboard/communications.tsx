@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
@@ -11,6 +11,11 @@ export default function Communications() {
   const [showComposer, setShowComposer] = useState(false);
   const [selectedType, setSelectedType] = useState<CommunicationType>();
   const [selectedChannel, setSelectedChannel] = useState<CommunicationChannel>();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const {
     communications,

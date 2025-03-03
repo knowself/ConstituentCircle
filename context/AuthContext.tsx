@@ -37,6 +37,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = createClientComponentClient();
 
   useEffect(() => {
+    // Check for existing session on mount
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error('Session check error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkSession();
+    
+    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -62,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, role: Role, metadata: Record<string, any> = {}) => {
     try {
       setError(null);
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -74,18 +89,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (signUpError) throw signUpError;
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: user?.id,
-            email,
-            role,
-            ...metadata
-          }
-        ]);
-      
-      if (profileError) throw profileError;
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: data.user.id,
+              email,
+              role,
+              ...metadata
+            }
+          ]);
+        
+        if (profileError) throw profileError;
+      }
     } catch (error) {
       throw new Error(getAuthErrorMessage(error as AuthError));
     }
