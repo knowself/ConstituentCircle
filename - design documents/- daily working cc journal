@@ -97,3 +97,8 @@ are you sure, I thought we did this
 Workspace
 
 check your work
+
+=====================
+Supabase Commands
+=====================
+supabase db dump -- --schema-only -n public > schema.sql

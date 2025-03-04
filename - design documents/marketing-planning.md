@@ -1,5 +1,14 @@
 # Constituent Circle Marketing & Pricing Strategy
 
+## Our Mission
+Constituent Circle creates AI-enabled tools for more effective, opinionated, goal-oriented communications at scale, ensuring representatives and constituents are heard by each other. We empower representatives in a democracy to conduct meaningful conversations with thousands of constituents while maintaining their authentic voice and personal touch.
+
+## Why We Exist
+As the United States has grown, people feel increasingly disconnected from their elected representatives. We believe in representative democracy and have created a solution to bridge this gap. Our platform enables effective, scalable communication that preserves the human connection essential to democratic representation.
+
+## Our Approach
+Starting with email as our first communication channel, we leverage AI and NLP to help representatives manage high volumes of constituent communications while maintaining their unique voice. Our tools analyze patterns, learn preferences, and provide personalized templates that empower representatives to respond efficiently without sacrificing authenticity.
+
 <!-- BEGIN-PROTECT: PRICING-TIERS -->
 <!-- LAST-UPDATED: 2024-12-17T19:45:07-05:00 -->
 <!-- REQUIRES-APPROVAL: VP-PRODUCT, FINANCE-LEAD -->

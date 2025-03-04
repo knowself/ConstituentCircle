@@ -112,27 +112,27 @@ export default function Layout({ children }: LayoutProps) {
   ];
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow-sm py-2 sm:py-4">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            {/* Logo and brand */}
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
+      <header className="bg-white dark:bg-gray-800 shadow-sm py-4 fixed w-full top-0 z-50 h-[145px]">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+          <div className="flex items-center justify-between w-full">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <Link href="/" className="flex items-center justify-center">
                 <img
                   src="/constituent-circle-logo.png"
                   alt="Constituent Circle"
-                  className="h-12 sm:h-20 w-auto"
+                  className="h-[125px] w-auto"
                   fetchPriority="high"
                 />
               </Link>
             </div>
-            {/* Desktop navigation */}
-            <div className="hidden md:flex md:items-center md:space-x-8">
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden lg:flex items-center justify-center flex-grow space-x-10 ml-10">
               {navigationLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-base font-medium ${
+                  className={`text-base font-medium transition-colors duration-200 ${
                     router.pathname === link.href
                       ? 'text-secondary'
                       : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -142,84 +142,82 @@ export default function Layout({ children }: LayoutProps) {
                 </Link>
               ))}
               
-              {/* Theme toggle and Auth buttons */}
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={toggleDarkMode}
-                  className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
-                  aria-label="Toggle dark mode"
-                >
-                  {isDarkMode ? (
-                    <SunIcon className="h-5 w-5" />
-                  ) : (
-                    <MoonIcon className="h-5 w-5" />
-                  )}
-                </button>
-                
-                {user ? (
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {user.email}
-                    </span>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
-                    >
-                      <LogoutIcon className="h-5 w-5" aria-hidden="true" />
-                    </button>
-                  </div>
+              {/* Theme toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                aria-label="Toggle dark mode"
+              >
+                {isDarkMode ? (
+                  <SunIcon className="h-5 w-5" />
                 ) : (
-                  <Link
-                    href="/auth/signin"
+                  <MoonIcon className="h-5 w-5" />
+                )}
+              </button>
+              {/* Auth button */}
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {user.email}
+                  </span>
+                  <button
+                    onClick={handleLogout}
                     className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                   >
-                    <LockClosedIcon className="h-5 w-5" aria-hidden="true" />
-                  </Link>
-                )}
-              </div>
+                    <LogoutIcon className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/auth/signin"
+                  className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                >
+                  <LockClosedIcon className="h-5 w-5" aria-hidden="true" />
+                </Link>
+              )}
             </div>
-            {/* Mobile menu button */}
-            <div className="md:hidden flex items-center">
-              <button
-                onClick={toggleMobileMenu}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-expanded="false"
+          </div>
+          {/* Mobile menu button */}
+          <div className="lg:hidden absolute right-4 top-4">
+            <button
+              onClick={toggleMobileMenu}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+              aria-expanded="false"
+            >
+              <span className="sr-only">Open main menu</span>
+              <svg
+                className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
               >
-                <span className="sr-only">Open main menu</span>
-                <svg
-                  className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-                <svg
-                  className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <svg
+                className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
           </div>
         </nav>
         {/* Mobile menu panel */}
-        <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+        <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} lg:hidden`}>
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navigationLinks.map((link) => (
               <Link
@@ -247,7 +245,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </header>
       {/* Main content */}
-      <main className="flex-grow">{children}</main>
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-[145px]">{children}</main>
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">

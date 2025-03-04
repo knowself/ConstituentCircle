@@ -4,7 +4,7 @@ import { initOpenAIClient } from '../lib/ai-services/openAIClient';
 import { useEffect } from 'react';
 import { registerServiceWorker } from '../lib/serviceWorker';
 import type { AppProps } from 'next/app';
-import Layout from '../components/layout/Layout';
+import Layout from '../components/Layout';
 import { AuthProvider } from '../context/AuthContext';
 import { LoadingProvider } from '../context/LoadingContext';
 
