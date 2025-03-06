@@ -1,6 +1,6 @@
 I need you to create a single comprehensive commit message which addresses each and every change. Examine each change in detail using git and describe it's essential impact. I will perform the commit. Make the commit message in standard commit message format and clearly separated from my request.
 ======================
-Let's start working on our project. We have a roadmap and milestones acheched in _roadmap.md. Our tech stack is documented there and we will record what we learn in _dev-lessons.md. Each time you get a question from me the human programmer make your top 5 best suggestions for me, after careful consideration, to choose from without making any changes and we will discuss them. Understoood ? Don't make any suggestions now.
+Let's start working on our project. We have a roadmap and milestones acheched in roadmap.md. Our tech stack is documented there and in architecture-vision.md. Each time you get a question from me the human programmer make your top 5 best suggestions for me, after careful consideration, to choose from without making any changes and we will discuss them. Understoood ? Don't make any suggestions now.
 ======================
 Review our roadmap in _instructions.md. Let's talk about next steps for work today.
 =======================
