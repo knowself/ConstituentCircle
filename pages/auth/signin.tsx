@@ -19,10 +19,16 @@ export default function SignIn() {
 
     try {
       await signIn(email, password);
+      console.log('Sign-in successful:', email);
       // After successful sign in, redirect to dashboard
       // The auth state will be handled by the ProtectedRoute component
       router.push('/dashboard');
     } catch (error: any) {
+      const timestamp = new Date().toISOString();
+      console.error(`[${timestamp}] Sign-in failed for email: ${email}`, error.message);
+      if (error.message === 'Invalid email or password') {
+        console.error('Additional context: Ensure the email and password are correct and the account exists.');
+      }
       setError(error.message);
       setIsLoading(false);
     }

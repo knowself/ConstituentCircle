@@ -16,7 +16,13 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { SunIcon, MoonIcon, LockClosedIcon, ArrowRightOnRectangleIcon as LogoutIcon } from '@heroicons/react/24/outline';
+import { 
+  SunIcon, 
+  MoonIcon, 
+  LockClosedIcon, 
+  ArrowRightOnRectangleIcon as LogoutIcon,
+  ChevronDownIcon
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import type { User } from '@supabase/supabase-js';
 
@@ -54,7 +60,11 @@ export default function Layout({ children }: LayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { user, logout } = useAuth();  // Destructure both user and logout from useAuth
+  const { user, logout } = useAuth();
+  
+  // Add state for dropdown menus
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  
   // Handle logout function
   const handleLogout = async () => {
     try {
@@ -80,14 +90,34 @@ export default function Layout({ children }: LayoutProps) {
       document.documentElement.classList.remove('dark');
     }
   }, []);
+  
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [router.asPath]);
+  
+  // Handle dropdown toggle
+  const toggleDropdown = (menuName: string) => {
+    setActiveDropdown(activeDropdown === menuName ? null : menuName);
+  };
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveDropdown(null);
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+  
   // Prevent hydration mismatch by only rendering theme-dependent content after mount
   if (!mounted) {
     return <div className="min-h-screen bg-white" />; // Basic loader
   }
+  
   // Toggle dark mode and update local storage
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
@@ -99,17 +129,20 @@ export default function Layout({ children }: LayoutProps) {
       document.documentElement.classList.remove('dark');
     }
   };
+  
   // Toggle mobile menu visibility
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-  // Navigation configuration - extend or modify to update site navigation
+  
+  // Keep the existing navigation links
   const navigationLinks: NavLink[] = [
     { href: '/', label: 'Home' },
     { href: '/services', label: 'Services' },
     { href: '/blog', label: 'Blog' },
     { href: '/contact', label: 'Contact' }
   ];
+  
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow-sm py-4 fixed w-full top-0 z-50 h-[145px]">
@@ -121,18 +154,18 @@ export default function Layout({ children }: LayoutProps) {
                 <img
                   src="/constituent-circle-logo.png"
                   alt="Constituent Circle"
-                  className="h-[125px] w-auto"
-                  fetchPriority="high"
+                  className="h-[110px] w-auto"
                 />
               </Link>
             </div>
-            {/* Desktop Navigation - Centered */}
+            
+            {/* Desktop Navigation - Centered with updated styling */}
             <div className="hidden lg:flex items-center justify-center flex-grow space-x-10 ml-10">
               {navigationLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-base font-medium transition-colors duration-200 ${
+                  className={`text-base font-medium transition-colors duration-200 hover:opacity-80 ${
                     router.pathname === link.href
                       ? 'text-secondary'
                       : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -142,10 +175,10 @@ export default function Layout({ children }: LayoutProps) {
                 </Link>
               ))}
               
-              {/* Theme toggle */}
+              {/* Theme toggle with updated styling */}
               <button
                 onClick={toggleDarkMode}
-                className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                 aria-label="Toggle dark mode"
               >
                 {isDarkMode ? (
@@ -154,15 +187,23 @@ export default function Layout({ children }: LayoutProps) {
                   <MoonIcon className="h-5 w-5" />
                 )}
               </button>
-              {/* Auth button */}
+              
+              {/* Auth button with updated styling */}
               {user ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {user.email}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <img 
+                      src={userAvatar} 
+                      alt={userDisplayName}
+                      className="h-8 w-8 rounded-full"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {user.email}
+                    </span>
+                  </div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                    className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                   >
                     <LogoutIcon className="h-5 w-5" aria-hidden="true" />
                   </button>
@@ -170,19 +211,21 @@ export default function Layout({ children }: LayoutProps) {
               ) : (
                 <Link
                   href="/auth/signin"
-                  className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                  className="flex items-center space-x-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                 >
                   <LockClosedIcon className="h-5 w-5" aria-hidden="true" />
+                  <span>Sign In</span>
                 </Link>
               )}
             </div>
           </div>
-          {/* Mobile menu button */}
+          
+          {/* Mobile menu button with updated styling */}
           <div className="lg:hidden absolute right-4 top-4">
             <button
               onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-              aria-expanded="false"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              aria-expanded={isMobileMenuOpen}
             >
               <span className="sr-only">Open main menu</span>
               <svg
@@ -216,14 +259,15 @@ export default function Layout({ children }: LayoutProps) {
             </button>
           </div>
         </nav>
-        {/* Mobile menu panel */}
+        
+        {/* Mobile menu panel with updated styling */}
         <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} lg:hidden`}>
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navigationLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                   router.pathname === link.href
                     ? 'text-secondary bg-gray-50 dark:bg-gray-700'
                     : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -232,10 +276,30 @@ export default function Layout({ children }: LayoutProps) {
                 {link.label}
               </Link>
             ))}
+            
+            {/* Theme toggle in mobile menu */}
+            <button
+              onClick={toggleDarkMode}
+              className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              {isDarkMode ? (
+                <>
+                  <SunIcon className="h-5 w-5 mr-2" />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <MoonIcon className="h-5 w-5 mr-2" />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </button>
+            
+            {/* Auth button in mobile menu */}
             {user && (
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="w-full flex items-center px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 <LogoutIcon className="h-5 w-5 mr-2" />
                 Sign Out
@@ -244,8 +308,10 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </header>
+      
       {/* Main content */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-[145px]">{children}</main>
+      
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
