@@ -205,3 +205,40 @@ This project is licensed under the **Apache 2.0 License**. See the [LICENSE](LIC
 ---
 
 Please feel free to reach out if you have any questions or need further assistance!
+
+## Technical Architecture
+
+ConstituentCircle is built on a modern tech stack designed for scalability, security, and real-time capabilities:
+
+### Frontend
+- Next.js for server-side rendering and static generation
+- TypeScript for type safety
+- Tailwind CSS for responsive design
+
+### Backend
+- Serverless architecture with Vercel Functions
+- Supabase for database and authentication
+
+### Database Schema
+
+Our PostgreSQL database in Supabase is structured around these core entities:
+
+1. **User Management**
+   - `profiles`: Links to Supabase Auth users with role-based permissions
+   - `representatives`: Elected officials and their office information
+   - `constituents`: Constituent data with customizable preferences
+
+2. **Communication System**
+   - `communications`: All interactions between representatives and constituents
+   - Support for multiple channels (email, SMS, etc.)
+   - Status tracking and analytics
+
+3. **Organization**
+   - `groups`: Segmentation of constituents for targeted outreach
+   - `group_members`: Membership management with roles
+
+4. **Analytics**
+   - Comprehensive metrics storage for reporting
+   - Engagement, demographics, and trend analysis
+
+The schema implements row-level security to ensure data protection and privacy, with carefully designed policies that restrict access based on user roles and relationships.

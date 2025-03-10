@@ -1,22 +1,33 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import CustomHead from './Head';
-import {
-  HomeIcon,
-  UserGroupIcon,
-  ChatBubbleLeftIcon as ChatIcon,
-  ChartBarIcon,
+import { 
+  HomeIcon, 
+  UserGroupIcon, 
+  ChatBubbleLeftRightIcon as ChatIcon, 
+  ChartBarIcon, 
   Cog6ToothIcon as CogIcon,
-  ArrowRightOnRectangleIcon as LogoutIcon,
-  Bars3Icon as MenuIcon,
   XMarkIcon as XIcon,
-  LockClosedIcon,
-} from '@heroicons/react/24/outline';
+  UserIcon,
+  Bars3Icon as MenuIcon,
+  ArrowRightOnRectangleIcon as LogoutIcon
+} from '@heroicons/react/24/solid';
+import Navigation from '../Navigation';
+import TestNavigation from '../TestNavigation';
+import Footer from '../Footer';
+import { User } from '../../types';
 
 interface LayoutProps {
   children: ReactNode;
+}
+
+// Define navigation item type
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 export default function Layout({ children }: LayoutProps) {
@@ -24,229 +35,158 @@ export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
 
+  // Handle ESC key to close mobile menu
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape' && mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  }, [mobileMenuOpen]);
+
+  // Add event listener for keyboard events
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // Check if a link is active - moved outside of JSX
+  const isActiveLink = (href: string) => {
+    return router.pathname === href || router.pathname.startsWith(`${href}/`);
+  };
+
+  // Type the user properly when logging
+  console.log('Auth state:', { user: user as User | null, isAuthenticated: !!user });
+
   const handleLogout = async () => {
     try {
       await logout();
       router.push('/auth/signin');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Logout error:', error);
     }
   };
 
-  const navigation = [
+  const navigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Communications', href: '/dashboard/communications', icon: ChatIcon },
     { name: 'Constituents', href: '/dashboard/constituents', icon: UserGroupIcon },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
     { name: 'Settings', href: '/dashboard/settings', icon: CogIcon },
-    { name: 'Auth', href: '/auth', icon: LockClosedIcon },
+    { name: 'Auth', href: '/auth', icon: UserIcon },
   ];
 
+  // Non-authenticated layout
   if (!user) {
+    console.log('Rendering non-authenticated layout with Navigation');
     return (
       <div className="min-h-screen">
-        <div className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex items-center">
-                <Link href="/">
-                  <img
-                    className="h-8 w-auto"
-                    src="/constituent-circle-logo.png"
-                    alt="Constituent Circle"
-                  />
-                </Link>
-              </div>
-              <div className="flex items-center">
-                <Link
-                  href="/auth/signin"
-                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200"
-                >
-                  <LockClosedIcon className="h-5 w-5 mr-2" aria-hidden="true" />
-                  Sign In
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Navigation />
         <main>{children}</main>
+        <Footer />
       </div>
     );
   }
 
+  // Authenticated user layout
   return (
-    <div className="min-h-screen bg-gray-100">
-      <CustomHead />
-      {/* Mobile menu */}
-      <div className="lg:hidden">
-        <div className="fixed inset-0 flex z-40">
-          <div
-            className={`fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity ease-linear duration-300 ${
-              mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
-            onClick={() => setMobileMenuOpen(false)}
-          />
-
-          <div
-            className={`relative flex-1 flex flex-col max-w-xs w-full bg-white transform transition ease-in-out duration-300 ${
-              mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
+    <div className="min-h-screen">
+      {/* Remove the user prop since Navigation doesn't accept it */}
+      <Navigation />
+      <div className="bg-gray-100 min-h-screen">
+        <CustomHead />
+        {/* Mobile menu button */}
+        <div className="lg:hidden fixed top-4 right-4 z-50">
+          <button
+            type="button"
+            className="p-2 rounded-md text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
+            aria-label="Open menu"
           >
-            <div className="absolute top-0 right-0 -mr-12 pt-2">
-              <button
-                type="button"
-                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <XIcon className="h-6 w-6 text-white" aria-hidden="true" />
-              </button>
-            </div>
+            {mobileMenuOpen ? (
+              <XIcon className="h-6 w-6" aria-hidden="true" />
+            ) : (
+              <MenuIcon className="h-6 w-6" aria-hidden="true" />
+            )}
+          </button>
+        </div>
+        
+        {/* Mobile menu */}
+        <div 
+          className="lg:hidden"
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile menu"
+        >
+          <div className="fixed inset-0 flex z-40">
+            <div
+              className={`fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity ease-linear duration-300 ${
+                mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            />
 
-            <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-              <div className="flex-shrink-0 flex items-center px-4 h-16">
-                <img
-                  className="h-8 w-auto"
-                  src="/constituent-circle-logo.png"
-                  alt="Constituent Circle"
-                />
-              </div>
-              <nav className="mt-5 px-2 space-y-1">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                      router.pathname === item.href
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+            <div
+              className={`relative flex-1 flex flex-col max-w-xs w-full bg-white transform transition ease-in-out duration-300 ${
+                mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+              }`}
+            >
+              <div className="pt-5 pb-4 px-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-xl font-bold">Menu</div>
+                  <button
+                    type="button"
+                    className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-label="Close menu"
                   >
-                    <item.icon
-                      className={`mr-4 h-6 w-6 ${
-                        router.pathname === item.href
-                          ? 'text-gray-500'
-                          : 'text-gray-400 group-hover:text-gray-500'
-                      }`}
-                      aria-hidden="true"
-                    />
-                    {item.name}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-
-            <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-              <div className="flex items-center">
-                <div>
-                  <img
-                    className="inline-block h-10 w-10 rounded-full"
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}`}
-                    alt=""
-                  />
+                    <XIcon className="h-6 w-6 text-gray-700" aria-hidden="true" />
+                  </button>
                 </div>
-                <div className="ml-3">
-                  <p className="text-base font-medium text-gray-700">
-                    {user?.email || 'User'}
-                  </p>
+                <div className="mt-5">
+                  <nav className="grid gap-y-8">
+                    {navigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={`flex items-center p-2 -m-2 rounded-md hover:bg-gray-100 ${
+                          isActiveLink(item.href) ? 'bg-gray-100 text-blue-600' : ''
+                        }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <item.icon 
+                          className={`h-6 w-6 mr-3 ${
+                            isActiveLink(item.href) ? 'text-blue-600' : 'text-gray-600'
+                          }`} 
+                          aria-hidden="true" 
+                        />
+                        <span className={`text-base font-medium ${
+                          isActiveLink(item.href) ? 'text-blue-600' : 'text-gray-900'
+                        }`}>
+                          {item.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+                <div className="mt-8 pt-4 border-t border-gray-200">
                   <button
                     onClick={handleLogout}
-                    className="text-sm font-medium text-gray-500 hover:text-gray-700 flex items-center"
+                    className="flex items-center p-2 -m-2 rounded-md hover:bg-gray-100 w-full"
                   >
-                    <LogoutIcon className="mr-2 h-4 w-4" />
-                    Logout
+                    <LogoutIcon className="h-6 w-6 text-gray-600 mr-3" aria-hidden="true" />
+                    <span className="text-base font-medium text-gray-900">Logout</span>
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white">
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex items-center h-16 flex-shrink-0 px-4 bg-white border-b border-gray-200">
-            <img
-              className="h-8 w-auto"
-              src="/constituent-circle-logo.png"
-              alt="Constituent Circle"
-            />
-          </div>
-          <div className="flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1 px-2 py-4 space-y-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    router.pathname === item.href
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <item.icon
-                    className={`mr-3 h-5 w-5 ${
-                      router.pathname === item.href
-                        ? 'text-gray-500'
-                        : 'text-gray-400 group-hover:text-gray-500'
-                    }`}
-                    aria-hidden="true"
-                  />
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </div>
-        <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-          <div className="flex items-center">
-            <div>
-              <img
-                className="inline-block h-9 w-9 rounded-full"
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}`}
-                alt=""
-              />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">
-                {user?.email || 'User'}
-              </p>
-              <button
-                onClick={handleLogout}
-                className="text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center"
-              >
-                <LogoutIcon className="mr-2 h-4 w-4" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile top bar */}
-      <div className="lg:hidden">
-        <div className="bg-white shadow">
-          <div className="px-4 sm:px-6">
-            <div className="flex items-center justify-between h-16">
-              <img
-                className="h-8 w-auto"
-                src="/constituent-circle-logo.png"
-                alt="Constituent Circle"
-              />
-              <button
-                type="button"
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <MenuIcon className="h-6 w-6" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="lg:pl-64 flex flex-col">
+        {/* Main content */}
         <main className="flex-1">
           <div className="py-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
@@ -255,6 +195,7 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   );
 }

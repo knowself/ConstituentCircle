@@ -25,6 +25,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import type { User } from '@supabase/supabase-js';
+import Navigation from './Navigation';
 
 /**
  * Props for the Layout component
@@ -135,165 +136,47 @@ export default function Layout({ children }: LayoutProps) {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
   
-  // Keep the existing navigation links
-  const navigationLinks: NavLink[] = [
-    { href: '/', label: 'Home' },
-    { href: '/services', label: 'Services' },
-    { href: '/blog', label: 'Blog' },
-    { href: '/contact', label: 'Contact' }
-  ];
-  
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow-sm py-4 fixed w-full top-0 z-50 h-[145px]">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-          <div className="flex items-center justify-between w-full">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <Link href="/" className="flex items-center justify-center">
-                <img
-                  src="/constituent-circle-logo.png"
-                  alt="Constituent Circle"
-                  className="h-[110px] w-auto"
-                />
-              </Link>
-            </div>
-            
-            {/* Desktop Navigation - Centered with updated styling */}
-            <div className="hidden lg:flex items-center justify-center flex-grow space-x-10 ml-10">
-              {navigationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-base font-medium transition-colors duration-200 hover:opacity-80 ${
-                    router.pathname === link.href
-                      ? 'text-secondary'
-                      : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              
-              {/* Theme toggle with updated styling */}
-              <button
-                onClick={toggleDarkMode}
-                className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-                aria-label="Toggle dark mode"
-              >
-                {isDarkMode ? (
-                  <SunIcon className="h-5 w-5" />
-                ) : (
-                  <MoonIcon className="h-5 w-5" />
-                )}
-              </button>
-              
-              {/* Auth button with updated styling */}
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <img 
-                      src={userAvatar} 
-                      alt={userDisplayName}
-                      className="h-8 w-8 rounded-full"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {user.email}
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-                  >
-                    <LogoutIcon className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                </div>
-              ) : (
-                <Link
-                  href="/auth/signin"
-                  className="flex items-center space-x-2 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-                >
-                  <LockClosedIcon className="h-5 w-5" aria-hidden="true" />
-                  <span>Sign In</span>
-                </Link>
-              )}
-            </div>
-          </div>
-          
-          {/* Mobile menu button with updated styling */}
-          <div className="lg:hidden absolute right-4 top-4">
-            <button
-              onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-              aria-expanded={isMobileMenuOpen}
-            >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              <svg
-                className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </nav>
+        {/* Desktop Navigation - hidden on mobile */}
+        <div className="hidden lg:block">
+          <Navigation 
+            isDarkMode={isDarkMode} 
+            toggleDarkMode={toggleDarkMode} 
+          />
+        </div>
         
-        {/* Mobile menu panel with updated styling */}
-        <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} lg:hidden`}>
+        {/* Mobile header with logo and menu button */}
+        <div className="lg:hidden flex justify-between items-center px-4">
+          <Link href="/" className="flex items-center">
+            <img
+              src="/constituent-circle-logo.png"
+              alt="Constituent Circle"
+              className="h-[80px] w-auto"
+            />
+          </Link>
+          
+          <button
+            onClick={toggleMobileMenu}
+            className="text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            aria-label="Toggle mobile menu"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+            </svg>
+          </button>
+        </div>
+        
+        {/* Mobile menu panel - consolidated version */}
+        <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} lg:hidden absolute top-[145px] left-0 right-0 bg-white dark:bg-gray-800 shadow-lg z-50`}>
           <div className="px-2 pt-2 pb-3 space-y-1">
-            {navigationLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                  router.pathname === link.href
-                    ? 'text-secondary bg-gray-50 dark:bg-gray-700'
-                    : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            
-            {/* Theme toggle in mobile menu */}
-            <button
-              onClick={toggleDarkMode}
-              className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-            >
-              {isDarkMode ? (
-                <>
-                  <SunIcon className="h-5 w-5 mr-2" />
-                  <span>Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <MoonIcon className="h-5 w-5 mr-2" />
-                  <span>Dark Mode</span>
-                </>
-              )}
-            </button>
+            {/* Mobile Navigation */}
+            <Navigation 
+              isMobile={true} 
+              isDarkMode={isDarkMode}
+              toggleDarkMode={toggleDarkMode}
+            />
             
             {/* Auth button in mobile menu */}
             {user && (

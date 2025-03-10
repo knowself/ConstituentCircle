@@ -40,7 +40,32 @@ To create AI-enabled tools that facilitate meaningful, goal-oriented communicati
   - Supabase for real-time data synchronization and management
   - Redis for caching and session management
   - Structured data organization for constituent profiles
-  - Efficient query optimization with PostgreSQL
+
+### Database Schema
+
+Our PostgreSQL database schema is designed to support the core functionality of the platform with the following key tables:
+
+#### Core Tables
+- **profiles**: Links to Supabase Auth users and stores role information
+- **representatives**: Stores information about elected officials and their offices
+- **constituents**: Manages constituent data and preferences
+- **communications**: Tracks all interactions between representatives and constituents
+- **groups**: Enables segmentation of constituents for targeted communications
+- **group_members**: Junction table for many-to-many relationship between groups and constituents
+- **analytics**: Stores aggregated metrics for reporting and insights
+
+#### Security Features
+- Row-level security (RLS) policies to ensure data access control
+- Role-based permissions for representatives and constituents
+- Secure authentication integration with Supabase Auth
+
+#### Technical Implementation
+- UUID primary keys for enhanced security and distribution
+- JSONB fields for flexible data storage (preferences, metadata, analytics)
+- Proper indexing for performance optimization
+- Timestamp tracking for auditing and analytics
+
+- Efficient query optimization with PostgreSQL
 
 #### Security Framework
 - **Authentication & Authorization**

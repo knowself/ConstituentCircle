@@ -45,7 +45,7 @@ const AuthConsumer = () => {
   return (
     <div>
       <div data-testid="user">{auth.user ? 'Authenticated' : 'Not authenticated'}</div>
-      <button onClick={() => auth.signIn('test@example.com', 'password')}>Sign In</button>
+      <button onClick={() => auth.signIn('test@example.com', 'password')}>Login</button>
       <button onClick={() => auth.signUp('test@example.com', 'password', 'representative', {})}>Sign Up</button>
       <button onClick={() => auth.logout()}>Logout</button>
     </div>
@@ -313,7 +313,7 @@ describe('Authentication', () => {
         target: { value: 'password' },
       });
       
-      fireEvent.click(screen.getByRole('button', { name: /Sign in/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Login/i }));
       
       await waitFor(() => {
         expect(mockRouter.push).toHaveBeenCalledWith('/dashboard');

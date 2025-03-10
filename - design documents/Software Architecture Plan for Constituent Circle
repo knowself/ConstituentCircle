@@ -76,6 +76,42 @@ The structure is designed for scalability, usability, and data efficiency.
 - **`profiles`**: User profiles (id, user_id, full_name, contact_info, preferences).
 - **`templates`**: Message templates (id, name, content, variables[]).
 
+#### Detailed Schema Implementation
+
+Our PostgreSQL database implementation in Supabase includes:
+
+1. **profiles**: 
+   - Links to Supabase Auth users
+   - Stores role information and basic user data
+   - Contains JSONB metadata for extensible profile information
+
+2. **representatives**:
+   - Stores information about elected officials
+   - Tracks district and office type information
+   - Enables representative-specific features
+
+3. **constituents**:
+   - Manages constituent contact information
+   - Stores preferences as JSONB for flexibility
+   - Enables personalized communication
+
+4. **communications**:
+   - Records all interactions between representatives and constituents
+   - Supports multiple message types and channels
+   - Tracks message status and delivery information
+
+5. **groups** and **group_members**:
+   - Enables segmentation for targeted outreach
+   - Supports different group types and roles
+   - Includes analytics for group performance
+
+6. **analytics**:
+   - Stores aggregated metrics for reporting
+   - Includes engagement, demographics, and trend data
+   - Supports data-driven decision making
+
+All tables implement row-level security with appropriate policies to ensure data access control based on user roles and relationships.
+
 ### API Routes (Next.js)
 - `/api/communications/[id]`: Manage communications.
 - `/api/groups/[id]`: Handle group operations.

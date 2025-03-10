@@ -99,8 +99,16 @@ Workspace
 
 check your work
 
+========================
+Terminate process on windows using port 3389
+========================
+1) netstat -ano | findstr :3389 -- find the process id
+2) tasklist | findstr <PID> -- list the process by name
+3) taskkill /F /PID <PID> -- kill process by process id
+
 =====================
 Supabase Commands
 =====================
 supabase db dump -- --schema-only -n public > schema.sql
+
 INSERT INTO auth.users (id, email) VALUES (gen_random_uuid(), 'joe@derivativegenius.com');

@@ -1,0 +1,15 @@
+/* ... existing CSS ... */
+
+/* Add styling for the icon links */
+.nav-icon {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon:hover {
+  color: #4caf50; /* Change to your preferred hover color */
+}
+
+/* ... existing CSS ... */
