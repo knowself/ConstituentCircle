@@ -38,7 +38,7 @@ Hybrid Serverless Architecture
 
 Frontend: Next.js
 Backend: Vercel Functions + Google Cloud Run
-Database: Supabase
+Database: Convex
 
 Job Queue:
 
@@ -91,8 +91,6 @@ Terminate process on windows using port 3389
 3) taskkill /F /PID <PID> -- kill process by process id
 ======================
 
-Based on the error message and the context provided, I can see that we need to migrate away from Firebase to Supabase in your Next.js application. The current error occurs because we're still trying to use Firebase authentication
-
 are you sure, I thought we did this
 
 Workspace
@@ -107,8 +105,8 @@ Terminate process on windows using port 3389
 3) taskkill /F /PID <PID> -- kill process by process id
 
 =====================
-Supabase Commands
+Convex Commands
 =====================
-supabase db dump -- --schema-only -n public > schema.sql
-
-INSERT INTO auth.users (id, email) VALUES (gen_random_uuid(), 'joe@derivativegenius.com');
+npx convex dev
+npx convex import --table tasks ./convex/sampleData.jsonl
+npx convex gen

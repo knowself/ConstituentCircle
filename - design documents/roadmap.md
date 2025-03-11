@@ -54,7 +54,7 @@ While our initial focus is on email, our roadmap includes expanding to other com
 ### Short-Term Milestones (Months 1-3)
 
 #### Month 1: Foundation Building
-- Set up Next.js + Supabase infrastructure
+- Set up Next.js + Convex infrastructure
   - Configure serverless functions for AI processing
   - Implement database schema for constituent profiles
   - Set up authentication system with role-based access
@@ -170,7 +170,7 @@ While our initial focus is on email, our roadmap includes expanding to other com
 #### Admin Authentication Implementation Plan
 
 ##### Milestone 1: Authentication Setup (Week 1)
-- Set up Supabase authentication for admin users
+- Set up Convex authentication for admin users
   - Configure admin-specific authentication policies
   - Create secure password requirements
   - Implement email verification flow

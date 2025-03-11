@@ -1,0 +1,23 @@
+[
+  {
+    "table_name": "profiles"
+  },
+  {
+    "table_name": "representatives"
+  },
+  {
+    "table_name": "constituents"
+  },
+  {
+    "table_name": "communications"
+  },
+  {
+    "table_name": "analytics"
+  },
+  {
+    "table_name": "groups"
+  },
+  {
+    "table_name": "group_members"
+  }
+]

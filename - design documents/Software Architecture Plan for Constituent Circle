@@ -1,18 +1,21 @@
-Below is a comprehensive software architectural plan and SEO strategy for your constituent management platform, **Constituent Circle**, utilizing **Next.js**, **Supabase**, and **Vercel**. This plan is designed to optimize user experience, SEO performance, scalability, and profitability, with clear short-term and long-term milestones. Following the plan, I'll explain why it's the best approach for your goals.
+# Software Architecture Plan for Constituent Circle
 
----
+Below is a comprehensive software architectural plan and SEO strategy for your constituent management platform, **Constituent Circle**, utilizing **Next.js**, **Convex**, and **Vercel**. This plan is designed to optimize user experience, SEO performance, scalability, and profitability, with clear short-term and long-term milestones.
 
 ## Software Architectural Plan
 
 ### Tech Stack Overview
+
 - **Next.js**: A React framework enabling server-side rendering (SSR), static site generation (SSG), and client-side rendering for SEO-friendly, fast, and scalable frontends.
-- **Supabase**: An open-source Firebase alternative with a PostgreSQL database, real-time capabilities, and built-in authentication, ideal for managing constituent data and communications.
+- **Convex**: A backend-as-a-service platform providing real-time database, authentication, and serverless functions for managing constituent data and communications.
 - **Vercel**: A deployment platform optimized for Next.js, offering a global CDN, automatic scaling, and easy CI/CD pipelines.
 
 ### Site Structure
+
 The structure is designed for scalability, usability, and data efficiency.
 
 #### 1. Homepage
+
 - **URL**: `constituentcircle.com`
 - **Purpose**: Entry point highlighting platform capabilities and guiding users to key features.
 - **Features**:
@@ -68,22 +71,23 @@ The structure is designed for scalability, usability, and data efficiency.
 - **Purpose**: Support UX and monetization.
 - **Features**: "Get Started" CTA, pricing plans.
 
-### Database Schema (Supabase)
-- **`users`**: Representatives and constituents (id, email, role, profile_data).
+### Database Schema (Convex)
+- **`profiles`**: Representatives and constituents (id, email, role, profile_data).
 - **`communications`**: Messages (id, type, channel, subject, content, status, analytics).
 - **`groups`**: Constituent segments (id, name, description, type, members[], settings).
 - **`analytics`**: Performance metrics (id, type, period, metrics, created_at).
-- **`profiles`**: User profiles (id, user_id, full_name, contact_info, preferences).
-- **`templates`**: Message templates (id, name, content, variables[]).
+- **`representatives`**: User profiles for representatives (id, user_id, full_name, district, office_type).
+- **`constituents`**: User profiles for constituents (id, user_id, full_name, preferences).
+- **`group_members`**: Junction table for groups and constituents (id, group_id, constituent_id, role).
 
 #### Detailed Schema Implementation
 
-Our PostgreSQL database implementation in Supabase includes:
+Our Convex database implementation includes:
 
 1. **profiles**: 
-   - Links to Supabase Auth users
+   - Links to Convex Auth users
    - Stores role information and basic user data
-   - Contains JSONB metadata for extensible profile information
+   - Contains object metadata for extensible profile information
 
 2. **representatives**:
    - Stores information about elected officials
@@ -92,13 +96,13 @@ Our PostgreSQL database implementation in Supabase includes:
 
 3. **constituents**:
    - Manages constituent contact information
-   - Stores preferences as JSONB for flexibility
+   - Stores preferences as objects for flexibility
    - Enables personalized communication
 
 4. **communications**:
    - Records all interactions between representatives and constituents
-   - Supports multiple message types and channels
-   - Tracks message status and delivery information
+   - Supports multiple communication channels
+   - Tracks message status and analytics
 
 5. **groups** and **group_members**:
    - Enables segmentation for targeted outreach
@@ -147,7 +151,7 @@ All tables implement row-level security with appropriate policies to ensure data
 
 ### Short-Term (Months 1-3): Foundation
 - **Month 1**: 
-  - Set up Next.js + Supabase.
+  - Set up Next.js + Convex.
   - Build homepage, dashboard, and basic communications features.
   - Deploy to Vercel staging.
 - **Month 2**: 
@@ -186,20 +190,20 @@ All tables implement row-level security with appropriate policies to ensure data
 - Next.js's performance capabilities ensure a smooth user experience.
 
 ### 2. Scalability
-- The modular Next.js architecture and Supabase's PostgreSQL backend handle growing user bases and communication volumes seamlessly.
+- The modular Next.js architecture and Convex's backend handle growing user bases and communication volumes seamlessly.
 - Vercel's serverless scaling ensures performance under load.
 
 ### 3. Security & Compliance
-- Supabase provides robust authentication and data protection.
+- Convex provides robust authentication and data protection.
 - The architecture supports compliance with data protection regulations.
 
 ### 4. Analytics & Insights
 - The platform provides actionable insights on constituent engagement and communication effectiveness.
-- Real-time updates via Supabase enhance decision-making.
+- Real-time updates via Convex enhance decision-making.
 
 ### 5. Technical Excellence
 - **Next.js**: Combines performance benefits with modern development practices.
-- **Supabase**: Simplifies backend management with real-time data and auth out-of-the-box.
+- **Convex**: Simplifies backend management with real-time data and auth out-of-the-box.
 - **Vercel**: Streamlines deployment and scaling, reducing operational overhead.
 
 ### 6. Competitive Edge

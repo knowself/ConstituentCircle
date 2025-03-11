@@ -37,7 +37,7 @@ To create AI-enabled tools that facilitate meaningful, goal-oriented communicati
 
 #### Database Layer
 - **Primary Storage**
-  - Supabase for real-time data synchronization and management
+  - Convex for real-time data synchronization and management
   - Redis for caching and session management
   - Structured data organization for constituent profiles
 
@@ -46,7 +46,7 @@ To create AI-enabled tools that facilitate meaningful, goal-oriented communicati
 Our PostgreSQL database schema is designed to support the core functionality of the platform with the following key tables:
 
 #### Core Tables
-- **profiles**: Links to Supabase Auth users and stores role information
+- **profiles**: Links to Convex Auth users and stores role information
 - **representatives**: Stores information about elected officials and their offices
 - **constituents**: Manages constituent data and preferences
 - **communications**: Tracks all interactions between representatives and constituents
@@ -57,7 +57,7 @@ Our PostgreSQL database schema is designed to support the core functionality of 
 #### Security Features
 - Row-level security (RLS) policies to ensure data access control
 - Role-based permissions for representatives and constituents
-- Secure authentication integration with Supabase Auth
+- Secure authentication integration with Convex Auth
 
 #### Technical Implementation
 - UUID primary keys for enhanced security and distribution

@@ -180,3 +180,99 @@ Tests are automatically run in CI/CD pipeline:
 - [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
 - [Testing Library Queries](https://testing-library.com/docs/queries/about)
 - [Common Testing Mistakes](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
+
+## 3. Architecture Vision Document Update
+
+```markdown:c%3A%5CAIdev%5Ccc%5Ccc%5C-%20design%20documents%5Carchitecture-vision.md
+# ConstituentCircle.com - Architecture Vision
+
+## Technical Architecture
+
+### Platform Foundation
+
+#### Frontend Architecture
+
+- **Next.js Framework**
+  - Server-side rendering for optimal SEO
+  - Static generation for content-heavy pages
+  - Real-time updates via WebSocket connections
+  - TypeScript integration for enhanced code quality
+  - Tailwind CSS for responsive design
+  - Component-based architecture for reusability
+
+#### Backend Architecture
+
+- **Convex Backend**
+  - Real-time data synchronization
+  - Serverless functions for business logic
+  - TypeScript integration for type safety
+  - Automatic API generation
+  - Built-in authentication and authorization
+
+#### Database Layer
+
+- **Primary Storage**
+  - Convex for real-time data synchronization and management
+  - Redis for caching and session management
+  - Structured data organization for constituent profiles
+
+### Database Schema
+
+#### Core Tables
+
+- **profiles**: Links to Convex Auth users and stores role information
+- **representatives**: Stores information about elected officials and their offices
+- **constituents**: Manages constituent data and preferences
+- **communications**: Tracks all interactions between representatives and constituents
+- **groups**: Enables segmentation of constituents for targeted communications
+- **group_members**: Junction table for many-to-many relationship between groups and constituents
+- **analytics**: Stores aggregated metrics for reporting and insights
+
+#### Security Features
+
+- Function-level access control to ensure data access security
+- Role-based permissions for representatives and constituents
+- Secure authentication integration with Convex Auth
+
+### Communication Infrastructure
+
+#### Template Management
+
+- Dynamic template generation
+- Category-based organization
+- Personalization tokens
+- Version control
+
+## Development and Operations
+
+### DevOps Pipeline
+
+- **Containerization**: Docker for consistent environments
+- **Orchestration**: Kubernetes for deployment management
+- **CI/CD**: GitHub Actions for automated workflows
+- **Monitoring**: Prometheus and Grafana integration
+
+## Business Model
+
+### Value-Added Services
+
+- Custom integration development
+- Training and onboarding
+- Communication strategy consulting
+- Advanced analytics packages
+
+## Implementation Roadmap
+
+### Phase 2: Advanced Features (Q1 2025)
+
+- Multi-channel support
+- Advanced AI capabilities
+- Analytics dashboard
+- API development
+
+### Phase 3: Enterprise Scaling (Q2 2025)
+
+- Custom integrations
+- Advanced security features
+- Performance optimization
+- Extended AI capabilities
