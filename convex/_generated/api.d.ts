@@ -14,8 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as auth from "../auth.js";
-import type * as samples_permissions from "../samples/permissions.js";
-import type * as samples_tasks from "../samples/tasks.js";
+import type * as scripts_populateRepresentatives from "../scripts/populateRepresentatives.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -27,8 +26,7 @@ import type * as samples_tasks from "../samples/tasks.js";
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "samples/permissions": typeof samples_permissions;
-  "samples/tasks": typeof samples_tasks;
+  "scripts/populateRepresentatives": typeof scripts_populateRepresentatives;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

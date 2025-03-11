@@ -2,12 +2,13 @@ I need you to create a single comprehensive commit message which addresses each 
 
 use "clear ; git status" and "git --no-pager diff --staged"
 ======================
-Let's start working on our project. We have a roadmap and milestones acheched in roadmap.md. Our tech stack is documented there and in architecture-vision.md. Each time you get a question from me the human programmer make your top 5 best suggestions for me, after careful consideration, to choose from without making any changes and we will discuss them. Understoood ? Don't make any suggestions now.
+Let's start working on our project. We have a roadmap and milestones archived in roadmap.md. Our tech stack is documented there and in architecture-vision.md. Each time you get a question from me make your top 5 best suggestions for me, after careful consideration, to choose from without making any changes and we will discuss them. Understoood ? Don't make any suggestions now.
 ======================
-Review our roadmap in _instructions.md. Let's talk about next steps for work today.
-=======================
+there are errors, show me the errors and potential solutions. Make no changes now, just give me options. Number the options, I may choose one by number.
+
+fix everything you understand.
+
 Explore changes below but do not change anything without permission.
-1
 
 Verify and Repeat your understanding.
 ===========================

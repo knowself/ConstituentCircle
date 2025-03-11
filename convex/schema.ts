@@ -2,17 +2,26 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  // Profiles table
   profiles: defineTable({
+    name: v.string(),
     email: v.string(),
     role: v.string(),
+    createdAt: v.number(),
+    // New fields for representatives
+    governmentLevel: v.optional(v.string()), // federal, state, county, city, etc.
+    position: v.optional(v.string()), // senator, governor, mayor, etc.
+    jurisdiction: v.optional(v.string()), // state name, county name, city name, district number
+    party: v.optional(v.string()),
+    termStart: v.optional(v.number()),
+    termEnd: v.optional(v.number()),
+    district: v.optional(v.string()),
     displayname: v.optional(v.string()),
     metadata: v.object({
       firstName: v.optional(v.string()),
       lastName: v.optional(v.string()),
       employmentType: v.optional(v.string())
     }),
-    created_at: v.string()
+    created_at: v.optional(v.string())
   }).index("by_email", ["email"]),
 
   // Representatives table
