@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+// Replace Supabase with Convex
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
@@ -13,7 +15,8 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  // Replace Supabase client with Convex mutation
+  const login = useMutation(api.auth.login);
 
   useEffect(() => {
     setMounted(true);
@@ -28,36 +31,19 @@ export default function AdminLogin() {
     setError(null);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Replace Supabase authentication with Convex
+      const result = await login({
         email,
         password,
+        role: 'admin' // Specify we want admin access
       });
       
-      if (error) {
-        throw error;
+      if (result.success) {
+        router.push('/admin/dashboard');
+        router.refresh();
+      } else {
+        throw new Error(result.message || 'Unauthorized: Admin access only');
       }
-      
-      if (!data.user) {
-        throw new Error('No user data returned');
-      }
-      
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-      
-      if (userError) {
-        throw userError;
-      }
-      
-      if (userData?.role !== 'admin') {
-        await supabase.auth.signOut();
-        throw new Error('Unauthorized: Admin access only');
-      }
-      
-      router.push('/admin/dashboard');
-      router.refresh();
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || 'An error occurred during login');

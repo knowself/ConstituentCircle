@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { User } from '@supabase/supabase-js';
+// Replace Supabase with Convex
+import { useQuery } from "convex/react";
+import { api } from '../../convex/_generated/api';
 import { useAuth } from '../../context/AuthContext';
 import Loading from '../Loading';
 
@@ -12,9 +13,12 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user: authUser, loading: authLoading } = useAuth();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  // Replace Supabase client with Convex query
+  const userRole = useQuery(api.users.getUserRole, 
+    authUser ? { userId: authUser.id } : "skip"
+  );
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -35,21 +39,21 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
             
             // Check role if required
             if (requiredRole) {
-              const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', authUser.id)
-                .single();
-
-              if (error) {
-                console.error('Role check error:', error);
+              // Use Convex query result instead of Supabase
+              if (userRole === undefined) {
+                // Still loading
+                return;
+              }
+              
+              if (userRole === null) {
+                console.error('Role check error');
                 setError('Failed to verify user role');
                 router.push('/unauthorized');
                 return;
               }
 
-              if (!profile || profile.role !== requiredRole) {
-                console.log(`User role ${profile?.role} does not match required role ${requiredRole}`);
+              if (userRole !== requiredRole) {
+                console.log(`User role ${userRole} does not match required role ${requiredRole}`);
                 setError('Unauthorized: Insufficient permissions');
                 router.push('/unauthorized');
                 return;
@@ -74,7 +78,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     };
 
     handleAuth();
-  }, [authUser, authLoading, mounted, requiredRole, router, supabase]);
+  }, [authUser, authLoading, mounted, requiredRole, router, userRole]);
 
   // During server-side rendering or before mounting, return a minimal placeholder
   // to prevent hydration mismatch

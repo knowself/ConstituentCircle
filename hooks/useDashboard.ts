@@ -44,7 +44,7 @@ export function useDashboard({
         const communications = await communicationService.query({
           representative_id: user.id,
           _limit: communicationLimit,
-          _sort: 'created_at:desc'
+          _sort: 'createdAt:desc'
         });
 
         // Load analytics if user has permission
@@ -55,7 +55,7 @@ export function useDashboard({
             type: analyticsType,
             period: analyticsPeriod,
             _limit: analyticsLimit,
-            _sort: 'created_at:desc'
+            _sort: 'createdAt:desc'
           });
         }
 

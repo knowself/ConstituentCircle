@@ -75,7 +75,7 @@ The structure is designed for scalability, usability, and data efficiency.
 - **`profiles`**: Representatives and constituents (id, email, role, profile_data).
 - **`communications`**: Messages (id, type, channel, subject, content, status, analytics).
 - **`groups`**: Constituent segments (id, name, description, type, members[], settings).
-- **`analytics`**: Performance metrics (id, type, period, metrics, created_at).
+- **`analytics`**: Performance metrics (id, type, period, metrics, createdAt).
 - **`representatives`**: User profiles for representatives (id, user_id, full_name, district, office_type).
 - **`constituents`**: User profiles for constituents (id, user_id, full_name, preferences).
 - **`group_members`**: Junction table for groups and constituents (id, group_id, constituent_id, role).

@@ -1,10 +1,19 @@
-import { mutation } from "../_generated/server";
+import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-export const addGovernmentRepresentatives = mutation({
+export default mutation({
   args: {},
   returns: v.string(),
   handler: async (ctx) => {
+    // Step 1: Delete all existing profiles
+    const profiles = await ctx.db.query("profiles").collect();
+    let deletedCount = 0;
+    
+    for (const profile of profiles) {
+      await ctx.db.delete(profile._id);
+      deletedCount++;
+    }
+    
     const now = Date.now();
     
     // Federal Level - Senate
@@ -17,7 +26,7 @@ export const addGovernmentRepresentatives = mutation({
       jurisdiction: "Texas",
       party: "Independent",
       termStart: now,
-      termEnd: now + (6 * 365 * 24 * 60 * 60 * 1000), // 6 years
+      termEnd: now + (6 * 365 * 24 * 60 * 60 * 1000),
       createdAt: now,
       displayname: "Sen. Sarah Mitchell",
       metadata: {
@@ -58,7 +67,7 @@ export const addGovernmentRepresentatives = mutation({
       jurisdiction: "TX-32",
       party: "Independent",
       termStart: now,
-      termEnd: now + (2 * 365 * 24 * 60 * 60 * 1000), // 2 years
+      termEnd: now + (2 * 365 * 24 * 60 * 60 * 1000),
       createdAt: now,
       displayname: "Rep. David Chen",
       metadata: {
@@ -79,7 +88,7 @@ export const addGovernmentRepresentatives = mutation({
       jurisdiction: "Texas",
       party: "Independent",
       termStart: now,
-      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000), // 4 years
+      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000),
       createdAt: now,
       displayname: "Gov. Greg Abbott",
       metadata: {
@@ -131,7 +140,6 @@ export const addGovernmentRepresentatives = mutation({
       district: "Harris County"
     });
 
-    // County Level
     await ctx.db.insert("profiles", {
       name: "Lisa Wong",
       email: "wong@harris.county.example.com",
@@ -152,7 +160,7 @@ export const addGovernmentRepresentatives = mutation({
       district: "Precinct 2"
     });
 
-    // Fix City Level entries
+    // City Level
     await ctx.db.insert("profiles", {
       name: "Sylvester Turner",
       email: "mayor@houston.gov.example.com",
@@ -173,7 +181,6 @@ export const addGovernmentRepresentatives = mutation({
       district: "Houston"
     });
 
-    // Fix Michael Lee entry
     await ctx.db.insert("profiles", {
       name: "Michael Lee",
       email: "lee@houston.gov.example.com",
@@ -194,7 +201,7 @@ export const addGovernmentRepresentatives = mutation({
       district: "District C"
     });
 
-    // Fix School District entry
+    // School District
     await ctx.db.insert("profiles", {
       name: "Patricia Martinez",
       email: "martinez@hisd.example.com",
@@ -215,6 +222,6 @@ export const addGovernmentRepresentatives = mutation({
       district: "District IV"
     });
 
-    return "Representatives added successfully";
+    return `Deleted ${deletedCount} profiles and regenerated new ones`;
   },
 });

@@ -55,7 +55,7 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
 
       // Apply sorting and limit
       query = query
-        .order('created_at', { ascending: false })
+        .order('createdAt', { ascending: false })
         .limit(options.limit || 50);
 
       const { data, error: queryError } = await query;
@@ -77,7 +77,7 @@ export const useCommunications = (options: UseCommunicationsOptions = {}) => {
       sender_id: user.id,
       sender_role: user.user_metadata?.role,
       representative_id: user.user_metadata?.role === 'admin' ? user.id : user.user_metadata?.representative_id,
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       status: 'draft',
       metadata: {

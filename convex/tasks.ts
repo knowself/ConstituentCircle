@@ -1,5 +1,5 @@
-// To this:
-import { query } from "../_generated/server";
+// Fix the import path - need to go up one directory level
+import { query } from "./_generated/server";
 
 export const get = query({
   args: {},

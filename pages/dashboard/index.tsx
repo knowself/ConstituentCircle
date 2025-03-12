@@ -35,7 +35,7 @@ export default function Dashboard() {
         // Load recent communications
         const communications = await communicationService.query({
           representative_id: user.id,
-          order: { created_at: 'desc' },
+          order: { createdAt: 'desc' },
           limit: 5
         });
         setRecentCommunications(communications);
@@ -48,7 +48,7 @@ export default function Dashboard() {
           const analyticsData = await analyticsService.query({
             type: 'communication',
             period: 'daily',
-            order: { created_at: 'desc' },
+            order: { createdAt: 'desc' },
             limit: 7
           });
           setAnalytics(analyticsData);

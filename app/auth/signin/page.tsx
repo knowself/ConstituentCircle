@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+// Replace Supabase with Convex
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserIcon } from '@heroicons/react/24/outline';
@@ -13,7 +15,8 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  // Replace Supabase client with Convex mutation
+  const login = useMutation(api.auth.login);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,17 +24,18 @@ export default function SignIn() {
     setError(null);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Replace Supabase authentication with Convex
+      const result = await login({
         email,
-        password,
+        password
       });
       
-      if (error) {
-        throw error;
+      if (result.success) {
+        router.push('/dashboard');
+        router.refresh();
+      } else {
+        throw new Error(result.message || 'Invalid credentials');
       }
-      
-      router.push('/dashboard');
-      router.refresh();
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || 'An error occurred during sign in');
