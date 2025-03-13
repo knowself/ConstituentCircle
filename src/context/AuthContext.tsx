@@ -1,148 +1,109 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 
+// Define types for our context
 interface User {
-  id: string;
-  email: string;
+  _id: Id<"users">;
   name: string;
-  role?: string;
+  email: string;
+  // Add other user properties as needed
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  loginWithGoogle: (token: string) => Promise<boolean>;
-  register: (email: string, password: string, name: string) => Promise<boolean>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateProfile: (userData: Partial<User>) => Promise<void>;
 }
 
+// Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Create a provider component
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch the current user using Convex query
+  const currentUser = useQuery(api.auth.getCurrentUser);
   
-  // Use existing login function that works with profiles table
+  // Convex mutations
   const login = useMutation(api.auth.login);
   const register = useMutation(api.auth.register);
-  const getCurrentUser = useQuery(api.auth.getCurrentUser);
+  const logoutMutation = useMutation(api.auth.logout);
+  const updateProfileMutation = useMutation(api.auth.updateProfile);
 
+  // Update user state when currentUser changes
   useEffect(() => {
-    // Check if user is already logged in
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
-
-    // If we have user data from the query
-    if (getCurrentUser) {
-      setUser({
-        id: getCurrentUser.id,
-        email: getCurrentUser.email,
-        name: getCurrentUser.name,
-        role: getCurrentUser.role
-      });
+    if (currentUser === undefined) {
+      setIsLoading(true);
+    } else {
+      setUser(currentUser);
       setIsLoading(false);
     }
-  }, [getCurrentUser]);
+  }, [currentUser]);
 
+  // Auth methods
   const handleLogin = async (email: string, password: string) => {
     try {
-      const result = await login({ email, password });
-      
-      if (!result.success) {
-        return false;
-      }
-      
-      // Store auth data
-      localStorage.setItem("userId", result.userId);
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("userName", result.name || email.split('@')[0]);
-      localStorage.setItem("userRole", result.role || "");
-      
-      setUser({
-        id: result.userId,
-        email,
-        name: result.name || email.split('@')[0],
-        role: result.role
-      });
-      
-      return true;
+      await login({ email, password });
     } catch (error) {
       console.error("Login failed:", error);
-      return false;
+      throw error;
     }
   };
 
-  const handleRegister = async (email: string, password: string, name: string) => {
+  const handleRegister = async (name: string, email: string, password: string) => {
     try {
-      const result = await register({ email, password, name });
-      
-      if (!result.success) {
-        return false;
-      }
-      
-      // Store auth data
-      localStorage.setItem("userId", result.userId);
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("userName", name);
-      localStorage.setItem("userRole", result.role || "");
-      
-      setUser({
-        id: result.userId,
-        email,
-        name,
-        role: result.role
-      });
-      
-      return true;
+      await register({ name, email, password });
     } catch (error) {
       console.error("Registration failed:", error);
-      return false;
+      throw error;
     }
   };
 
-  // This is a placeholder - you'll need to implement Google auth separately
-  const loginWithGoogle = async (token: string) => {
-    console.warn("Google login not implemented yet");
-    return false;
+  const handleLogout = async () => {
+    try {
+      await logoutMutation();
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      throw error;
+    }
   };
 
-  const handleLogout = () => {
-    // Clear auth data
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userRole");
-    
-    setUser(null);
+  const handleUpdateProfile = async (userData: Partial<User>) => {
+    try {
+      await updateProfileMutation(userData);
+    } catch (error) {
+      console.error("Profile update failed:", error);
+      throw error;
+    }
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isAuthenticated: !!user,
-        login: handleLogin,
-        loginWithGoogle,
-        register: handleRegister,
-        logout: handleLogout
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const value = {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    login: handleLogin,
+    register: handleRegister,
+    logout: handleLogout,
+    updateProfile: handleUpdateProfile,
+  };
 
-export const useAuth = () => {
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+// Create a hook to use the auth context
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-};
+}

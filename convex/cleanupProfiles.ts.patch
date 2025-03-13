@@ -1,0 +1,5 @@
+// Add a null check for profile.userId
+if (profile.userId) {
+  const user = await ctx.db.get(profile.userId);
+  // Rest of the code
+}

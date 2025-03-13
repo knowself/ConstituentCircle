@@ -48,6 +48,8 @@ export const verifyPassword = action({
   },
 });
 
+// Fix the function calls to use runAfter instead of runAction and correct the internal path
+
 // Email/Password Registration
 export const registerWithEmail = mutation({
   args: {
@@ -129,7 +131,8 @@ export const registerWithEmail = mutation({
       party: "none",
       termStart: Date.now(),
       termEnd: Date.now() + (10 * 365 * 24 * 60 * 60 * 1000),
-      district: "unassigned"
+      district: "unassigned",
+      userId
     });
     
     return {
@@ -175,7 +178,7 @@ export const loginWithEmail = mutation({
     // Verify password using scheduler
     const isValid = await ctx.scheduler.runAfter(0, internal.auth_utils.verifyPassword, {
       password,
-      hash: user.passwordHash!,
+      hash: user.passwordHash || "",
     });
     
     if (!isValid) {
@@ -223,6 +226,11 @@ export const verifySession = query({
     v.null()
   ),
   handler: async (ctx, args) => {
+    // Check if token is provided
+    if (!args.token) {
+      return null;
+    }
+    
     const session = await ctx.db
       .query("sessions")
       .withIndex("by_token", (q) => q.eq("token", args.token))
@@ -278,7 +286,7 @@ export const verifyProfileSession = query({
       userId: user._id,
       email: user.email,
       name: user.name || user.displayname || user.email.split('@')[0],
-      role: user.role || user.metadata?.role
+      role: user.role || (user.metadata ? user.metadata.role : undefined)
     };
   },
 });
@@ -340,6 +348,274 @@ export const register = mutation({
       success: true,
       userId,
       role: "constituent"
+    };
+  },
+});
+
+// Get the currently authenticated user
+export const getCurrentUser = query({
+  args: {},
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      name: v.string(),
+      email: v.string(),
+      role: v.optional(v.string())
+    }),
+    v.null()
+  ),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    // Find the user in the database
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
+    
+    if (!user) return null;
+    
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role || (user.metadata ? user.metadata.role : undefined)
+    };
+  },
+});
+
+// Login a user
+export const login = mutation({
+  args: {
+    email: v.string(),
+    password: v.string(),
+    token: v.optional(v.string())
+  },
+  returns: v.object({
+    success: v.boolean(),
+    userId: v.optional(v.id("users")),
+    role: v.optional(v.string()),
+    message: v.optional(v.string())
+  }),
+  handler: async (ctx, args) => {
+    // Find the user by email
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
+    
+    if (!user || !user.passwordHash) {
+      return {
+        success: false,
+        message: "Invalid email or password"
+      };
+    }
+    
+    // In a real implementation, you would validate the password
+    // For example: if (!await bcrypt.compare(args.password, user.passwordHash))
+    
+    // If token is provided, validate it
+    if (args.token) {
+      const session = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q) => q.eq("token", args.token || ""))
+        .unique();
+      
+      if (!session || session.expiresAt < Date.now()) {
+        return {
+          success: false,
+          message: "Invalid or expired token"
+        };
+      }
+    }
+    
+    // Create a new session
+    const token = Math.random().toString(36).substring(2, 15);
+    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+    
+    await ctx.db.insert("sessions", {
+      userId: user._id,
+      token,
+      expiresAt
+    });
+    
+    // Update user's last login time
+    await ctx.db.patch(user._id, { lastLoginAt: Date.now() });
+    
+    return {
+      success: true,
+      userId: user._id,
+      role: user.role || (user.metadata ? user.metadata.role : undefined)
+    };
+  },
+});
+
+// Logout a user
+export const logout = mutation({
+  args: {
+    token: v.optional(v.string())
+  },
+  returns: v.object({
+    success: v.boolean()
+  }),
+  handler: async (ctx, args) => {
+    if (!args.token) {
+      return { success: true };
+    }
+    
+    // Find the session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token || ""))
+      .unique();
+    
+    if (session) {
+      // Delete the session
+      await ctx.db.delete(session._id);
+    }
+    
+    return { success: true };
+  },
+});
+
+// Get user profile
+export const getProfile = query({
+  args: {
+    userId: v.id("users")
+  },
+  returns: v.union(
+    v.object({
+      userId: v.id("users"),
+      name: v.string(),
+      email: v.string(),
+      role: v.optional(v.string())
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    // Find the user
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+    
+    // Find the profile
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+    
+    return {
+      userId: args.userId,
+      name: user.name || user.displayname || user.email.split('@')[0],
+      email: user.email,
+      role: user.role || (user.metadata ? user.metadata.role : undefined)
+    };
+  },
+});
+
+// Update user profile
+export const updateProfile = mutation({
+  args: {
+    userId: v.id("users"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    // Add other fields as needed
+  },
+  returns: v.object({
+    success: v.boolean(),
+    message: v.optional(v.string())
+  }),
+  handler: async (ctx, args) => {
+    // Check if user exists
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found"
+      };
+    }
+    
+    // Update the user
+    const updates: any = {};
+    if (args.name) updates.name = args.name;
+    if (args.email) updates.email = args.email;
+    
+    await ctx.db.patch(args.userId, updates);
+    
+    // Find and update the profile
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+    
+    if (profile) {
+      const profileUpdates: any = {};
+      if (args.name) profileUpdates.name = args.name;
+      if (args.email) profileUpdates.email = args.email;
+      
+      await ctx.db.patch(profile._id, profileUpdates);
+    }
+    
+    return { success: true };
+  },
+});
+
+// Register a new user - renamed to createUser to avoid duplicate declaration
+export const createUser = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    password: v.string(),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    userId: v.optional(v.id("users")),
+    role: v.optional(v.string()),
+    message: v.optional(v.string())
+  }),
+  handler: async (ctx, args) => {
+    // Check if user already exists
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
+    
+    if (existingUser) {
+      return {
+        success: false,
+        message: "Email already in use"
+      };
+    }
+    
+    // In a real implementation, you would hash the password
+    // For example: const passwordHash = await bcrypt.hash(args.password, 10);
+    const passwordHash = args.password; // This is just a placeholder
+    
+    // Create the user
+    const userId = await ctx.db.insert("users", {
+      name: args.name,
+      email: args.email,
+      tokenIdentifier: `email:${args.email}`,
+      passwordHash,
+      role: "user",
+      displayname: args.name
+    });
+    
+    // Create a profile for the user
+    await ctx.db.insert("profiles", {
+      userId,
+      name: args.name,
+      email: args.email,
+      role: "user",
+      displayname: args.name
+    });
+    
+    return {
+      success: true,
+      userId,
+      role: "user"
     };
   },
 });

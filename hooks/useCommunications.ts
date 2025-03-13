@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
+// Remove or comment out Supabase imports
+// import { supabase } from '../lib/supabase';
+
+// Update any functions that use Supabase
+// For example, if there's a function like:
+// const fetchCommunications = async () => {
+//   const { data, error } = await supabase.from('communications').select('*');
+//   // ...
+// }
+
+// Replace with appropriate Convex queries or other data source
 import {
   Communication,
   CommunicationType,

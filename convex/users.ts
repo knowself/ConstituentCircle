@@ -4,46 +4,62 @@ import { Id } from "./_generated/dataModel";
 
 // Get user role
 export const getUserRole = query({
-  args: { userId: v.id("profiles") },
+  args: {
+    userId: v.id("users")
+  },
+  returns: v.union(v.string(), v.null()),
   handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("profiles")
-      .filter(q => q.eq(q.field("_id"), args.userId))
-      .first();
-    
-    return user?.metadata?.role || null;
+    const user = await ctx.db.get(args.userId);
+    return user?.role || user?.metadata?.role || null;
   },
 });
 
 // Get user profile
 export const getUserProfile = query({
-  args: { userId: v.id("profiles") },
+  args: {
+    userId: v.id("users")
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      name: v.string(),
+      email: v.string(),
+      role: v.optional(v.string())
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("profiles")
-      .filter(q => q.eq(q.field("_id"), args.userId))
-      .first();
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+    
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role || user.metadata?.role
+    };
   },
 });
 
-// Update user profile
-export const updateUserProfile = mutation({
+// Update user
+export const updateUser = mutation({
   args: {
-    userId: v.id("profiles"),
-    data: v.object({
-      name: v.optional(v.string()),
-      email: v.optional(v.string()),
-      // Add other fields as needed
-    }),
+    userId: v.id("users"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    role: v.optional(v.string())
   },
+  returns: v.object({
+    success: v.boolean()
+  }),
   handler: async (ctx, args) => {
-    // Update user profile
-    await ctx.db.patch(args.userId, {
-      // Map the input data to the appropriate fields
-      ...(args.data.name && { full_name: args.data.name }),
-      ...(args.data.email && { email: args.data.email }),
-      // Add other field mappings as needed
-    });
+    const updates: any = {};
+    if (args.name) updates.name = args.name;
+    if (args.email) updates.email = args.email;
+    if (args.role) updates.role = args.role;
+    
+    await ctx.db.patch(args.userId, updates);
+    
     return { success: true };
   },
 });

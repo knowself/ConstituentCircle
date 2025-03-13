@@ -1,27 +1,30 @@
+// Fix the optional userId parameter
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-export default mutation({  // Change to default export
+export const cleanupOrphanedProfiles = mutation({
   args: {},
-  returns: v.string(),
+  returns: v.number(),
   handler: async (ctx) => {
     // Get all profiles
     const profiles = await ctx.db.query("profiles").collect();
-    let count = 0;
+    let deletedCount = 0;
     
-    // Update each profile to ensure correct field structure
+    // Check each profile
     for (const profile of profiles) {
-      // Check if the problematic field exists
-      if ('created_at' in profile) {
-        // Create a new object without the created_at field
-        const { created_at, ...cleanProfile } = profile;
-        
-        // Update the document
-        await ctx.db.replace(profile._id, cleanProfile);
-        count++;
+      // Skip profiles without a userId
+      if (!profile.userId) continue;
+      
+      // Check if the user exists
+      const user = await ctx.db.get(profile.userId);
+      
+      // If user doesn't exist, delete the profile
+      if (!user) {
+        await ctx.db.delete(profile._id);
+        deletedCount++;
       }
     }
     
-    return `Cleaned up ${count} profiles`;
+    return deletedCount;
   },
 });

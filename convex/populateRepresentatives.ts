@@ -1,4 +1,4 @@
-import { mutation } from "../_generated/server";
+import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 export const addGovernmentRepresentatives = mutation({
@@ -152,7 +152,7 @@ export const addGovernmentRepresentatives = mutation({
       district: "Precinct 2"
     });
 
-    // Fix City Level entries
+    // City Level entries
     await ctx.db.insert("profiles", {
       name: "Sylvester Turner",
       email: "mayor@houston.gov.example.com",
@@ -173,7 +173,7 @@ export const addGovernmentRepresentatives = mutation({
       district: "Houston"
     });
 
-    // Fix Michael Lee entry
+    // Michael Lee entry
     await ctx.db.insert("profiles", {
       name: "Michael Lee",
       email: "lee@houston.gov.example.com",
@@ -194,7 +194,7 @@ export const addGovernmentRepresentatives = mutation({
       district: "District C"
     });
 
-    // Fix School District entry
+    // School District entry
     await ctx.db.insert("profiles", {
       name: "Patricia Martinez",
       email: "martinez@hisd.example.com",

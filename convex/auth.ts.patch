@@ -1,0 +1,10 @@
+// In verifySession function, add a null check for token
+if (!args.token) {
+  return null;
+}
+
+// In login function, add a null check for token
+if (args.token) {
+  // Use the token in the query
+  .withIndex("by_token", (q) => q.eq("token", args.token))
+}

@@ -7,6 +7,11 @@ import type { AppProps } from 'next/app';
 import Layout from '../components/Layout';
 import { AuthProvider } from '../context/AuthContext';
 import { LoadingProvider } from '../context/LoadingContext';
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+
+// Create a client with proper environment variable handling and fallback
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || "";
+const convex = new ConvexReactClient(convexUrl);
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -23,13 +28,15 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <AuthProvider>
-      <LoadingProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </LoadingProvider>
-    </AuthProvider>
+    <ConvexProvider client={convex}>
+      <AuthProvider>
+        <LoadingProvider>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </LoadingProvider>
+      </AuthProvider>
+    </ConvexProvider>
   )
 }
 
