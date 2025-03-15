@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 // Replace Supabase with Convex
 import { useMutation } from "convex/react";
 // Fix the import path to use the generated API
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';

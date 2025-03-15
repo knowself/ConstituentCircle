@@ -1,15 +1,17 @@
-import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
+import { v } from "convex/values";
+import bcrypt from "bcryptjs";
 import { internal } from "./_generated/api";
 import { ConvexError } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { isValidGovernmentLevel, isValidJurisdiction, normalizeGovernmentLevel, normalizeJurisdiction, VALID_GOVERNMENT_LEVELS, VALID_JURISDICTIONS } from "./validators";
 
 // Define return types for clarity
 type UserResponse = {
   id: Id<"users">;
   email: string;
   name: string;
-  role?: string;
+  role: string;
 };
 
 type AuthResponse = {
@@ -22,9 +24,8 @@ export const hashPassword = action({
   args: { password: v.string() },
   returns: v.string(),
   handler: async (ctx, args) => {
-    // Implementation of password hashing
-    // This would use a proper hashing library in production
-    return `hashed_${args.password}`;
+    // Use bcrypt to hash the password
+    return await bcrypt.hash(args.password, 10);
   },
 });
 
@@ -87,18 +88,16 @@ export const registerWithEmail = mutation({
     // Create user
     const userId: Id<"users"> = await ctx.db.insert("users", {
       email,
-      name,
-      passwordHash,
       authProvider: "email",
       role: "constituent", // Default role
       metadata: {
         firstName: name.split(' ')[0],
         lastName: name.split(' ')[1] || '',
-        employmentType: "citizen",
-        role: "constituent"
+        employmentType: "citizen"
       },
       createdAt: Date.now(),
       lastLoginAt: Date.now(),
+      name: "Sarah Mitchell",
     });
     
     // Generate session token using scheduler
@@ -115,23 +114,16 @@ export const registerWithEmail = mutation({
     // Also create a profile for backward compatibility
     await ctx.db.insert("profiles", {
       email,
-      name,
       role: "constituent",
       displayname: name,
+      governmentLevel: "Federal",
+      jurisdiction: "National",
       metadata: {
         firstName: name.split(' ')[0],
         lastName: name.split(' ')[1] || '',
-        employmentType: "citizen",
-        role: "constituent"
+        employmentType: "permanent",
       },
       createdAt: Date.now(),
-      governmentLevel: "none",
-      position: "constituent",
-      jurisdiction: "unassigned",
-      party: "none",
-      termStart: Date.now(),
-      termEnd: Date.now() + (10 * 365 * 24 * 60 * 60 * 1000),
-      district: "unassigned",
       userId
     });
     
@@ -205,7 +197,7 @@ export const loginWithEmail = mutation({
         id: user._id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role || "constituent"
       },
     };
   },
@@ -286,7 +278,7 @@ export const verifyProfileSession = query({
       userId: user._id,
       email: user.email,
       name: user.name || user.displayname || user.email.split('@')[0],
-      role: user.role || (user.metadata ? user.metadata.role : undefined)
+      role: user.role
     };
   },
 });
@@ -322,26 +314,31 @@ export const register = mutation({
     
     // Create user in profiles table
     const now = Date.now();
-    const userId = await ctx.db.insert("profiles", {
+    const newUserId: Id<"users"> = await ctx.db.insert("users", {
       email,
-      name,
       role: "constituent",
-      displayname: name,
+      name,
       metadata: {
         firstName: name.split(' ')[0],
         lastName: name.split(' ')[1] || '',
-        employmentType: "citizen",
-        password: password, // Note: In production, you should hash this password
-        role: "constituent"
+        employmentType: "permanent",
       },
       createdAt: now,
-      governmentLevel: "none",
-      position: "constituent",
-      jurisdiction: "unassigned",
-      party: "none",
-      termStart: now,
-      termEnd: now + (10 * 365 * 24 * 60 * 60 * 1000),
-      district: "unassigned"
+    });
+
+    const userId: Id<"profiles"> = await ctx.db.insert("profiles", {
+      email,
+      role: "constituent",
+      displayname: name,
+      governmentLevel: "Federal",
+      jurisdiction: "National",
+      metadata: {
+        firstName: name.split(' ')[0],
+        lastName: name.split(' ')[1] || '',
+        employmentType: "permanent",
+      },
+      createdAt: now,
+      userId: newUserId
     });
     
     return {
@@ -382,23 +379,24 @@ export const getCurrentUser = query({
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role || (user.metadata ? user.metadata.role : undefined)
+      role: user.role
     };
   },
 });
 
 // Login a user
+/**
+ * Authenticate a user with email and password
+ */
 export const login = mutation({
   args: {
     email: v.string(),
     password: v.string(),
-    token: v.optional(v.string())
   },
   returns: v.object({
     success: v.boolean(),
     userId: v.optional(v.id("users")),
-    role: v.optional(v.string()),
-    message: v.optional(v.string())
+    error: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
     // Find the user by email
@@ -407,51 +405,101 @@ export const login = mutation({
       .withIndex("by_email", (q) => q.eq("email", args.email))
       .unique();
     
-    if (!user || !user.passwordHash) {
+    if (!user) {
       return {
         success: false,
-        message: "Invalid email or password"
+        error: "Invalid email or password",
       };
     }
     
-    // In a real implementation, you would validate the password
-    // For example: if (!await bcrypt.compare(args.password, user.passwordHash))
-    
-    // If token is provided, validate it
-    if (args.token) {
-      const session = await ctx.db
-        .query("sessions")
-        .withIndex("by_token", (q) => q.eq("token", args.token || ""))
-        .unique();
-      
-      if (!session || session.expiresAt < Date.now()) {
-        return {
-          success: false,
-          message: "Invalid or expired token"
-        };
-      }
+    // Verify password
+    if (!user.passwordHash) {
+      return {
+        success: false,
+        error: "User has no password set",
+      };
     }
     
-    // Create a new session
-    const token = Math.random().toString(36).substring(2, 15);
-    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+    const isMatch = await bcrypt.compare(args.password, user.passwordHash);
+    if (!isMatch) {
+      return {
+        success: false,
+        error: "Invalid email or password",
+      };
+    }
+    
+    // Update last login time
+    await ctx.db.patch(user._id, {
+      lastLoginAt: Date.now(),
+    });
+    
+    // Create a session
+    const token = generateSessionToken();
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
     
     await ctx.db.insert("sessions", {
       userId: user._id,
       token,
-      expiresAt
+      expiresAt,
+      createdAt: Date.now(),
     });
-    
-    // Update user's last login time
-    await ctx.db.patch(user._id, { lastLoginAt: Date.now() });
     
     return {
       success: true,
       userId: user._id,
-      role: user.role || (user.metadata ? user.metadata.role : undefined)
     };
   },
 });
+
+/**
+ * Check if a user has admin role
+ */
+export const isAdmin = query({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    return user?.role === "admin";
+  },
+});
+
+/**
+ * Get user by ID with role information
+ */
+export const getUser = query({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.object({
+    _id: v.id("users"),
+    email: v.string(),
+    name: v.string(),
+    role: v.optional(v.string()),
+    displayname: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    return {
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      displayname: user.displayname,
+    };
+  },
+});
+
+// Helper function to generate a random session token
+function generateSessionToken(): string {
+  return Math.random().toString(36).substring(2, 15) + 
+         Math.random().toString(36).substring(2, 15);
+}
 
 // Logout a user
 export const logout = mutation({
@@ -510,7 +558,7 @@ export const getProfile = query({
       userId: args.userId,
       name: user.name || user.displayname || user.email.split('@')[0],
       email: user.email,
-      role: user.role || (user.metadata ? user.metadata.role : undefined)
+      role: user.role
     };
   },
 });
@@ -521,6 +569,8 @@ export const updateProfile = mutation({
     userId: v.id("users"),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
+    governmentLevel: v.optional(v.string()),
+    jurisdiction: v.optional(v.string()),
     // Add other fields as needed
   },
   returns: v.object({
@@ -534,6 +584,22 @@ export const updateProfile = mutation({
       return {
         success: false,
         message: "User not found"
+      };
+    }
+    
+    // Validate government level if provided
+    if (args.governmentLevel && !isValidGovernmentLevel(args.governmentLevel)) {
+      return {
+        success: false,
+        message: `Invalid government level: ${args.governmentLevel}. Valid values are: ${VALID_GOVERNMENT_LEVELS.join(", ")}`
+      };
+    }
+    
+    // Validate jurisdiction if provided
+    if (args.jurisdiction && !isValidJurisdiction(args.jurisdiction)) {
+      return {
+        success: false,
+        message: `Invalid jurisdiction: ${args.jurisdiction}. Valid values are: ${VALID_JURISDICTIONS.join(", ")}`
       };
     }
     
@@ -552,70 +618,91 @@ export const updateProfile = mutation({
     
     if (profile) {
       const profileUpdates: any = {};
-      if (args.name) profileUpdates.name = args.name;
+      if (args.name) profileUpdates.displayname = args.name;
       if (args.email) profileUpdates.email = args.email;
+      
+      // Normalize and add government level if provided
+      if (args.governmentLevel) {
+        profileUpdates.governmentLevel = normalizeGovernmentLevel(args.governmentLevel);
+      }
+      
+      // Normalize and add jurisdiction if provided
+      if (args.jurisdiction) {
+        profileUpdates.jurisdiction = normalizeJurisdiction(args.jurisdiction);
+      }
       
       await ctx.db.patch(profile._id, profileUpdates);
     }
     
-    return { success: true };
+    return {
+      success: true
+    };
   },
 });
 
 // Register a new user - renamed to createUser to avoid duplicate declaration
 export const createUser = mutation({
   args: {
-    name: v.string(),
     email: v.string(),
     password: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+    governmentLevel: v.optional(v.string()),
+    jurisdiction: v.optional(v.string()),
   },
   returns: v.object({
     success: v.boolean(),
-    userId: v.optional(v.id("users")),
-    role: v.optional(v.string()),
-    message: v.optional(v.string())
+    message: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
-    // Check if user already exists
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
-      .unique();
-    
-    if (existingUser) {
+    // Validate government level if provided
+    if (args.governmentLevel && !isValidGovernmentLevel(args.governmentLevel)) {
       return {
         success: false,
-        message: "Email already in use"
+        message: `Invalid government level: ${args.governmentLevel}. Valid values are: ${VALID_GOVERNMENT_LEVELS.join(", ")}`
       };
     }
     
-    // In a real implementation, you would hash the password
-    // For example: const passwordHash = await bcrypt.hash(args.password, 10);
-    const passwordHash = args.password; // This is just a placeholder
+    // Validate jurisdiction if provided
+    if (args.jurisdiction && !isValidJurisdiction(args.jurisdiction)) {
+      return {
+        success: false,
+        message: `Invalid jurisdiction: ${args.jurisdiction}. Valid values are: ${VALID_JURISDICTIONS.join(", ")}`
+      };
+    }
     
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(args.password, 10);
+
     // Create the user
     const userId = await ctx.db.insert("users", {
-      name: args.name,
       email: args.email,
-      tokenIdentifier: `email:${args.email}`,
-      passwordHash,
+      passwordHash: hashedPassword,
       role: "user",
-      displayname: args.name
+      name: `${args.firstName} ${args.lastName}`,
+      createdAt: Date.now()
     });
     
     // Create a profile for the user
     await ctx.db.insert("profiles", {
-      userId,
-      name: args.name,
       email: args.email,
       role: "user",
-      displayname: args.name
+      displayname: `${args.firstName} ${args.lastName}`,
+      name: args.firstName,
+      governmentLevel: normalizeGovernmentLevel(args.governmentLevel || "Federal"),
+      jurisdiction: normalizeJurisdiction(args.jurisdiction || "National"),
+      metadata: {
+        firstName: args.firstName,
+        lastName: args.lastName,
+        employmentType: "permanent",
+      },
+      createdAt: Date.now(),
+      userId: userId
     });
     
     return {
       success: true,
-      userId,
-      role: "user"
+      message: "User registered successfully"
     };
   },
 });

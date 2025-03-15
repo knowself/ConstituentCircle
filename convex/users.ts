@@ -10,7 +10,7 @@ export const getUserRole = query({
   returns: v.union(v.string(), v.null()),
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
-    return user?.role || user?.metadata?.role || null;
+    return user?.role
   },
 });
 
@@ -36,7 +36,7 @@ export const getUserProfile = query({
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role || user.metadata?.role
+      role: user.role
     };
   },
 });

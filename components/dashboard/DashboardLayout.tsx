@@ -116,7 +116,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-shrink-0">
                 <img
                   className="h-8 w-8 rounded-full"
-                  src={mounted && user?.user_metadata?.avatar_url ? user.user_metadata.avatar_url : 'https://via.placeholder.com/40'}
+                  src={mounted && user?.metadata?.avatar_url ? user.metadata.avatar_url : 'https://via.placeholder.com/40'}
                   alt={mounted && user?.email ? user.email : 'User'}
                 />
               </div>

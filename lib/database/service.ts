@@ -1,20 +1,24 @@
-// This file provides compatibility with previous database service
-// by re-exporting equivalent functionality from Convex
+import { api } from '../../convex/_generated/api';
+import { ConvexHttpClient } from 'convex/browser';
 
-import { api } from "../../convex/api";
+// Create a client for server-side operations
+export const CONVEX_URL = process.env.NEXT_PUBLIC_ENV === "prod"
+  ? process.env.NEXT_PUBLIC_CONVEX_URL_PROD
+  : process.env.NEXT_PUBLIC_CONVEX_URL_DEV;
 
-// Export any functions that were previously used from this service
-// These are placeholder implementations - adjust based on your actual needs
-export const getUser = async (userId) => {
-  // Implementation using Convex instead of previous database
-  // This is a placeholder - implement based on your actual data model
-  return { id: userId, /* other user properties */ };
-};
+const convex = new ConvexHttpClient(CONVEX_URL!);
 
-export const getUsers = async () => {
-  // Implementation using Convex instead of previous database
-  return [];
-};
+export class DatabaseService {
+  static async getUser(userId: string) {
+    return await convex.query(api.users.getById, { userId });
+  }
+  
+  static async getUserByEmail(email: string) {
+    return await convex.query(api.users.getByEmail, { email });
+  }
+  
+  // Add other methods as needed
+}
 
-// Add other functions that were exported from this service
-// and used in pages/dashboard/index.tsx
+// Export individual methods for backward compatibility
+export const getUser = DatabaseService.getUser;

@@ -8,7 +8,7 @@ export default function Home() {
   const tasks = useQuery(api.tasks.get);
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      {tasks?.map(({ _id, text }) => <div key={_id}>{text}</div>)}
+      {tasks?.map(({ _id, text }: { _id: string, text: string }) => <div key={_id}>{text}</div>)}
     </main>
   );
 }

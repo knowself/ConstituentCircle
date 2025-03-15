@@ -6,6 +6,12 @@ import { api } from '../../convex/_generated/api';
 import { useAuth } from '../../context/AuthContext';
 import Loading from '../Loading';
 
+// Define a proper interface for the user object
+interface User {
+  id: string;
+  // Add other properties that your user object has
+}
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string;
@@ -13,7 +19,8 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user: authUser, loading: authLoading } = useAuth();
-  const [user, setUser] = useState(null);
+  // Better typing for the user state
+  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Replace Supabase client with Convex query
   const userRole = useQuery(api.users.getUserRole, 

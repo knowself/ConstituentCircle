@@ -77,7 +77,7 @@ export default function Layout({ children }: LayoutProps) {
   };
   // Update user photo and display name references
   // Update user metadata access with proper type checking
-  const userAvatar = user?.user_metadata?.avatar_url || 
+  const userAvatar = (user as any)?.user_metadata?.avatar_url ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}`;
   const userDisplayName = user?.email || 'User';
   // Initialize theme from local storage and handle hydration

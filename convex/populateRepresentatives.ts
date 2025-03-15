@@ -9,210 +9,279 @@ export const addGovernmentRepresentatives = mutation({
     
     // Federal Level - Senate
     await ctx.db.insert("profiles", {
-      name: "Sarah Mitchell",
       email: "mitchell.senate@gov.example.com",
       role: "representative",
-      governmentLevel: "federal",
-      position: "Senator",
-      jurisdiction: "Texas",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (6 * 365 * 24 * 60 * 60 * 1000), // 6 years
+      governmentLevel: "Federal",
+      jurisdiction: "State",
+      district: 'Texas',
       createdAt: now,
       displayname: "Sen. Sarah Mitchell",
+      name: "Sarah Mitchell",
       metadata: {
         firstName: "Sarah",
         lastName: "Mitchell",
         employmentType: "elected"
       },
-      district: "Texas"
+      userId: await ctx.db.insert("users", {
+        email: "mitchell.senate@gov.example.com",
+        role: "representative",
+        name: "Sarah Mitchell",
+        metadata: {
+          firstName: "Sarah",
+          lastName: "Mitchell",
+          employmentType: "elected"
+        }
+      }),
     });
 
     await ctx.db.insert("profiles", {
-      name: "James Rodriguez",
       email: "rodriguez.senate@gov.example.com",
       role: "representative",
-      governmentLevel: "federal",
-      position: "Senator",
-      jurisdiction: "Texas",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (6 * 365 * 24 * 60 * 60 * 1000),
+      governmentLevel: "Federal",
+      jurisdiction: "State",
+      district: 'Texas',
       createdAt: now,
       displayname: "Sen. James Rodriguez",
+      name: "James Rodriguez",
       metadata: {
         firstName: "James",
         lastName: "Rodriguez",
         employmentType: "elected"
       },
-      district: "Texas"
+      userId: await ctx.db.insert("users", {
+        email: "rodriguez.senate@gov.example.com",
+        role: "representative",
+        name: "James Rodriguez",
+        metadata: {
+          firstName: "James",
+          lastName: "Rodriguez",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     // Federal Level - House
     await ctx.db.insert("profiles", {
-      name: "David Chen",
       email: "chen.house@gov.example.com",
       role: "representative",
-      governmentLevel: "federal",
-      position: "Representative",
-      jurisdiction: "TX-32",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (2 * 365 * 24 * 60 * 60 * 1000), // 2 years
+      governmentLevel: "Federal",
+      jurisdiction: "District",
+      district: 'TX-32',
       createdAt: now,
       displayname: "Rep. David Chen",
+      name: "David Chen",
       metadata: {
         firstName: "David",
         lastName: "Chen",
         employmentType: "elected"
       },
-      district: "TX-32"
+      userId: await ctx.db.insert("users", {
+        email: "chen.house@gov.example.com",
+        role: "representative",
+        name: "David Chen",
+        metadata: {
+          firstName: "David",
+          lastName: "Chen",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     // State Level
     await ctx.db.insert("profiles", {
-      name: "Greg Abbott",
       email: "governor@texas.gov.example.com",
       role: "representative",
-      governmentLevel: "state",
-      position: "Governor",
-      jurisdiction: "Texas",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000), // 4 years
+      governmentLevel: "State",
+      jurisdiction: "State",
+      district: 'Texas',
       createdAt: now,
       displayname: "Gov. Greg Abbott",
+      name: "Greg Abbott",
       metadata: {
         firstName: "Greg",
         lastName: "Abbott",
         employmentType: "elected"
       },
-      district: "Texas"
+      userId: await ctx.db.insert("users", {
+        email: "governor@texas.gov.example.com",
+        role: "representative",
+        name: "Greg Abbott",
+        metadata: {
+          firstName: "Greg",
+          lastName: "Abbott",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     await ctx.db.insert("profiles", {
-      name: "Maria Garcia",
       email: "garcia@texas.gov.example.com",
       role: "representative",
-      governmentLevel: "state",
-      position: "State Senator",
-      jurisdiction: "Texas District 15",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000),
+      governmentLevel: "State",
+      jurisdiction: "District",
+      district: 'District 15',
       createdAt: now,
       displayname: "State Sen. Maria Garcia",
+      name: "Maria Garcia",
       metadata: {
         firstName: "Maria",
         lastName: "Garcia",
         employmentType: "elected"
       },
-      district: "District 15"
+      userId: await ctx.db.insert("users", {
+        email: "garcia@texas.gov.example.com",
+        role: "representative",
+        name: "Maria Garcia",
+        metadata: {
+          firstName: "Maria",
+          lastName: "Garcia",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     // County Level
     await ctx.db.insert("profiles", {
-      name: "Robert Thompson",
       email: "thompson@harris.county.example.com",
       role: "representative",
-      governmentLevel: "county",
-      position: "County Judge",
-      jurisdiction: "Harris County",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000),
+      governmentLevel: "County",
+      jurisdiction: "County",
+      district: 'Harris County',
       createdAt: now,
       displayname: "Judge Robert Thompson",
+      name: "Robert Thompson",
       metadata: {
         firstName: "Robert",
         lastName: "Thompson",
         employmentType: "elected"
       },
-      district: "Harris County"
+      userId: await ctx.db.insert("users", {
+        email: "thompson@harris.county.example.com",
+        role: "representative",
+        name: "Robert Thompson",
+        metadata: {
+          firstName: "Robert",
+          lastName: "Thompson",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     // County Level
     await ctx.db.insert("profiles", {
-      name: "Lisa Wong",
       email: "wong@harris.county.example.com",
       role: "representative",
-      governmentLevel: "county",
-      position: "County Commissioner",
-      jurisdiction: "Harris County Precinct 2",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000),
+      governmentLevel: "County",
+      jurisdiction: "Precinct",
+      district: 'Precinct 2',
       createdAt: now,
       displayname: "Commissioner Lisa Wong",
+      name: "Lisa Wong",
       metadata: {
         firstName: "Lisa",
         lastName: "Wong",
         employmentType: "elected"
       },
-      district: "Precinct 2"
+      userId: await ctx.db.insert("users", {
+        email: "wong@harris.county.example.com",
+        role: "representative",
+        name: "Lisa Wong",
+        metadata: {
+          firstName: "Lisa",
+          lastName: "Wong",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     // City Level entries
     await ctx.db.insert("profiles", {
-      name: "Sylvester Turner",
       email: "mayor@houston.gov.example.com",
       role: "representative",
-      governmentLevel: "city",
-      position: "Mayor",
-      jurisdiction: "Houston",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000),
+      governmentLevel: "Municipal",
+      jurisdiction: "Municipal",
+      district: 'Houston',
       createdAt: now,
       displayname: "Mayor Sylvester Turner",
+      name: "Sylvester Turner",
       metadata: {
         firstName: "Sylvester",
         lastName: "Turner",
         employmentType: "elected"
       },
-      district: "Houston"
+      userId: await ctx.db.insert("users", {
+        email: "mayor@houston.gov.example.com",
+        role: "representative",
+        name: "Sylvester Turner",
+        metadata: {
+          firstName: "Sylvester",
+          lastName: "Turner",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     // Michael Lee entry
     await ctx.db.insert("profiles", {
-      name: "Michael Lee",
       email: "lee@houston.gov.example.com",
       role: "representative",
-      governmentLevel: "city",
-      position: "City Council Member",
-      jurisdiction: "Houston District C",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (2 * 365 * 24 * 60 * 60 * 1000),
+      governmentLevel: "Municipal",
+      jurisdiction: "District",
+      district: 'District C',
       createdAt: now,
       displayname: "Council Member Michael Lee",
+      name: "Michael Lee",
       metadata: {
         firstName: "Michael",
         lastName: "Lee",
         employmentType: "elected"
       },
-      district: "District C"
+      userId: await ctx.db.insert("users", {
+        email: "lee@houston.gov.example.com",
+        role: "representative",
+        name: "Michael Lee",
+        metadata: {
+          firstName: "Michael",
+          lastName: "Lee",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     // School District entry
     await ctx.db.insert("profiles", {
-      name: "Patricia Martinez",
       email: "martinez@hisd.example.com",
       role: "representative",
-      governmentLevel: "school_district",
-      position: "School Board Trustee",
-      jurisdiction: "Houston ISD District IV",
-      party: "Independent",
-      termStart: now,
-      termEnd: now + (4 * 365 * 24 * 60 * 60 * 1000),
+      governmentLevel: "School District",
+      jurisdiction: "District",
+      district: 'District IV',
       createdAt: now,
       displayname: "Trustee Patricia Martinez",
+      name: "Patricia Martinez",
       metadata: {
         firstName: "Patricia",
         lastName: "Martinez",
         employmentType: "elected"
       },
-      district: "District IV"
+      userId: await ctx.db.insert("users", {
+        email: "martinez@hisd.example.com",
+        role: "representative",
+        name: "Patricia Martinez",
+        metadata: {
+          firstName: "Patricia",
+          lastName: "Martinez",
+          employmentType: "elected"
+        },
+        createdAt: now
+      })
     });
 
     return "Representatives added successfully";

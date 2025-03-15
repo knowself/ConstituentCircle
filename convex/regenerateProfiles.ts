@@ -21,10 +21,17 @@ export const regenerateProfiles = mutation({
         // Create a profile for the user
         await ctx.db.insert("profiles", {
           userId: user._id,
-          name: user.name,
           email: user.email,
-          role: user.role || user.metadata?.role || "user",
-          governmentLevel: "federal", // Add this field to the schema
+          role: user.role ,
+          governmentLevel: 'Federal', 
+          jurisdiction: 'State',
+          displayname: user.displayname || user.email,
+          createdAt: Date.now(),
+          metadata: {
+            firstName: user.metadata?.firstName || '',
+            lastName: user.metadata?.lastName || '',
+            employmentType: user.metadata?.employmentType || 'citizen'
+          }
         });
         
         createdCount++;
