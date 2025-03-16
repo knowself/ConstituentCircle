@@ -8,7 +8,7 @@ import Layout from '../components/Layout';
 import { AuthProvider } from '../context/AuthContext';
 import { LoadingProvider } from '../context/LoadingContext';
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 // Create a client with proper environment variable handling and fallback
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
@@ -23,7 +23,7 @@ if (!convexUrl) {
 // Create the Convex client only if we have a valid URL
 const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }: AppProps): ReactNode {
   useEffect(() => {
     registerServiceWorker();
   }, []);
@@ -59,22 +59,32 @@ function MyApp({ Component, pageProps }: AppProps) {
     );
   }
 
+  // Create a properly typed wrapper for each component
+  const TypedConvexProvider = ConvexProvider as React.ComponentType<{client: ConvexReactClient, children: ReactNode}>;
+  const TypedAuthProvider = AuthProvider as React.ComponentType<{children: ReactNode}>;
+  const TypedLoadingProvider = LoadingProvider as React.ComponentType<{children: ReactNode}>;
+  const TypedLayout = Layout as React.ComponentType<{children: ReactNode}>;
+
   return React.createElement(
-    ConvexProvider,
-    { client: convex },
-    React.createElement(
-      AuthProvider,
-      null,
+    TypedConvexProvider,
+    { client: convex, children: 
       React.createElement(
-        LoadingProvider,
-        null,
-        React.createElement(
-          Layout,
-          null,
-          React.createElement(Component, pageProps)
-        )
+        TypedAuthProvider,
+        { children: 
+          React.createElement(
+            TypedLoadingProvider,
+            { children: 
+              React.createElement(
+                TypedLayout,
+                { children: 
+                  React.createElement(Component, pageProps)
+                }
+              )
+            }
+          )
+        }
       )
-    )
+    }
   );
 }
 

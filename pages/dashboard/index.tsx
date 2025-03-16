@@ -4,6 +4,7 @@ import { DatabaseService } from '../../lib/database/service';
 import { Communication, CommunicationType, CommunicationDirection, CommunicationChannel } from '../../lib/types/communication';
 import React, { useState, useEffect } from 'react';
 import { Id } from '../../convex/_generated/dataModel';
+import dynamic from 'next/dynamic';
 
 // Define the ConvexCommunication interface based on what Convex returns
 interface ConvexCommunication {
@@ -22,8 +23,10 @@ interface ConvexCommunication {
 /**
  * Dashboard component that displays user information and recent communications.
  * Uses React.createElement to avoid JSX type issues.
+ * Uses dynamic import with ssr: false to prevent server-side rendering issues with Convex.
  */
-export default function Dashboard() {
+// Use dynamic import with ssr: false to prevent server-side rendering
+const DashboardComponent = () => {
   const { user } = useAuth();
   const [recentCommunications, setRecentCommunications] = useState<Communication[]>([])
 
@@ -96,4 +99,11 @@ export default function Dashboard() {
   
   // TODO: Once the type issues are resolved, we'll add back the ProtectedRoute wrapper
   // The current issue is that React.createElement with ProtectedRoute is causing type errors
-}
+};
+
+// Use dynamic import with ssr: false to prevent server-side rendering
+const Dashboard = dynamic(() => Promise.resolve(DashboardComponent), {
+  ssr: false
+});
+
+export default Dashboard;
