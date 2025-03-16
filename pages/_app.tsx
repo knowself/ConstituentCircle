@@ -1,35 +1,31 @@
 import '../styles/globals.css'
 import '../styles/utilities.css';
 import { initOpenAIClient } from '../lib/ai-services/openAIClient';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { registerServiceWorker } from '../lib/serviceWorker';
 import type { AppProps } from 'next/app';
 import Layout from '../components/Layout';
 import { AuthProvider } from '../context/AuthContext';
 import { LoadingProvider } from '../context/LoadingContext';
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexProvider } from "convex/react";
 import React, { ReactNode } from 'react';
-
-// Create a client with proper environment variable handling and fallback
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-
-// Validate that we have a valid Convex URL
-if (!convexUrl) {
-  console.warn(
-    "NEXT_PUBLIC_CONVEX_URL is not set. Please set it to your Convex deployment URL."
-  );
-}
-
-// Create the Convex client only if we have a valid URL
-const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+import { getConvexReactClient } from '../lib/convex/client';
 
 function MyApp({ Component, pageProps }: AppProps): ReactNode {
-  useEffect(() => {
-    registerServiceWorker();
-  }, []);
+  // Use state to store the client to ensure it's only created on the client side
+  const [convexClient, setConvexClient] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize OpenAI client only on the client side
+    // Initialize the Convex client on the client side
+    const client = getConvexReactClient();
+    setConvexClient(client);
+    setIsLoading(false);
+
+    // Register service worker
+    registerServiceWorker();
+
+    // Initialize OpenAI client
     try {
       initOpenAIClient();
     } catch (error) {
@@ -37,8 +33,21 @@ function MyApp({ Component, pageProps }: AppProps): ReactNode {
     }
   }, []);
 
-  // If we don't have a valid Convex client, show an error message using React.createElement
-  if (!convex) {
+  // Show loading state while initializing
+  if (isLoading) {
+    return React.createElement(
+      'div', 
+      { className: "flex items-center justify-center min-h-screen bg-gray-100" },
+      React.createElement(
+        'p', 
+        { className: "text-lg" },
+        "Loading application..."
+      )
+    );
+  }
+
+  // If we don't have a valid Convex client, show an error message
+  if (!convexClient) {
     return React.createElement(
       'div', 
       { className: "flex items-center justify-center min-h-screen bg-gray-100" },
@@ -60,14 +69,14 @@ function MyApp({ Component, pageProps }: AppProps): ReactNode {
   }
 
   // Create a properly typed wrapper for each component
-  const TypedConvexProvider = ConvexProvider as React.ComponentType<{client: ConvexReactClient, children: ReactNode}>;
+  const TypedConvexProvider = ConvexProvider as React.ComponentType<{client: any, children: ReactNode}>;
   const TypedAuthProvider = AuthProvider as React.ComponentType<{children: ReactNode}>;
   const TypedLoadingProvider = LoadingProvider as React.ComponentType<{children: ReactNode}>;
   const TypedLayout = Layout as React.ComponentType<{children: ReactNode}>;
 
   return React.createElement(
     TypedConvexProvider,
-    { client: convex, children: 
+    { client: convexClient, children: 
       React.createElement(
         TypedAuthProvider,
         { children: 

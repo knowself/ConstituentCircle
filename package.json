@@ -9,9 +9,9 @@
   },
   "scripts": {
     "clean": "rd /s /q .next",
-    "prebuild": "if not exist node_modules npm install && npx convex codegen",
-    "build": "next build",
     "dev": "next dev",
+    "prebuild": "node scripts/generate-convex.js",
+    "build": "next build",
     "start": "next start",
     "start:dev": "./start_dev.sh",
     "lint": "next lint",

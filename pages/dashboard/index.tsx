@@ -5,6 +5,7 @@ import { Communication, CommunicationType, CommunicationDirection, Communication
 import React, { useState, useEffect } from 'react';
 import { Id } from '../../convex/_generated/dataModel';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
 
 // Define the ConvexCommunication interface based on what Convex returns
 interface ConvexCommunication {
@@ -25,12 +26,25 @@ interface ConvexCommunication {
  * Uses React.createElement to avoid JSX type issues.
  * Uses dynamic import with ssr: false to prevent server-side rendering issues with Convex.
  */
-// Use dynamic import with ssr: false to prevent server-side rendering
+// Create a loading component that will be shown during client-side rendering
+const LoadingComponent = () => {
+  return React.createElement(
+    'div', { className: "container mx-auto px-4 py-8 flex justify-center items-center h-screen" },
+    React.createElement('p', null, "Loading dashboard...")
+  );
+};
+
+// The actual dashboard component that will only be rendered on the client
 const DashboardComponent = () => {
   const { user } = useAuth();
   const [recentCommunications, setRecentCommunications] = useState<Communication[]>([])
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
+    // If we're in a server environment, don't do anything
+    if (typeof window === 'undefined') return;
+
     async function loadData() {
       if (user) {
         console.log('Loading dashboard data for user:', user.id);
@@ -66,12 +80,25 @@ const DashboardComponent = () => {
           setRecentCommunications(communications);
         } catch (error) {
           console.error("Error fetching communications:", error);
+        } finally {
+          setIsLoading(false);
         }
+      } else {
+        // If no user, redirect to login
+        router.push('/auth/signin');
       }
     }
 
     loadData();
-  }, [user])
+  }, [user, router])
+
+  // If still loading, show loading indicator
+  if (isLoading) {
+    return React.createElement(
+      'div', { className: "container mx-auto px-4 py-8 flex justify-center items-center" },
+      React.createElement('p', null, "Loading dashboard data...")
+    );
+  }
 
   // Create the dashboard content using React.createElement
   const dashboardContent = React.createElement(
@@ -93,17 +120,19 @@ const DashboardComponent = () => {
     )
   );
 
-  // For now, return just the dashboardContent without ProtectedRoute
-  // This is a temporary solution to fix the type issues
   return dashboardContent;
-  
-  // TODO: Once the type issues are resolved, we'll add back the ProtectedRoute wrapper
-  // The current issue is that React.createElement with ProtectedRoute is causing type errors
 };
 
 // Use dynamic import with ssr: false to prevent server-side rendering
+// This ensures the component is only loaded on the client side
 const Dashboard = dynamic(() => Promise.resolve(DashboardComponent), {
-  ssr: false
+  ssr: false,
+  loading: () => React.createElement(LoadingComponent, null)
 });
 
-export default Dashboard;
+// Create a simple server-side safe page component
+function DashboardPage() {
+  return React.createElement(Dashboard, null);
+}
+
+export default DashboardPage;
