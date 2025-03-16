@@ -1,0 +1,12 @@
+{
+  "project": "constituent-circle",
+  "team": "knowself",
+  "prodUrl": "https://eager-hedgehog-558.convex.cloud",
+  "functions": "./convex",
+  "authInfo": [
+    {
+      "domain": "https://constituent-circle.vercel.app",
+      "applicationID": "constituent-circle"
+    }
+  ]
+}
