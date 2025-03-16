@@ -8,6 +8,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "clean": "rd /s /q .next",
+    "prebuild": "if not exist node_modules npm install",
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
@@ -30,9 +32,6 @@
   "license": "ISC",
   "dependencies": {
     "@heroicons/react": "^2.0.18",
-    "@sendgrid/mail": "^8.1.0",
-    "@supabase/auth-helpers-nextjs": "^0.9.0",
-    "@supabase/supabase-js": "^2.49.1",
     "@types/nodemailer": "^6.4.17",
     "@vercel/analytics": "^1.1.1",
     "ai": "^4.0.20",

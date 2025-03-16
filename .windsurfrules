@@ -1,5 +1,20 @@
+I'm developing on Windows 11
 
+## Tech Stack
 
+- **Frontend**: Next.js with TypeScript and Tailwind CSS
+- **Backend**: Convex for database and real-time data synchronization
+- **Authentication**: Convex Auth
+- **Deployment**: Vercel
+
+## Tech Stack Versions
+
+- **@heroicons/react**: ^2.0.18
+- **@types/nodemailer**: ^6.4.17
+- **@vercel/analytics**: ^1.1.1
+- **ai**: ^4.0.20
+- **Convex**: ^1.20.0
+- **Next.js**: ^15.2.0
 
 # Convex guidelines
 ## Function guidelines

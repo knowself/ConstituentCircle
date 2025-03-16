@@ -130,7 +130,7 @@ export default function Communications() {
               </div>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {communications.map((comm) => (
+                {communications.map((comm: Communication) => (
                   <li key={comm.id} className="p-4 hover:bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">

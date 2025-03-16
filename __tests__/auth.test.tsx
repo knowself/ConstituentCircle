@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/router';
 import { AuthProvider, useAuth } from '../context/AuthContext';
-import SignIn from '../pages/auth/signin';
+import SignIn from '../src/app/auth/signin/page';
 import SignUp from '../pages/auth/signup';
 import Dashboard from '../pages/dashboard/index';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -87,7 +87,7 @@ describe('Authentication', () => {
         </AuthProvider>
       );
       
-      fireEvent.click(screen.getByText('Sign In'));
+      fireEvent.click(screen.getByText('Login'));
       
       expect(mockSignIn).toHaveBeenCalledWith({
         email: 'test@example.com',

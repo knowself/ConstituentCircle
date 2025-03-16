@@ -8,7 +8,42 @@ export const CONVEX_URL = process.env.NEXT_PUBLIC_ENV === "prod"
 
 const convex = new ConvexHttpClient(CONVEX_URL!);
 
-export class DatabaseService {
+export class DatabaseService<T> {
+  private table: string;
+
+  constructor(table: string) {
+    this.table = table;
+  }
+
+  async getAll(): Promise<T[]> {
+    const result = await convex.query(api[this.table].getAll); 
+    return result;
+  }
+
+  async query<U>(filters: Partial<U>): Promise<U[]> {
+    if (this.table === 'communications') {
+      const representativeId = (filters as any).representativeId;
+      const limit = (filters as any)._limit || 10; // Default to 10 if not specified
+      
+      console.log('Querying communications with:', { representativeId, limit });
+      
+      try {
+        const result = await convex.query(api.communications.getRecentCommunications, { 
+          representativeId, 
+          limit 
+        });
+        
+        console.log('Query result:', result);
+        return result as any as U[];
+      } catch (error) {
+        console.error('Error querying communications:', error);
+        throw error;
+      }
+    } else {
+      throw new Error(`Querying table ${this.table} is not supported.`);
+    }
+  }
+
   static async getUser(userId: string) {
     return await convex.query(api.users.getById, { userId });
   }

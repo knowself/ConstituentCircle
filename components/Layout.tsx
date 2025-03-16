@@ -24,7 +24,6 @@ import {
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
-import type { User } from '@supabase/supabase-js';
 import Navigation from './Navigation';
 
 /**
@@ -77,8 +76,7 @@ export default function Layout({ children }: LayoutProps) {
   };
   // Update user photo and display name references
   // Update user metadata access with proper type checking
-  const userAvatar = (user as any)?.user_metadata?.avatar_url ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}`;
+  const userAvatar = user?.avatar_url ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email ?? 'User')}`;
   const userDisplayName = user?.email || 'User';
   // Initialize theme from local storage and handle hydration
   useEffect(() => {

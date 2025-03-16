@@ -9,6 +9,15 @@ A platform for representatives to effectively communicate with their constituent
 - **Authentication**: Convex Auth
 - **Deployment**: Vercel
 
+## Tech Stack Versions
+
+- **@heroicons/react**: ^2.0.18
+- **@types/nodemailer**: ^6.4.17
+- **@vercel/analytics**: ^1.1.1
+- **ai**: ^4.0.20
+- **Convex**: ^1.20.0
+- **Next.js**: ^15.2.0
+
 ## Getting Started
 
 ### Prerequisites
@@ -22,4 +31,3 @@ A platform for representatives to effectively communicate with their constituent
 ```bash
 git clone https://github.com/yourusername/constituent-circle.git
 cd constituent-circle
-```

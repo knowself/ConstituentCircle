@@ -17,6 +17,7 @@ interface UserProfile {
   role: Role;
   displayName?: string;
   email: string;
+  avatar_url?: string;
   metadata?: Record<string, any>;
 }
 
@@ -57,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setError(null);
+      // Pass email and password as separate parameters to match the interface
       const result = await login({ email, password });
       if (!result.success) {
         throw new Error(result.error);
