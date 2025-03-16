@@ -6,6 +6,7 @@
   "outputDirectory": ".next",
   "regions": ["iad1"],
   "env": {
-    "NEXT_TELEMETRY_DISABLED": "1"
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "NEXT_PUBLIC_CONVEX_URL": "https://eager-hedgehog-558.convex.cloud"
   }
 }
