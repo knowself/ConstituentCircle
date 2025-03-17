@@ -103,7 +103,7 @@ export default function DashboardPage() {
                       <h4 className="text-lg font-medium text-gray-900 dark:text-white">{communication.subject}</h4>
                       <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{communication.content}</p>
                       <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        {communication.createdAt.toLocaleDateString()} • {communication.channel} • {communication.status}
+                        {communication.createdAt?.toLocaleDateString() || 'Unknown date'} • {communication.channel} • {communication.status}
                       </p>
                     </div>
                     <div className="ml-4">

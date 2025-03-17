@@ -2,6 +2,7 @@
 
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ThemeProvider } from "../components/ThemeProvider";
+import { AuthProvider } from "../context/AuthContext";
 import '../styles/globals.css'; // Make sure to import global styles
 
 // Initialize the Convex client
@@ -68,9 +69,11 @@ export default function RootLayout({
       </head>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
         <ConvexProvider client={convex}>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              {children}
+            </ThemeProvider>
+          </AuthProvider>
         </ConvexProvider>
       </body>
     </html>
