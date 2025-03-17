@@ -98,6 +98,32 @@ Workspace
 
 check your work
 
+
+================================
+Great! You now have all three users set up in your Convex database:
+
+Admin User:
+Email: joe@derivativegenius.com
+Name: Joe Terry
+Role: admin
+
+User ID: k97812b7d4k3dmvx943q0wzw497c7kya
+Representative User:
+Email: joe@joeterry.org
+Name: Harriet Representative
+Role: representative
+
+User ID: k9718xct8grmtaag87mej881wx7c6wmn
+Constituent User:
+Email: joeterry@gmail.com
+Name: Chris Constituent
+Role: constituent
+User ID: k973vvcmnnvfhxmgw259tvbre97c7dmw
+The constituent user already has the "constituent" role by default, so we didn't need to update it.
+
+These users can now be used to test different role-based functionalities in your application. You can log in with each of these accounts to test the different user experiences and access controls in your application.
+================================
+
 ========================
 Terminate process on windows using port 3389
 ========================

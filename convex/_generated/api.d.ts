@@ -17,6 +17,7 @@ import type * as api_ from "../api.js";
 import type * as auth from "../auth.js";
 import type * as auth_utils from "../auth_utils.js";
 import type * as cleanupProfiles from "../cleanupProfiles.js";
+import type * as communications from "../communications.js";
 import type * as createAdminUser from "../createAdminUser.js";
 import type * as displayTables from "../displayTables.js";
 import type * as fixProfilesSchema from "../fixProfilesSchema.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   auth_utils: typeof auth_utils;
   cleanupProfiles: typeof cleanupProfiles;
+  communications: typeof communications;
   createAdminUser: typeof createAdminUser;
   displayTables: typeof displayTables;
   fixProfilesSchema: typeof fixProfilesSchema;

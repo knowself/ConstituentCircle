@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 
 interface BreadcrumbItem {
   label: string;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const Breadcrumb: React.FC<Props> = ({ items }) => {
-  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <nav className="flex mb-8" aria-label="Breadcrumb">
@@ -36,7 +36,7 @@ const Breadcrumb: React.FC<Props> = ({ items }) => {
             <Link 
               href={item.href}
               className={`ml-1 text-sm font-medium md:ml-2 ${
-                router.asPath === item.href
+                pathname === item.href
                   ? 'text-secondary dark:text-secondary'
                   : 'text-gray-700 hover:text-secondary dark:text-gray-400 dark:hover:text-white'
               }`}

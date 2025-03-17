@@ -10,6 +10,7 @@ import { LoadingProvider } from '../context/LoadingContext';
 import { ConvexProvider } from "convex/react";
 import React, { ReactNode } from 'react';
 import { getConvexReactClient } from '../lib/convex/client';
+import { ThemeProvider } from '../components/ThemeProvider';
 
 function MyApp({ Component, pageProps }: AppProps): ReactNode {
   // Use state to store the client to ensure it's only created on the client side
@@ -73,20 +74,26 @@ function MyApp({ Component, pageProps }: AppProps): ReactNode {
   const TypedAuthProvider = AuthProvider as React.ComponentType<{children: ReactNode}>;
   const TypedLoadingProvider = LoadingProvider as React.ComponentType<{children: ReactNode}>;
   const TypedLayout = Layout as React.ComponentType<{children: ReactNode}>;
+  const TypedThemeProvider = ThemeProvider as React.ComponentType<{children: ReactNode}>;
 
   return React.createElement(
     TypedConvexProvider,
     { client: convexClient, children: 
       React.createElement(
-        TypedAuthProvider,
-        { children: 
+        TypedThemeProvider,
+        { children:
           React.createElement(
-            TypedLoadingProvider,
+            TypedAuthProvider,
             { children: 
               React.createElement(
-                TypedLayout,
+                TypedLoadingProvider,
                 { children: 
-                  React.createElement(Component, pageProps)
+                  React.createElement(
+                    TypedLayout,
+                    { children: 
+                      React.createElement(Component, pageProps)
+                    }
+                  )
                 }
               )
             }

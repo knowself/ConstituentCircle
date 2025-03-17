@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   poweredByHeader: false,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
@@ -81,7 +80,7 @@ const nextConfig = {
     // During Vercel deployments, don't fail the build on TypeScript errors
     // This allows us to deploy even with some TypeScript warnings
     ignoreBuildErrors: process.env.VERCEL === '1',
-  },
+  }
 }
 
 module.exports = nextConfig

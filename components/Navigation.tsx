@@ -1,16 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserIcon, ShieldCheckIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { UserIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { useTheme, ThemeToggle } from './ThemeProvider';
 
 const Navigation = ({ 
-  isMobile = false,
-  isDarkMode = false,
-  toggleDarkMode
+  isMobile = false
 }: { 
-  isMobile?: boolean,
-  isDarkMode?: boolean,
-  toggleDarkMode?: () => void 
+  isMobile?: boolean
 }) => {
   const pathname = usePathname();
   
@@ -42,41 +39,41 @@ const Navigation = ({
         ))}
         
         {/* Dark/Light mode toggle for mobile */}
-        {toggleDarkMode && (
-          <button
-            onClick={toggleDarkMode}
-            className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {isDarkMode ? (
-              <SunIcon className="h-5 w-5" />
-            ) : (
-              <MoonIcon className="h-5 w-5" />
-            )}
-          </button>
-        )}
+        <div className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+          <span className="mr-2">Theme</span>
+          <ThemeToggle />
+        </div>
         
-        {/* Auth links for mobile - stacked vertically without text labels */}
-        <Link
-          href="/auth/signin"
-          className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-          title="User Login"
-        >
-          <UserIcon className="h-5 w-5" />
-        </Link>
-        
-        <Link
-          href="/admin/login"
-          className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-          title="Admin Login"
-        >
-          <ShieldCheckIcon className="h-5 w-5" />
-        </Link>
+        {/* Auth links for mobile */}
+        <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center px-3">
+            <div className="flex-shrink-0">
+              <UserIcon className="h-6 w-6 text-gray-400 dark:text-gray-300" />
+            </div>
+            <div className="ml-3">
+              <Link
+                href="/signin"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+              >
+                Sign In
+              </Link>
+            </div>
+          </div>
+          <div className="mt-3 space-y-1">
+            <Link
+              href="/admin/login"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              <ShieldCheckIcon className="h-5 w-5 mr-2" />
+              Admin
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
-
-  // Desktop navigation - fixed to ensure it's visible on large screens
+  
+  // Desktop navigation
   return (
     <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
       <div className="flex-shrink-0">
@@ -89,52 +86,40 @@ const Navigation = ({
         </Link>
       </div>
       
-      <div className="flex items-center space-x-10">
+      <div className="hidden lg:flex items-center space-x-4">
         {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className={`text-base font-medium transition-colors duration-200 hover:opacity-80 ${
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
               pathname === link.href
-                ? "text-secondary"
-                : "text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                ? "text-secondary bg-gray-50 dark:bg-gray-700"
+                : "text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
             }`}
           >
             {link.label}
           </Link>
         ))}
+      </div>
+      
+      <div className="hidden lg:flex items-center space-x-4">
+        {/* Dark/Light mode toggle for desktop */}
+        <ThemeToggle />
         
-        {/* Auth icons for desktop */}
-        <div className="flex items-center space-x-4">
-          {/* Add dark/light mode toggle for desktop */}
-          {toggleDarkMode && (
-            <button
-              onClick={toggleDarkMode}
-              className="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center"
-              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {isDarkMode ? (
-                <SunIcon className="h-5 w-5" />
-              ) : (
-                <MoonIcon className="h-5 w-5" />
-              )}
-            </button>
-          )}
-          
+        {/* Auth links for desktop */}
+        <div className="flex items-center space-x-2 ml-4">
           <Link
-            href="/auth/signin"
-            className="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center"
-            title="User Login"
+            href="/signin"
+            className="px-3 py-2 rounded-md text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
           >
-            <UserIcon className="h-5 w-5" />
+            Sign In
           </Link>
-          
           <Link
             href="/admin/login"
-            className="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center"
-            title="Admin Login"
+            className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
           >
-            <ShieldCheckIcon className="h-5 w-5" />
+            <ShieldCheckIcon className="h-5 w-5 mr-1" />
+            Admin
           </Link>
         </div>
       </div>
