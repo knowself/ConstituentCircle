@@ -16,6 +16,8 @@ import type {
 import type * as api_ from "../api.js";
 import type * as auth from "../auth.js";
 import type * as auth_utils from "../auth_utils.js";
+import type * as checkAdminUser from "../checkAdminUser.js";
+import type * as checkUser from "../checkUser.js";
 import type * as cleanupProfiles from "../cleanupProfiles.js";
 import type * as communications from "../communications.js";
 import type * as createAdminUser from "../createAdminUser.js";
@@ -26,6 +28,7 @@ import type * as populateRepresentatives from "../populateRepresentatives.js";
 import type * as regenerateProfiles from "../regenerateProfiles.js";
 import type * as schema_auth from "../schema/auth.js";
 import type * as seed from "../seed.js";
+import type * as setAdminPassword from "../setAdminPassword.js";
 import type * as tasks from "../tasks.js";
 import type * as updateProfileGovernmentLevel from "../updateProfileGovernmentLevel.js";
 import type * as users from "../users.js";
@@ -43,6 +46,8 @@ declare const fullApi: ApiFromModules<{
   api: typeof api_;
   auth: typeof auth;
   auth_utils: typeof auth_utils;
+  checkAdminUser: typeof checkAdminUser;
+  checkUser: typeof checkUser;
   cleanupProfiles: typeof cleanupProfiles;
   communications: typeof communications;
   createAdminUser: typeof createAdminUser;
@@ -53,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   regenerateProfiles: typeof regenerateProfiles;
   "schema/auth": typeof schema_auth;
   seed: typeof seed;
+  setAdminPassword: typeof setAdminPassword;
   tasks: typeof tasks;
   updateProfileGovernmentLevel: typeof updateProfileGovernmentLevel;
   users: typeof users;

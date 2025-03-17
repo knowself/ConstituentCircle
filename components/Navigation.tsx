@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { UserIcon, ShieldCheckIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useTheme, ThemeToggle } from './ThemeProvider';
 
 const Navigation = ({ 
@@ -61,6 +61,13 @@ const Navigation = ({
           </div>
           <div className="mt-3 space-y-1">
             <Link
+              href="/signup"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Create Account
+            </Link>
+            <Link
               href="/admin/login"
               className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
             >
@@ -109,9 +116,17 @@ const Navigation = ({
         {/* Auth links for desktop */}
         <div className="flex items-center space-x-2 ml-4">
           <Link
-            href="/signin"
-            className="px-3 py-2 rounded-md text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            href="/signup"
+            className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
           >
+            <PlusIcon className="h-5 w-5 mr-1" />
+            Create Account
+          </Link>
+          <Link
+            href="/signin"
+            className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+          >
+            <UserIcon className="h-5 w-5 mr-1" />
             Sign In
           </Link>
           <Link

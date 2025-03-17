@@ -26,6 +26,10 @@ export default function DashboardLayout({
       // No authenticated user, redirect to sign in
       console.log('No authenticated user, redirecting to sign in');
       router.push('/auth/signin');
+    } else if (!loading && user && user.role === 'admin') {
+      // Redirect admin users to admin dashboard
+      console.log('Admin user detected, redirecting to admin dashboard');
+      router.push('/admin/dashboard');
     }
   }, [user, loading, mounted, router]);
 

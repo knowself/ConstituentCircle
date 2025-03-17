@@ -21,6 +21,8 @@ interface UseDashboardOptions {
 
 interface UserProfile {
   id: string;
+  firstName?: string;
+  lastName?: string;
   user_metadata: { role: string };
 }
 

@@ -1,24 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Replace Supabase with Convex
-import { useMutation } from "convex/react";
-// Fix the import path to use the generated API
-import { api } from "../../../convex/_generated/api";
+import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline';
 import Header from '../../../components/Header';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
-  // Replace Supabase client with Convex mutation
-  const login = useMutation(api.auth.login);
+  const { signIn, user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -27,29 +25,69 @@ export default function AdminLogin() {
     };
   }, []);
 
+  // Check if user is already logged in
+  useEffect(() => {
+    if (!mounted || isRedirecting) return;
+    
+    const checkAuthStatus = async () => {
+      try {
+        // Check if we have a logout parameter in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const isLogout = urlParams.get('logout') === 'true';
+        
+        // If we're coming from a logout, don't redirect back to dashboard
+        if (isLogout) {
+          // Set success message
+          setSuccessMessage('You have been successfully logged out.');
+          
+          // Clean the URL by removing the logout parameter
+          if (window.history.replaceState) {
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+          }
+          return;
+        }
+        
+        // If still loading auth state, wait
+        if (loading) return;
+        
+        // If user is already authenticated and is an admin, redirect to dashboard
+        // Only redirect if we have a valid session token in localStorage
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (user && user.role === 'admin' && sessionToken) {
+          console.log('User already logged in as admin, redirecting to dashboard');
+          setIsRedirecting(true);
+          router.replace('/admin/dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+      }
+    };
+    
+    checkAuthStatus();
+  }, [user, mounted, router, isRedirecting, loading]);
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
     
     try {
-      // Replace Supabase authentication with Convex
-      const result = await login({
-        email,
-        password,
-        role: 'admin' // Specify we want admin access
-      });
+      // Call the signIn function with email and password
+      const result = await signIn(email, password);
       
-      if (result.success) {
-        router.push('/admin/dashboard');
-        router.refresh();
-      } else {
-        throw new Error(result.message || 'Unauthorized: Admin access only');
-      }
+      // If we get here, login was successful
+      console.log('Login successful, redirecting to dashboard');
+      
+      // Set flag to prevent redirect loops
+      setIsRedirecting(true);
+      
+      // Use router.replace instead of push to avoid adding to history
+      router.replace('/admin/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || 'An error occurred during login');
-    } finally {
       setLoading(false);
     }
   };
@@ -67,12 +105,16 @@ export default function AdminLogin() {
           <div className="flex justify-center">
             <ShieldCheckIcon className="h-12 w-12 text-indigo-600 dark:text-blue-500" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Admin Login
-          </h2>
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Only administrators can access this area
+            </p>
+          </div>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            <Link href="/auth/signin" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-500 dark:hover:text-blue-400">
-              Return to regular login
+            <Link href="/signin" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-500 dark:hover:text-blue-400 inline-flex items-center">
+              <UserIcon className="h-4 w-4 mr-1" />
+              Normal Sign In
             </Link>
           </p>
         </div>
@@ -85,6 +127,15 @@ export default function AdminLogin() {
                   <div className="flex">
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-red-800 dark:text-red-200">{error}</h3>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {successMessage && (
+                <div className="rounded-md bg-green-50 dark:bg-green-900/30 p-4">
+                  <div className="flex">
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-green-800 dark:text-green-200">{successMessage}</h3>
                     </div>
                   </div>
                 </div>

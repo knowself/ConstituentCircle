@@ -3,6 +3,8 @@ interface UserProfile {
   id: string;
   email: string;
   avatar_url?: string;
+  firstName?: string;
+  lastName?: string;
   user_metadata?: {
     role?: string; // Add role or other properties as needed
   };

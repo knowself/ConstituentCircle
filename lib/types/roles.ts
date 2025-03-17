@@ -18,7 +18,8 @@ export type Role =
   | 'volunteer_coordinator'
   | 'temp_staff'
   | 'intern'
-  | 'volunteer';
+  | 'volunteer'
+  | 'admin';
 
 export type CompanyRole = 
   | 'company_admin'

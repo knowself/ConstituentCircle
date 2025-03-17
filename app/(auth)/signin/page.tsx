@@ -34,7 +34,11 @@ export default function SignIn() {
     try {
       const result = await login({ email, password });
       if (result.success) {
-        router.push('/dashboard');
+        if (result.user && result.user.role === 'admin') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         setError(result.error || 'Failed to sign in');
       }
@@ -65,7 +69,7 @@ export default function SignIn() {
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Or{' '}
             <Link href="/signup" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-500 dark:hover:text-blue-400">
-              create a new account
+              Create a New Account
             </Link>
           </p>
         </div>
