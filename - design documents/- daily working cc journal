@@ -136,3 +136,17 @@ Convex Commands
 npx convex dev
 npx convex import --table tasks ./convex/sampleData.jsonl
 npx convex gen
+
+
+Example of convex workflow
+
+# Sync local code to dev and test
+npx convex dev
+# Deploy schema/functions to prod
+npx convex deploy
+# Backup prod (optional)
+npx convex export --prod --path prod-backup.zip
+# Export dev data
+npx convex export --path dev-data.zip
+# Import to prod
+npx convex import --prod --path dev-data.zip

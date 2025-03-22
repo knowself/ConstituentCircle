@@ -1,11 +1,42 @@
-import { internalQuery } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+
+/**
+ * Check if an admin user exists and has a password set
+ */
+export const checkAdminUser = query({
+  args: {},
+  returns: v.object({
+    exists: v.boolean(),
+    hasPassword: v.boolean(),
+    email: v.optional(v.string())
+  }),
+  handler: async (ctx) => {
+    const adminUser = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "admin"))
+      .first();
+    
+    if (!adminUser) {
+      return {
+        exists: false,
+        hasPassword: false
+      };
+    }
+    
+    return {
+      exists: true,
+      hasPassword: !!adminUser.passwordHash,
+      email: adminUser.email
+    };
+  },
+});
 
 /**
  * Check if an admin user exists and has a password set
  * This is an internal query that should only be used for debugging
  */
-export const checkAdminUser = internalQuery({
+export const checkAdminUserInternal = internalQuery({
   args: {
     email: v.string(),
   },
@@ -22,27 +53,19 @@ export const checkAdminUser = internalQuery({
         .query("users")
         .withIndex("by_email", (q) => q.eq("email", args.email))
         .unique();
-      
+
       if (!user) {
         return {
           exists: false,
           hasPassword: false,
         };
       }
-      
-      // Return user details without sensitive information
+
       return {
         exists: true,
         hasPassword: !!user.passwordHash,
         role: user.role,
-        fields: {
-          id: user._id,
-          email: user.email,
-          role: user.role,
-          // List all fields except passwordHash
-          hasPasswordField: 'password' in user,
-          fieldNames: Object.keys(user),
-        },
+        fields: user,
       };
     } catch (error) {
       console.error("Error checking admin user:", error);

@@ -16,7 +16,7 @@ export default function AuthNavHeader() {
             <img
               src="/constituent-circle-logo.png"
               alt="Constituent Circle"
-              className="h-10 w-auto"
+              className="h-[40px] w-auto"
             />
             <span className="ml-2 text-lg font-semibold text-gray-900 dark:text-white hidden sm:inline">
               Constituent Circle

@@ -31,14 +31,14 @@ export default function DashboardPage() {
 
     async function loadData() {
       if (user) {
-        console.log('Loading dashboard data for user:', user.id);
+        console.log('Loading dashboard data for user:', user._id);
 
         // Load recent communications
         const communicationService = new DatabaseService('communications');
         try {
           // First, get the raw results
           const rawResults = await communicationService.query({
-            representativeId: user.id,
+            representativeId: user._id,
             _limit: 5
           });
 
@@ -85,7 +85,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Welcome, {user?.displayName || 'User'}!</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Welcome, {user?.displayname || 'User'}!</h2>
         <p className="text-gray-600 dark:text-gray-300">
           This is your dashboard where you can manage all your constituent communications and analyze engagement data.
         </p>

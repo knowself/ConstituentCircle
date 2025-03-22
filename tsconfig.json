@@ -1,5 +1,5 @@
 {
-  "compilerOptions": {
+"compilerOptions": {
     "target": "es5",
     "lib": [
       "dom",
@@ -9,6 +9,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "types": ["convex"],
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",

@@ -1,65 +1,133 @@
-import { query, mutation } from "./_generated/server";
+"use node";
+import { internalAction, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
-
-// Get user role
-export const getUserRole = query({
-  args: {
-    userId: v.id("users")
-  },
-  returns: v.union(v.string(), v.null()),
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    return user?.role
-  },
-});
-
-// Get user profile
-export const getUserProfile = query({
-  args: {
-    userId: v.id("users")
-  },
-  returns: v.union(
-    v.object({
-      _id: v.id("users"),
-      name: v.string(),
-      email: v.string(),
-      role: v.optional(v.string())
-    }),
-    v.null()
-  ),
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) return null;
-    
-    return {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    };
-  },
-});
+import { internal as internalFunctions } from "./_generated/api";
 
 // Update user
-export const updateUser = mutation({
+export const updateUser = internalAction({
   args: {
     userId: v.id("users"),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
-    role: v.optional(v.string())
+    metadata: v.optional(v.object({
+      firstName: v.optional(v.string()),
+      lastName: v.optional(v.string()),
+    })),
   },
-  returns: v.object({
-    success: v.boolean()
-  }),
   handler: async (ctx, args) => {
-    const updates: any = {};
-    if (args.name) updates.name = args.name;
-    if (args.email) updates.email = args.email;
-    if (args.role) updates.role = args.role;
+    const { userId, ...updates } = args;
     
-    await ctx.db.patch(args.userId, updates);
+    // Import the internal functions
+    const { internal } = await import("./_generated/api");
     
-    return { success: true };
+    // Use the updateUserPassword function
+    await ctx.runMutation(internal.users.updateUserPassword, {
+      userId,
+      ...updates
+    });
   },
 });
+
+// Define types for the action functions
+type GetByEmailAction = typeof getByEmailAction;
+type GetAdminUserAction = typeof getAdminUserAction;
+
+// Pre-define the action functions to avoid circular references
+const getByEmailAction = internalAction({
+  args: {
+    email: v.string()
+  },
+  handler: async (ctx, args): Promise<any> => {
+    // We need to use internalFunctions to get a reference to a query function
+    return await ctx.runQuery(internalFunctions.users_queries.getUserByEmail, { email: args.email });
+  },
+});
+
+const getAdminUserAction = internalAction({
+  args: {},
+  handler: async (ctx): Promise<any> => {
+    // We need to use internalFunctions to get a reference to a query function
+    return await ctx.runQuery(internalFunctions.users_queries.getAdminUserQuery, {});
+  },
+});
+
+// Export the actions with proper type annotations
+export const getByEmail: GetByEmailAction = getByEmailAction;
+export const getAdminUser: GetAdminUserAction = getAdminUserAction;
+
+// Define types for internal functions to avoid circular references
+type InternalActions = {
+  create: typeof createUserAction;
+  updateUserPassword: typeof updateUserPasswordAction;
+};
+
+// Pre-define the action functions to avoid circular references
+const createUserAction = internalAction({
+  args: {
+    email: v.string(),
+    name: v.string(),
+    passwordHash: v.string(),
+    role: v.string(),
+    createdAt: v.number(),
+    lastLoginAt: v.number(),
+    metadata: v.object({
+      firstName: v.optional(v.string()),
+      lastName: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, args): Promise<Id<"users">> => {
+    return await ctx.runMutation(internalFunctions.users.internalMutations.createUser, args);
+  },
+});
+
+const updateUserPasswordAction = internalAction({
+  args: {
+    userId: v.id("users"),
+    passwordHash: v.string(),
+  },
+  handler: async (ctx, args): Promise<void> => {
+    await ctx.runMutation(internalFunctions.users.internalMutations.updateUserPassword, args);
+  },
+});
+
+// Internal functions for use within other Convex functions
+export const internal: InternalActions = {
+  create: createUserAction,
+  updateUserPassword: updateUserPasswordAction,
+};
+
+// Internal mutations for database operations
+export const internalMutations = {
+  // Create a user
+  createUser: internalMutation({
+    args: {
+      email: v.string(),
+      name: v.string(),
+      passwordHash: v.string(),
+      role: v.string(),
+      createdAt: v.number(),
+      lastLoginAt: v.number(),
+      metadata: v.object({
+        firstName: v.optional(v.string()),
+        lastName: v.optional(v.string()),
+      }),
+    },
+    handler: async (ctx, args): Promise<Id<"users">> => {
+      return await ctx.db.insert("users", args);
+    },
+  }),
+
+  // Update user password
+  updateUserPassword: internalMutation({
+    args: {
+      userId: v.id("users"),
+      passwordHash: v.string(),
+    },
+    handler: async (ctx, args) => {
+      await ctx.db.patch(args.userId, {
+        passwordHash: args.passwordHash,
+      });
+    },
+  }),
+};

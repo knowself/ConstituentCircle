@@ -88,14 +88,45 @@ export default defineSchema({
   constituents: defineTable({
     email: v.string(),
     fullName: v.string(),
-    district: v.string(),
+    // Location Details (from signup enhancements)
+    town: v.optional(v.string()),        // e.g., "Springfield Township"
+    city: v.string(),                    // e.g., "Springfield"
+    state: v.string(),                   // e.g., "IL"
+    county: v.string(),                  // e.g., "Sangamon County"
+    district: v.string(),                // Congressional district, e.g., "IL-13"
+    // Enhanced Preferences
     preferences: v.object({
-      contact_preference: v.string(),
-      interests: v.array(v.string())
+      contact_preference: v.union(
+        v.literal("email"),
+        v.literal("phone"),
+        v.literal("in-app"),
+        v.literal("mail")
+      ),                                 // Preferred contact method
+      interests: v.array(v.string()),    // e.g., ["education", "healthcare"]
+      notification_frequency: v.optional(
+        v.union(v.literal("daily"), v.literal("weekly"), v.literal("asap"))
+      ),                                 // How often to receive updates
+      subscribed_topics: v.optional(v.array(v.string())), // e.g., ["budget", "elections"]
     }),
+    // Engagement Tracking
+    status: v.union(
+      v.literal("active"),
+      v.literal("inactive"),
+      v.literal("pending"),
+      v.literal("suspended")
+    ),                                   // Account status
+    lastEngagementAt: v.optional(v.number()), // Timestamp of last message/action
+    messageCount: v.optional(v.number()),     // Total messages sent
+    // Metadata for Flexibility
+    metadata: v.optional(v.object({
+      phone: v.optional(v.string()),          // Optional contact info
+      address: v.optional(v.string()),        // Physical address if needed
+      ageRange: v.optional(v.string()),       // e.g., "18-24" for analytics
+      registrationDate: v.optional(v.number()), // When they signed up
+    })),
     createdAt: v.number(),
     userId: v.id('users')
-  }).index('by_email', ['email']).index('by_district', ['district']).index('by_user', ['userId']),
+  }).index('by_email', ['email']).index('by_district', ['district']).index('by_user', ['userId']).index('by_status', ['status']), // New index for filtering active constituents
   
   representatives: defineTable({
     email: v.string(),

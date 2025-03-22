@@ -12,7 +12,8 @@ import {
   ClockIcon,
   EyeIcon,
   PencilSquareIcon,
-  TrashIcon
+  TrashIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 
 // Define types for representative data

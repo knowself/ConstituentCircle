@@ -12,7 +12,7 @@ export default function AdminDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, confirmLogout } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   const [isRedirecting, setIsRedirecting] = React.useState(false);
@@ -98,7 +98,7 @@ export default function AdminDashboardLayout({
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      logout();
+                      confirmLogout();
                     }}
                     className="p-2 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
                     aria-label="Logout"

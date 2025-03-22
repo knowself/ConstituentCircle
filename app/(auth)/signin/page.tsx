@@ -2,22 +2,159 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
 import Link from 'next/link';
 import { UserIcon } from '@heroicons/react/24/outline';
 import Header from '../../../components/Header';
+import { useAction } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 
-export default function SignIn() {
+// Create a separate client component for Convex interactions
+function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   
-  // Use Convex mutation
-  const login = useMutation(api.auth.login);
+  // Try to use Convex action if available, otherwise fallback to fetch
+  const convexLogin = useAction(api.auth.loginWithEmail);
+  
+  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    
+    try {
+      // First try using Convex action
+      try {
+        const result = await convexLogin({ email, password });
+        // Store token in localStorage
+        localStorage.setItem('sessionToken', result.token);
+        // Redirect to dashboard
+        router.push('/dashboard');
+        return;
+      } catch (convexError: any) {
+        console.log('Convex login failed, falling back to API route:', convexError);
+        // Fall back to fetch API if Convex action fails
+      }
+      
+      // Fallback: Use fetch to call the API route
+      console.log('Attempting to login via API route');
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      console.log('API response status:', response.status, response.statusText);
+      
+      // Safely parse the JSON response
+      let data;
+      try {
+        data = await response.json();
+        console.log('API response data:', data);
+      } catch (jsonError) {
+        console.error('Error parsing JSON response:', jsonError);
+        throw new Error('Unable to process the server response. Please try again.');
+      }
+      
+      if (!response.ok) {
+        // Display the specific error message from the server
+        const errorMessage = data?.message || 'Login failed. Please check your credentials and try again.';
+        throw new Error(errorMessage);
+      }
+      
+      // Store token in localStorage
+      if (data?.token) {
+        localStorage.setItem('sessionToken', data.token);
+        // Redirect to dashboard
+        router.push('/dashboard');
+      } else {
+        throw new Error('Invalid response from server. Missing authentication token.');
+      }
+    } catch (err: any) {
+      console.error('Sign in error:', err);
+      setError(err.message || 'An error occurred during sign in. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div className="bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+      <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+        <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+          Sign in to your account
+        </h1>
+        <form className="space-y-4 md:space-y-6" onSubmit={handleSignIn}>
+          <div>
+            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="name@company.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="••••••••"
+              className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          {error && (
+            <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4 mb-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-200">{error}</h3>
+                  {error.includes('endpoint not found') && (
+                    <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+                      <p>The authentication service may be temporarily unavailable. Please try again later or contact support if the issue persists.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 dark:bg-blue-600 hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
+          <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+            Don't have an account yet?{' '}
+            <Link href="/signup" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-700 dark:hover:text-blue-700">
+              Sign up
+            </Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function SignIn() {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -25,30 +162,6 @@ export default function SignIn() {
       setMounted(false);
     };
   }, []);
-
-  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    
-    try {
-      const result = await login({ email, password });
-      if (result.success) {
-        if (result.user && result.user.role === 'admin') {
-          router.push('/admin/dashboard');
-        } else {
-          router.push('/dashboard');
-        }
-      } else {
-        setError(result.error || 'Failed to sign in');
-      }
-    } catch (err) {
-      setError('An error occurred during sign in');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (!mounted) {
     return null;
@@ -58,12 +171,12 @@ export default function SignIn() {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header showMobileMenu={true} />
       
-      <div className="flex flex-grow flex-col justify-center py-12 sm:px-6 lg:px-8 pt-[145px]">
+      <div className="flex flex-grow flex-col justify-center py-8 sm:px-6 lg:px-8 pt-2">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">
             <UserIcon className="h-12 w-12 text-indigo-600 dark:text-blue-500" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h2 className="mt-4 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
             Sign in to Constituent Circle
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
@@ -74,123 +187,8 @@ export default function SignIn() {
           </p>
         </div>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form className="space-y-6" onSubmit={handleSignIn}>
-              {error && (
-                <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
-                  <div className="flex">
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800 dark:text-red-200">{error}</h3>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Email address
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-600 dark:text-blue-500 focus:ring-indigo-500 dark:focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                    Remember me
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <Link href="/forgot-password" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-500 dark:hover:text-blue-400">
-                    Forgot your password?
-                  </Link>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 dark:bg-blue-600 hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Signing in...' : 'Sign in'}
-                </button>
-              </div>
-            </form>
-
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div>
-                  <a
-                    href="#"
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
-                  >
-                    <span className="sr-only">Sign in with Google</span>
-                    <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                    </svg>
-                  </a>
-                </div>
-
-                <div>
-                  <a
-                    href="#"
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
-                  >
-                    <span className="sr-only">Sign in with GitHub</span>
-                    <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+          <SignInForm />
         </div>
       </div>
       

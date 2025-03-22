@@ -24,11 +24,11 @@ export default function Header({ showMobileMenu = true }: HeaderProps) {
 
   // Prevent hydration mismatch by only rendering content after mount
   if (!mounted) {
-    return <div className="bg-white dark:bg-gray-800 shadow-sm py-4 w-full h-[145px]" />; // Basic loader
+    return <div className="bg-white dark:bg-gray-800 shadow-sm py-4 w-full h-[130px]" />; // Basic loader
   }
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm py-4 w-full z-50 h-[145px]">
+    <header className="bg-white dark:bg-gray-800 shadow-sm py-4 w-full z-50 h-[130px]">
       {/* Desktop Navigation - hidden on mobile */}
       <div className="hidden lg:block h-full">
         <Navigation />
@@ -40,7 +40,7 @@ export default function Header({ showMobileMenu = true }: HeaderProps) {
           <img
             src="/constituent-circle-logo.png"
             alt="Constituent Circle"
-            className="h-[80px] w-auto"
+            className="h-[130px] w-auto"
           />
         </Link>
         

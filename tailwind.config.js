@@ -10,12 +10,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'background-light': '#ffffff',
-        'background-dark': '#1a202c',
-        'text-light': '#f7fafc',
-        'text-dark': '#1a202c',
-        'primary': '#4299e1',
-        'secondary': '#2b6cb0',
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        primary: 'var(--primary)',
+        secondary: 'var(--secondary)',
       },
     },
   },

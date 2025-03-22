@@ -156,17 +156,103 @@ export const seed = mutation({
       userId: repUser
     });
 
-    // Create constituent
+    // Create constituent with enhanced fields
     const constituent = await ctx.db.insert('constituents', {
       email: 'constituent@example.com',
       fullName: 'John Doe',
+      // Location details
+      town: 'Springfield Township',
+      city: 'Springfield',
+      state: 'IL',
+      county: 'Sangamon County',
       district: 'District 5',
+      // Enhanced preferences
       preferences: {
         contact_preference: 'email',
-        interests: ['education', 'healthcare']
+        interests: ['education', 'healthcare', 'infrastructure', 'environment'],
+        notification_frequency: 'daily',
+        subscribed_topics: ['budget', 'elections', 'local_issues']
+      },
+      // Engagement tracking
+      status: 'active',
+      lastEngagementAt: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
+      messageCount: 5,
+      // Metadata
+      metadata: {
+        phone: '555-123-4567',
+        address: '123 Main St, Springfield, IL 62701',
+        ageRange: '35-44',
+        registrationDate: Date.now() - 30 * 24 * 60 * 60 * 1000 // 30 days ago
       },
       createdAt: Date.now(),
       userId: constituentUser
+    });
+
+    // Create additional constituents for testing
+    const constituent2 = await ctx.db.insert('constituents', {
+      email: 'sarah@example.com',
+      fullName: 'Sarah Johnson',
+      town: 'Springfield Township',
+      city: 'Springfield',
+      state: 'IL',
+      county: 'Sangamon County',
+      district: 'District 5',
+      preferences: {
+        contact_preference: 'phone',
+        interests: ['education', 'public_safety', 'taxes'],
+        notification_frequency: 'weekly',
+        subscribed_topics: ['education_reform', 'public_safety']
+      },
+      status: 'active',
+      lastEngagementAt: Date.now() - 5 * 24 * 60 * 60 * 1000,
+      messageCount: 3,
+      metadata: {
+        phone: '555-987-6543',
+        address: '456 Oak St, Springfield, IL 62704',
+        ageRange: '25-34',
+        registrationDate: Date.now() - 45 * 24 * 60 * 60 * 1000
+      },
+      createdAt: Date.now(),
+      userId: await ctx.db.insert('users', {
+        email: 'sarah@example.com',
+        name: 'Sarah Johnson',
+        createdAt: Date.now(),
+        role: 'constituent',
+        displayname: 'Sarah Johnson'
+      })
+    });
+
+    const constituent3 = await ctx.db.insert('constituents', {
+      email: 'michael@example.com',
+      fullName: 'Michael Williams',
+      town: 'Lincoln Township',
+      city: 'Lincoln',
+      state: 'IL',
+      county: 'Logan County',
+      district: 'District 5',
+      preferences: {
+        contact_preference: 'in-app',
+        interests: ['transportation', 'economy', 'veterans'],
+        notification_frequency: 'asap',
+        subscribed_topics: ['infrastructure', 'jobs', 'veterans_affairs']
+      },
+      status: 'active',
+      lastEngagementAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
+      messageCount: 8,
+      metadata: {
+        phone: '555-456-7890',
+        address: '789 Elm St, Lincoln, IL 62656',
+        ageRange: '45-54',
+        registrationDate: Date.now() - 60 * 24 * 60 * 60 * 1000
+      },
+      createdAt: Date.now(),
+      userId: await ctx.db.insert('users', {
+        email: 'michael@example.com',
+        name: 'Michael Williams',
+        createdAt: Date.now(),
+        role: 'constituent',
+        displayname: 'Michael Williams'
+      })
     });
 
     // Create groups
@@ -215,6 +301,21 @@ export const seed = mutation({
       joinedAt: Date.now()
     });
 
+    // Add new constituents to groups
+    await ctx.db.insert('groupMembers', {
+      groupId: educationGroup,
+      constituentId: constituent2,
+      role: 'member',
+      joinedAt: Date.now()
+    });
+
+    await ctx.db.insert('groupMembers', {
+      groupId: healthcareGroup,
+      constituentId: constituent3,
+      role: 'member',
+      joinedAt: Date.now()
+    });
+
     // Create communications
     await ctx.db.insert('communications', {
       representativeId: representative,
@@ -247,6 +348,29 @@ export const seed = mutation({
       status: 'received',
       sentAt: Date.now() - 24 * 60 * 60 * 1000,
       createdAt: Date.now() - 24 * 60 * 60 * 1000
+    });
+
+    // Additional communications for new constituents
+    await ctx.db.insert('communications', {
+      representativeId: representative,
+      constituentId: constituent2,
+      messageType: 'inquiry',
+      content: 'When is the next town hall meeting scheduled?',
+      channel: 'web',
+      status: 'received',
+      sentAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
+      createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000
+    });
+
+    await ctx.db.insert('communications', {
+      representativeId: representative,
+      constituentId: constituent3,
+      messageType: 'feedback',
+      content: 'I appreciate your support on the veterans benefits bill. Thank you for your service.',
+      channel: 'email',
+      status: 'sent',
+      sentAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
+      createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000
     });
 
     // Create analytics

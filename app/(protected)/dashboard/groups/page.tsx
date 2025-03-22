@@ -19,7 +19,7 @@ export default function GroupsPage() {
     // Sample data - replace with real data from your database service
     {
       id: '1',
-      representativeId: mounted && user?.id ? user.id : '',
+      representativeId: mounted && user?._id ? user._id : '',
       name: 'District 5 Residents',
       description: 'Residents of District 5',
       type: 'geographic',

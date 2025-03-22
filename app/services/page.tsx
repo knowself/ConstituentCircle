@@ -32,10 +32,10 @@ interface TechnicalService {
  * Displays individual feature information in a consistent card format
  */
 const FeatureCard = ({ icon, title, description, link }: Feature) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center text-center transition-all duration-300 ease-in-out hover:shadow-xl">
+  <div className="bg-background dark:bg-background/90 rounded-lg shadow-md p-6 flex flex-col items-center text-center transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-200 dark:border-gray-700">
     <div className="text-5xl mb-4">{icon}</div>
-    <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">{title}</h3>
-    <p className="text-gray-600 dark:text-gray-300 mb-4">{description}</p>
+    <h3 className="text-2xl font-semibold mb-3 text-foreground">{title}</h3>
+    <p className="text-foreground/80 mb-4">{description}</p>
     <Link 
       href={link}
       className="mt-auto text-secondary hover:text-primary transition-colors duration-200 font-semibold"
@@ -49,56 +49,48 @@ const FeatureCard = ({ icon, title, description, link }: Feature) => (
  * TechnicalServiceCard Component
  * Displays individual technical service information in a consistent card format
  */
-const TechnicalServiceCard = ({ 
-  icon, 
-  title, 
-  description, 
-  link, 
-  techDetails,
-  features,
-  benefits
-}: TechnicalService) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col hover:shadow-xl transition-shadow duration-300">
-    <div className="flex items-center mb-4">
-      <div className="text-4xl mr-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
+const TechnicalServiceCard = ({ icon, title, description, link, techDetails, features, benefits }: TechnicalService) => (
+  <div className="bg-background dark:bg-background/90 rounded-lg shadow-md p-6 flex flex-col transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-200 dark:border-gray-700">
+    <div className="flex items-start mb-4">
+      <div className="text-5xl mr-4">{icon}</div>
+      <div>
+        <h3 className="text-2xl font-semibold mb-2 text-foreground">{title}</h3>
+        <p className="text-foreground/80">{description}</p>
+      </div>
     </div>
-    <p className="text-gray-600 dark:text-gray-300 mb-6">{description}</p>
     
-    <div className="mb-6">
-      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        Key Features
-      </h4>
-      <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
-        {features.map((feature, index) => (
-          <li key={index}>{feature}</li>
-        ))}
-      </ul>
-    </div>
-
-    <div className="mb-6">
-      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        Benefits
-      </h4>
-      <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
-        {benefits.map((benefit, index) => (
-          <li key={index}>{benefit}</li>
-        ))}
-      </ul>
-    </div>
-
     {techDetails && (
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 italic">{techDetails}</p>
+      <div className="mb-4">
+        <h4 className="font-semibold text-lg mb-2 text-foreground">Technical Details</h4>
+        <p className="text-foreground/80">{techDetails}</p>
+      </div>
     )}
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+        <h4 className="font-semibold text-lg mb-2 text-foreground">Key Features</h4>
+        <ul className="list-disc list-inside text-foreground/80">
+          {features.map((feature, index) => (
+            <li key={index}>{feature}</li>
+          ))}
+        </ul>
+      </div>
+      
+      <div>
+        <h4 className="font-semibold text-lg mb-2 text-foreground">Benefits</h4>
+        <ul className="list-disc list-inside text-foreground/80">
+          {benefits.map((benefit, index) => (
+            <li key={index}>{benefit}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
     
     <Link 
       href={link}
-      className="mt-auto inline-flex items-center justify-center px-4 py-2 bg-secondary hover:bg-primary text-white rounded-lg transition-colors duration-200 font-semibold"
+      className="mt-auto text-secondary hover:text-primary transition-colors duration-200 font-semibold self-start"
     >
-      View Technical Details
-      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
+      Learn More →
     </Link>
   </div>
 );
@@ -192,15 +184,17 @@ export default function ServicesPage() {
   ];
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold text-center mb-12 text-foreground">Our Technical Services</h1>
+        
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-foreground">
             Our Technical Services
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-foreground/80 max-w-3xl mx-auto">
             Cutting-edge solutions designed to revolutionize constituent engagement through 
             AI-powered communication technologies and data-driven insights.
           </p>
@@ -208,7 +202,7 @@ export default function ServicesPage() {
         
         {/* Main Features Section */}
         <section className="mb-16">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-foreground">
             Core Capabilities
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -220,7 +214,7 @@ export default function ServicesPage() {
         
         {/* Technical Services Section */}
         <section>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-foreground">
             Technical Deep-Dives
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -229,7 +223,7 @@ export default function ServicesPage() {
             ))}
           </div>
         </section>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }

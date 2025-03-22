@@ -74,6 +74,22 @@ const nextConfig = {
   // Ensure environment variables are properly passed to the client
   env: {
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
+    NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV || 'dev',
+  },
+  // Add script to inject environment variables into window.ENV
+  // This ensures they're available even after hydration
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline';",
+          },
+        ],
+      },
+    ];
   },
   // Add specific Vercel configuration
   typescript: {

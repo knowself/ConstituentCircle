@@ -37,7 +37,7 @@ const navigation: NavItem[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { logout } = useAuth();
+  const { logout, confirmLogout } = useAuth();
 
   return (
     <div className={`bg-gray-800 text-white ${collapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out flex flex-col`}>
@@ -108,7 +108,7 @@ export default function AdminSidebar() {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                logout();
+                confirmLogout();
               }}
               className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white w-full"
             >
@@ -120,7 +120,7 @@ export default function AdminSidebar() {
           <button
             onClick={(e) => {
               e.preventDefault();
-              logout();
+              confirmLogout();
             }}
             className="flex items-center justify-center w-full p-2 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
             title="Logout"

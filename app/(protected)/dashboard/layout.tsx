@@ -56,7 +56,7 @@ export default function DashboardLayout({
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
               <div className="flex items-center">
                 <span className="text-sm text-gray-700 dark:text-gray-300 mr-2">
-                  {user?.displayName || 'User'}
+                  {user?.displayname || 'User'}
                 </span>
               </div>
             </div>

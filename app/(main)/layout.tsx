@@ -9,7 +9,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <Header />
       
       {/* Main content */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-[145px]">
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         {children}
       </main>
       

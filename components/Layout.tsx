@@ -68,7 +68,7 @@ export default function Layout({ children }: LayoutProps) {
   };
   // Update user photo and display name references
   // Update user metadata access with proper type checking
-  const userAvatar = user?.avatar_url ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email ?? 'User')}`;
+  const userAvatar = user?.metadata?.avatar_url ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email ?? 'User')}`;
   const userDisplayName = user?.email || 'User';
   
   // Initialize component

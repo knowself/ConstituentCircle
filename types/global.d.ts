@@ -5,6 +5,21 @@ import { CommunicationChannel, CommunicationType, CommunicationDirection } from 
 import { Id } from '../convex/_generated/dataModel';
 
 declare global {
+  // Add window.ENV for environment variables
+  interface Window {
+    ENV?: {
+      CONVEX_URL?: string;
+      [key: string]: string | undefined;
+    };
+    
+    // Add Convex internal state for debugging
+    __CONVEX_STATE?: {
+      client?: any;
+      auth?: any;
+      [key: string]: any;
+    };
+  }
+
   namespace JSX {
     interface IntrinsicElements {
       div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;

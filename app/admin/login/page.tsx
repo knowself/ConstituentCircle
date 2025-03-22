@@ -34,11 +34,12 @@ export default function AdminLogin() {
         // Check if we have a logout parameter in the URL
         const urlParams = new URLSearchParams(window.location.search);
         const isLogout = urlParams.get('logout') === 'true';
+        const logoutMessage = urlParams.get('message');
         
         // If we're coming from a logout, don't redirect back to dashboard
         if (isLogout) {
           // Set success message
-          setSuccessMessage('You have been successfully logged out.');
+          setSuccessMessage(logoutMessage || 'You have been successfully logged out.');
           
           // Clean the URL by removing the logout parameter
           if (window.history.replaceState) {
@@ -100,7 +101,7 @@ export default function AdminLogin() {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header showMobileMenu={true} />
       
-      <div className="flex flex-grow flex-col justify-center py-12 sm:px-6 lg:px-8 pt-[145px]">
+      <div className="flex flex-grow flex-col justify-center py-12 sm:px-6 lg:px-8 pt-4">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">
             <ShieldCheckIcon className="h-12 w-12 text-indigo-600 dark:text-blue-500" />

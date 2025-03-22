@@ -1,0 +1,47 @@
+## set-password.js
+
+**Purpose**:
+- Handles password setting and updating functionality in the Convex authentication system
+
+**Features**:
+- Validates password strength requirements
+- Hashes passwords securely before storage
+- Uses Convex actions and mutations for secure database updates
+- Provides error handling for common password-related issues
+
+**Usage**:
+1. Import the setPassword function from the tool
+2. Call setPassword with user ID and new password
+3. Handle the response to provide user feedback
+
+**Example**:
+```javascript
+import { setPassword } from './set-password';
+
+const result = await setPassword({
+  userId: 'user_123',
+  newPassword: 'securePassword123!'
+});
+
+if (result.success) {
+  // Password updated successfully
+} else {
+  // Handle error
+  console.error(result.error);
+}
+```
+
+**Command Line Usage**:
+```bash
+node set-password.js --userId <userId> --newPassword <password>
+```
+
+**Options**:
+- `--userId`: The user ID to update (required)
+- `--newPassword`: The new password to set (required)
+- `--verbose`: (Optional) Show detailed output
+
+**Implementation Details**:
+- Uses Convex actions for password hashing
+- Calls internal mutations for database updates
+- Follows security best practices for password handling

@@ -19,6 +19,7 @@ export type Role =
   | 'temp_staff'
   | 'intern'
   | 'volunteer'
+  | 'constituent'
   | 'admin';
 
 export type CompanyRole = 

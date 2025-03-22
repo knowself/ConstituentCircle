@@ -7,6 +7,7 @@ import { useAuth } from '../../../context/AuthContext';
 import AuthInput from '../../../components/auth/AuthInput';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import Header from '../../../components/Header';
+import { Role } from '../../../lib/types/roles';
 
 type UserType = 'constituent' | 'representative';
 type RepresentativeLevel = 'federal' | 'state' | 'county' | 'city' | 'judge' | 'other';
@@ -68,7 +69,7 @@ export default function SignUp() {
       };
 
       // Call the signUp method with appropriate parameters
-      await signUp(email, password, userType, metadata);
+      await signUp(email, password, userType as Role, metadata);
       router.push('/dashboard');
     } catch (err) {
       console.error('Sign up error:', err);
@@ -83,7 +84,7 @@ export default function SignUp() {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header showMobileMenu={true} />
       
-      <div className="flex flex-grow flex-col justify-center py-12 sm:px-6 lg:px-8 pt-[145px]">
+      <div className="flex flex-grow flex-col justify-center py-12 sm:px-6 lg:px-8 pt-4">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">
             <PlusIcon className="h-12 w-12 text-indigo-600 dark:text-blue-500" />

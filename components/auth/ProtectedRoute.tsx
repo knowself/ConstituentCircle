@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { useQuery } from "convex/react";
 import { api } from '../../convex/_generated/api';
 import { useAuth } from '../../context/AuthContext';
+import { Id } from '../../convex/_generated/dataModel';
 import Loading from '../Loading';
 
 // Define a proper interface for the user object
 interface User {
-  id: string;
-  // Add other properties that your user object has
+  _id: Id<"users">;
 }
 
 interface ProtectedRouteProps {
@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   const [error, setError] = useState<string | null>(null);
   // Replace Supabase client with Convex query
   const userRole = useQuery(api.users.getUserRole, 
-    authUser ? { userId: authUser.id } : "skip"
+    authUser ? { userId: authUser._id } : "skip"
   );
   const router = useRouter();
   const [loading, setLoading] = useState(true);

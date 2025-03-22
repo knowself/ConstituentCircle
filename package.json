@@ -9,8 +9,9 @@
   },
   "scripts": {
     "clean": "rd /s /q .next",
+    "predev": "node scripts/generate-env-config.js",
     "dev": "next dev",
-    "prebuild": "node scripts/generate-convex.js",
+    "prebuild": "node scripts/generate-convex.js && node scripts/generate-env-config.js && node scripts/fix-convex-build.js",
     "build": "next build",
     "start": "next start",
     "start:dev": "./start_dev.sh",
@@ -21,7 +22,9 @@
     "test:auth": "node scripts/test-auth.js",
     "format": "prettier --write .",
     "prepare": "husky install",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "set-password": "node scripts/set-password.js",
+    "set-admin-password": "node scripts/set-admin-password.js"
   },
   "keywords": [
     "typescript",
@@ -38,7 +41,7 @@
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.2",
     "chart.js": "^4.4.7",
-    "convex": "1.20.0",
+    "convex": "^1.21.0",
     "dotenv": "^16.4.7",
     "ioredis": "^5.5.0",
     "next": "^15.2.0",
@@ -53,7 +56,7 @@
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@types/jest": "^29.5.11",
-    "@types/node": "^20.10.5",
+    "@types/node": "^20.17.25",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
