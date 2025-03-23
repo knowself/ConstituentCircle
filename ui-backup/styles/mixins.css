@@ -1,0 +1,21 @@
+@layer components {
+  .responsive-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6;
+  }
+  
+  .button-base {
+    @apply px-4 py-2 rounded-md transition-all duration-200;
+  }
+  
+  .button-primary {
+    @apply button-base bg-primary text-white hover:bg-opacity-90;
+  }
+  
+  .button-secondary {
+    @apply button-base bg-secondary text-white hover:bg-opacity-90;
+  }
+}
