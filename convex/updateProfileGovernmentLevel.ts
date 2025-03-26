@@ -2,26 +2,23 @@ import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
+// Update to lowercase values
+const governmentLevels = v.union(
+  v.literal("federal"),
+  v.literal("state"),
+  v.literal("county"),
+  v.literal("municipal"),
+  v.literal("school_district")
+);
+
 export const updateGovernmentLevel = mutation({
-  args: {
+  args: { 
     profileId: v.id("profiles"),
-    newGovernmentLevel: v.union(
-      v.literal('Federal'),
-      v.literal('State'),
-      v.literal('Local'),
-      v.literal('County'),
-      v.literal('Municipal'),
-      v.literal('School District')
-    ),
+    newGovernmentLevel: governmentLevels
   },
   handler: async (ctx, args) => {
-    const { profileId, newGovernmentLevel } = args;
-    
-    // Update the document with the correct case for governmentLevel
-    await ctx.db.patch(profileId, {
-      governmentLevel: newGovernmentLevel
+    await ctx.db.patch(args.profileId, {
+      governmentLevel: args.newGovernmentLevel
     });
-    
-    return { success: true, message: `Updated governmentLevel to ${newGovernmentLevel}` };
-  },
+  }
 });

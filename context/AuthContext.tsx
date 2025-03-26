@@ -1,18 +1,27 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
-const AuthContext = createContext<any>(null);
+interface User {
+  id: string;
+  email: string;
+  role?: string; 
+  name?: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const currentUser = useQuery(api.auth.getCurrentUser);
 
-  const value = {
+  const value: AuthContextType = {
     user: currentUser || null,
-    loading: currentUser === undefined,
-    error: null
   };
 
   return (
@@ -24,8 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

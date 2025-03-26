@@ -109,7 +109,7 @@ export default function AdminLogin() {
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Only administrators can access this area
+              Only Constituent Circle admins can access this area
             </p>
           </div>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">

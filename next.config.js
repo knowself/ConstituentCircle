@@ -19,6 +19,12 @@ const nextConfig = {
         fs: false,
         path: false,
         crypto: false
+      },
+      alias: {
+        ...config.resolve.alias,
+        '@convex': `${__dirname}/convex`,
+        '@/components': `${__dirname}/src/components`,
+        '@/lib': `${__dirname}/src/lib`,
       }
     };
 

@@ -4,20 +4,26 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserIcon } from '@heroicons/react/24/outline';
-import Header from '../../../components/Header';
-import { useAction } from 'convex/react';
+import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
+import Header from '../../../components/Header';
 
-// Create a separate client component for Convex interactions
 function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   
-  // Try to use Convex action if available, otherwise fallback to fetch
-  const convexLogin = useAction(api.auth.loginWithEmail);
+  const login = useMutation(api.auth.login);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => {
+      setMounted(false);
+    };
+  }, []);
   
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,58 +31,12 @@ function SignInForm() {
     setLoading(true);
     
     try {
-      // First try using Convex action
-      try {
-        const result = await convexLogin({ email, password });
-        // Store token in localStorage
-        localStorage.setItem('sessionToken', result.token);
-        // Redirect to dashboard
-        router.push('/dashboard');
-        return;
-      } catch (convexError: any) {
-        console.log('Convex login failed, falling back to API route:', convexError);
-        // Fall back to fetch API if Convex action fails
-      }
-      
-      // Fallback: Use fetch to call the API route
-      console.log('Attempting to login via API route');
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      console.log('API response status:', response.status, response.statusText);
-      
-      // Safely parse the JSON response
-      let data;
-      try {
-        data = await response.json();
-        console.log('API response data:', data);
-      } catch (jsonError) {
-        console.error('Error parsing JSON response:', jsonError);
-        throw new Error('Unable to process the server response. Please try again.');
-      }
-      
-      if (!response.ok) {
-        // Display the specific error message from the server
-        const errorMessage = data?.message || 'Login failed. Please check your credentials and try again.';
-        throw new Error(errorMessage);
-      }
-      
-      // Store token in localStorage
-      if (data?.token) {
-        localStorage.setItem('sessionToken', data.token);
-        // Redirect to dashboard
-        router.push('/dashboard');
-      } else {
-        throw new Error('Invalid response from server. Missing authentication token.');
-      }
+      const result = await login({ email, password });
+      localStorage.setItem('sessionToken', result.token);
+      router.push('/dashboard');
     } catch (err: any) {
       console.error('Sign in error:', err);
-      setError(err.message || 'An error occurred during sign in. Please try again.');
+      setError(err.message || 'An error occurred during sign in');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { useEffect, useState } from 'react';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 // Create a Convex client outside of the component
 let convexClient: ConvexReactClient | null = null;
@@ -32,18 +33,28 @@ export default function App({ Component, pageProps }: AppProps) {
 
   // During SSR, render without ConvexProvider
   if (!isClient) {
-    return <Component {...pageProps} />;
+    return (
+      <ErrorBoundary>
+        <Component {...pageProps} />
+      </ErrorBoundary>
+    );
   }
 
   // If client is available, use it
   if (convexClient) {
     return (
       <ConvexProvider client={convexClient}>
-        <Component {...pageProps} />
+        <ErrorBoundary>
+          <Component {...pageProps} />
+        </ErrorBoundary>
       </ConvexProvider>
     );
   }
 
   // Fallback if client isn't initialized yet
-  return <Component {...pageProps} />;
+  return (
+    <ErrorBoundary>
+      <Component {...pageProps} />
+    </ErrorBoundary>
+  );
 }

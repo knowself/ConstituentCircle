@@ -1,3 +1,21 @@
+import { v } from "convex/values";
+
+export const userRoles = v.union(
+  v.literal("admin"),
+  v.literal("user"),
+  v.literal("representative"),
+  v.literal("company_admin"),
+  v.literal("constituent")
+);
+
+export const employmentTypes = v.union(
+  v.literal("permanent"),
+  v.literal("seasonal"),
+  v.literal("intern"),
+  v.literal("elected"),
+  v.literal("volunteer")
+);
+
 /**
  * Validation utilities for Convex functions
  * 

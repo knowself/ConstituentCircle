@@ -1,23 +1,20 @@
 // app/layout.tsx
-'use client';
+import { ClientProviders } from '@/components/providers/ClientProviders'
+import { Toaster } from 'react-hot-toast'
 
-import { ThemeProvider } from "../components/ThemeProvider";
-import { AuthProvider } from "../context/AuthContext";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
-import '../styles/globals.css';
-
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL || "");
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ConvexProvider client={convex}>
-          <ThemeProvider>
-            <AuthProvider>{children}</AuthProvider>
-          </ThemeProvider>
-        </ConvexProvider>
+    <html lang="en">
+      <body className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+        <ClientProviders>
+          {children}
+          <Toaster position="bottom-right" />
+        </ClientProviders>
       </body>
     </html>
-  );
+  )
 }

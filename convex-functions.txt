@@ -1,0 +1,2582 @@
+{
+  "url": "https://tangible-butterfly-498.convex.cloud",
+  "functions": [
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:cleanupExpiredSessions",
+      "returns": {
+        "type": "number"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:getCurrentUser",
+      "returns": {
+        "type": "union",
+        "value": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "value": {
+              "_id": {
+                "fieldType": {
+                  "tableName": "users",
+                  "type": "id"
+                },
+                "optional": false
+              },
+              "displayname": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "email": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "name": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "role": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              }
+            }
+          }
+        ]
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:getProfile",
+      "returns": {
+        "type": "union",
+        "value": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "value": {
+              "_id": {
+                "fieldType": {
+                  "tableName": "users",
+                  "type": "id"
+                },
+                "optional": false
+              },
+              "displayname": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "email": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "metadata": {
+                "fieldType": {
+                  "type": "object",
+                  "value": {
+                    "employmentType": {
+                      "fieldType": {
+                        "type": "union",
+                        "value": [
+                          {
+                            "type": "literal",
+                            "value": "permanent"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "seasonal"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "intern"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "onloan"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "elected"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "citizen"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "campaign_manager"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "volunteer_coordinator"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "communications_director"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "field_director"
+                          },
+                          {
+                            "type": "literal",
+                            "value": "fundraising_director"
+                          }
+                        ]
+                      },
+                      "optional": true
+                    },
+                    "firstName": {
+                      "fieldType": {
+                        "type": "string"
+                      },
+                      "optional": true
+                    },
+                    "lastName": {
+                      "fieldType": {
+                        "type": "string"
+                      },
+                      "optional": true
+                    }
+                  }
+                },
+                "optional": true
+              },
+              "name": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "role": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              }
+            }
+          }
+        ]
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:getUserByEmail",
+      "returns": {
+        "type": "union",
+        "value": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "value": {
+              "_id": {
+                "fieldType": {
+                  "tableName": "users",
+                  "type": "id"
+                },
+                "optional": false
+              },
+              "displayname": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "email": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "name": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "passwordHash": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "role": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              }
+            }
+          }
+        ]
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:getUserById",
+      "returns": {
+        "type": "union",
+        "value": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "value": {
+              "_id": {
+                "fieldType": {
+                  "tableName": "users",
+                  "type": "id"
+                },
+                "optional": false
+              },
+              "displayname": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "email": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "name": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "role": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              }
+            }
+          }
+        ]
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "auth.js:hashPasswordAction",
+      "returns": {
+        "type": "string"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:isAdmin",
+      "returns": {
+        "type": "boolean"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:login",
+      "returns": {
+        "type": "object",
+        "value": {
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "user": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "_id": {
+                  "fieldType": {
+                    "tableName": "users",
+                    "type": "id"
+                  },
+                  "optional": false
+                },
+                "displayname": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "email": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "role": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:logout",
+      "returns": {
+        "type": "object",
+        "value": {
+          "message": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "success": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "firstName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "governmentLevel": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "jurisdiction": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "lastName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:registerUser",
+      "returns": {
+        "type": "object",
+        "value": {
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "user": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "_id": {
+                  "fieldType": {
+                    "tableName": "users",
+                    "type": "id"
+                  },
+                  "optional": false
+                },
+                "displayname": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "email": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "role": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "firstName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "governmentLevel": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "jurisdiction": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "lastName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:registerUserWithAdditionalInfo",
+      "returns": {
+        "type": "object",
+        "value": {
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "user": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "_id": {
+                  "fieldType": {
+                    "tableName": "users",
+                    "type": "id"
+                  },
+                  "optional": false
+                },
+                "displayname": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "email": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "role": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "firstName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "lastName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:registerWithEmail",
+      "returns": {
+        "type": "object",
+        "value": {
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "user": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "_id": {
+                  "fieldType": {
+                    "tableName": "users",
+                    "type": "id"
+                  },
+                  "optional": false
+                },
+                "displayname": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "email": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "name": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                },
+                "role": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:setAdminPassword",
+      "returns": {
+        "type": "object",
+        "value": {
+          "error": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "success": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "currentPassword": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "newPassword": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:updatePassword",
+      "returns": {
+        "type": "object",
+        "value": {
+          "success": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "displayname": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "name": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "role": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:updateUser",
+      "returns": {
+        "type": "object",
+        "value": {
+          "success": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "role": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "auth.js:updateUserRole",
+      "returns": {
+        "type": "object",
+        "value": {
+          "success": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:validateSession",
+      "returns": {
+        "type": "union",
+        "value": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "value": {
+              "_id": {
+                "fieldType": {
+                  "tableName": "users",
+                  "type": "id"
+                },
+                "optional": false
+              },
+              "displayname": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "email": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "name": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "role": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              }
+            }
+          }
+        ]
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "auth.js:verifyPasswordAction",
+      "returns": {
+        "type": "object",
+        "value": {
+          "isValid": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "type": "union",
+              "value": [
+                {
+                  "tableName": "users",
+                  "type": "id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Query",
+      "identifier": "tasks.js:get",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Mutation",
+      "identifier": "cleanupProfiles.js:cleanupOrphanedProfiles",
+      "returns": {
+        "type": "number"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Mutation",
+      "identifier": "regenerateProfiles.js:regenerateProfiles",
+      "returns": {
+        "type": "number"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "metadata": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "firstName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "lastName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                }
+              }
+            },
+            "optional": true
+          },
+          "name": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "users.js:updateUser",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "users.js:getByEmail",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Action",
+      "identifier": "users.js:getAdminUser",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Mutation",
+      "identifier": "populateRepresentatives.js:addGovernmentRepresentatives",
+      "returns": {
+        "type": "string"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "any"
+      },
+      "functionType": "Mutation",
+      "identifier": "seed.js:seed",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "newGovernmentLevel": {
+            "fieldType": {
+              "type": "union",
+              "value": [
+                {
+                  "type": "literal",
+                  "value": "Federal"
+                },
+                {
+                  "type": "literal",
+                  "value": "State"
+                },
+                {
+                  "type": "literal",
+                  "value": "Local"
+                },
+                {
+                  "type": "literal",
+                  "value": "County"
+                },
+                {
+                  "type": "literal",
+                  "value": "Municipal"
+                },
+                {
+                  "type": "literal",
+                  "value": "School District"
+                }
+              ]
+            },
+            "optional": false
+          },
+          "profileId": {
+            "fieldType": {
+              "tableName": "profiles",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "updateProfileGovernmentLevel.js:updateGovernmentLevel",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "tableName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "displayTables.js:displayTables",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Mutation",
+      "identifier": "fixProfilesSchema.js:fixGovernmentLevels",
+      "returns": {
+        "type": "object",
+        "value": {
+          "fixed": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "message": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "functionType": "HttpAction",
+      "method": "POST",
+      "path": "/createAdminUser"
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "createAdminUser.js:createAdminUser",
+      "returns": {
+        "type": "object",
+        "value": {
+          "message": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "success": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": true
+          }
+        }
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "limit": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "representativeId": {
+            "fieldType": {
+              "tableName": "representatives",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "communications.js:getRecentCommunications",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "createdAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "lastLoginAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "metadata": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "firstName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "lastName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                }
+              }
+            },
+            "optional": false
+          },
+          "name": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "passwordHash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "role": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "users_mutations.js:createUser",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "metadata": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "firstName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "lastName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                }
+              }
+            },
+            "optional": true
+          },
+          "name": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "users_mutations.js:updateUser",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "passwordHash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "users_mutations.js:updateUserPassword",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Query",
+      "identifier": "users_queries.js:getAdminUserQuery",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "users_queries.js:getUser",
+      "returns": {
+        "type": "union",
+        "value": [
+          {
+            "type": "object",
+            "value": {
+              "_id": {
+                "fieldType": {
+                  "tableName": "users",
+                  "type": "id"
+                },
+                "optional": false
+              },
+              "email": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "name": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "role": {
+                "fieldType": {
+                  "type": "string"
+                },
+                "optional": true
+              }
+            }
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "users_queries.js:getUserByEmail",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "users_queries.js:getUserRole",
+      "returns": {
+        "type": "union",
+        "value": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Query",
+      "identifier": "admin_queries.js:checkAdminUser",
+      "returns": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "exists": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          },
+          "hasPassword": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "admin_queries.js:checkAdminUserInternal",
+      "returns": {
+        "type": "object",
+        "value": {
+          "exists": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          },
+          "fields": {
+            "fieldType": {
+              "type": "any"
+            },
+            "optional": true
+          },
+          "hasPassword": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          },
+          "role": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          }
+        }
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "authInternal.js:hashPassword",
+      "returns": {
+        "type": "string"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "authInternal.js:internal_hashPassword",
+      "returns": {
+        "type": "string"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "hash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "authInternal.js:internal_verifyPassword",
+      "returns": {
+        "type": "boolean"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "hash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "authInternal.js:verifyPassword",
+      "returns": {
+        "type": "boolean"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:generateToken",
+      "returns": {
+        "type": "string"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:internal_generateToken",
+      "returns": {
+        "type": "string"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "createdAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "expiresAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:createSession",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "createdAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "expiresAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:createSessionMutation",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "createdAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "expiresAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "token": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:internal_createSessionMutation",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:internal_updateLastLoginMutation",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:updateLastLogin",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:updateLastLoginMutation",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "passwordHash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:internal_updatePasswordMutation",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "passwordHash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:updatePassword",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "passwordHash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "authInternal.js:updatePasswordMutation",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "checkUser.js:checkUserByEmail",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "userId": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "constituents.js:getByUserId",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "city": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "county": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "fullName": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "id": {
+            "fieldType": {
+              "tableName": "constituents",
+              "type": "id"
+            },
+            "optional": false
+          },
+          "metadata": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "address": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "ageRange": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "phone": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "registrationDate": {
+                  "fieldType": {
+                    "type": "number"
+                  },
+                  "optional": true
+                }
+              }
+            },
+            "optional": true
+          },
+          "preferences": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "contact_preference": {
+                  "fieldType": {
+                    "type": "union",
+                    "value": [
+                      {
+                        "type": "literal",
+                        "value": "email"
+                      },
+                      {
+                        "type": "literal",
+                        "value": "phone"
+                      },
+                      {
+                        "type": "literal",
+                        "value": "in-app"
+                      },
+                      {
+                        "type": "literal",
+                        "value": "mail"
+                      }
+                    ]
+                  },
+                  "optional": false
+                },
+                "interests": {
+                  "fieldType": {
+                    "type": "array",
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "optional": false
+                },
+                "notification_frequency": {
+                  "fieldType": {
+                    "type": "union",
+                    "value": [
+                      {
+                        "type": "literal",
+                        "value": "daily"
+                      },
+                      {
+                        "type": "literal",
+                        "value": "weekly"
+                      },
+                      {
+                        "type": "literal",
+                        "value": "asap"
+                      }
+                    ]
+                  },
+                  "optional": false
+                },
+                "subscribed_topics": {
+                  "fieldType": {
+                    "type": "array",
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "optional": false
+                }
+              }
+            },
+            "optional": true
+          },
+          "state": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          },
+          "town": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": true
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "constituents.js:update",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "any"
+      },
+      "functionType": "Query",
+      "identifier": "constituents.js:getAll",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "district": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "constituents.js:getByDistrict",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "any"
+      },
+      "functionType": "Query",
+      "identifier": "constituents.js:getActive",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "password": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "setAdminPassword.js:setAdminPassword",
+      "returns": {
+        "type": "object",
+        "value": {
+          "message": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "success": {
+            "fieldType": {
+              "type": "boolean"
+            },
+            "optional": false
+          }
+        }
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "createdAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "lastLoginAt": {
+            "fieldType": {
+              "type": "number"
+            },
+            "optional": false
+          },
+          "metadata": {
+            "fieldType": {
+              "type": "object",
+              "value": {
+                "firstName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "lastName": {
+                  "fieldType": {
+                    "type": "string"
+                  },
+                  "optional": true
+                }
+              }
+            },
+            "optional": false
+          },
+          "name": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "passwordHash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "role": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "users_actions.js:createUser",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Action",
+      "identifier": "users_actions.js:getAdminUser",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "email": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "users_actions.js:getByEmail",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "passwordHash": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          },
+          "userId": {
+            "fieldType": {
+              "tableName": "users",
+              "type": "id"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Action",
+      "identifier": "users_actions.js:updateUserPassword",
+      "returns": {
+        "type": "any"
+      },
+      "visibility": {
+        "kind": "internal"
+      }
+    }
+  ]
+}

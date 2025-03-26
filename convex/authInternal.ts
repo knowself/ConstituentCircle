@@ -2,31 +2,33 @@
 import { internalAction, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import bcrypt from "bcryptjs";
-import { ActionCtxWithAuth, MutationCtxWithAuth } from "./types";
+import { Id } from "./_generated/dataModel";
+import type { MutationCtx } from "./types";
 
 export const hashPassword = internalAction({
   args: { password: v.string() },
-  returns: v.string(),
-  handler: async (ctx: ActionCtxWithAuth, args) => {
+  handler: async (ctx, args) => {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(args.password, salt);
   },
 });
 
 export const verifyPassword = internalAction({
-  args: { password: v.string(), hash: v.string() },
-  returns: v.boolean(),
-  handler: async (ctx: ActionCtxWithAuth, args) => {
+  args: { 
+    password: v.string(), 
+    hash: v.string() 
+  },
+  handler: async (ctx, args) => {
     return await bcrypt.compare(args.password, args.hash);
   },
 });
 
-export const generateToken = internalMutation({
-  args: {},
-  returns: v.string(),
-  handler: async (ctx: MutationCtxWithAuth) => {
-    const timestamp = Date.now().toString(36);
-    return `${Math.random().toString(36).substring(2, 15)}${timestamp}${Math.random().toString(36).substring(2, 15)}`;
+export const generateToken = internalAction({
+  args: {
+    userId: v.optional(v.id("users"))
+  },
+  handler: async () => {
+    return `${crypto.randomUUID()}-${Date.now().toString(36)}`;
   },
 });
 
@@ -34,29 +36,31 @@ export const createSession = internalMutation({
   args: {
     userId: v.id("users"),
     token: v.string(),
-    expiresAt: v.number(),
-    createdAt: v.number(),
+    expiresAt: v.number()
   },
-  handler: async (ctx: MutationCtxWithAuth, args) => {
-    await ctx.db.insert("sessions", {
+  handler: async (ctx: MutationCtx, args) => {
+    return await ctx.db.insert("sessions", {
       userId: args.userId,
       token: args.token,
       expiresAt: args.expiresAt,
-      createdAt: args.createdAt,
+      createdAt: Date.now()
     });
   },
 });
 
 export const updateLastLogin = internalMutation({
   args: { userId: v.id("users") },
-  handler: async (ctx: MutationCtxWithAuth, args) => {
+  handler: async (ctx: MutationCtx, args) => {
     await ctx.db.patch(args.userId, { lastLoginAt: Date.now() });
   },
 });
 
 export const updatePassword = internalMutation({
-  args: { userId: v.id("users"), passwordHash: v.string() },
-  handler: async (ctx: MutationCtxWithAuth, args) => {
+  args: {
+    userId: v.id("users"),
+    passwordHash: v.string()
+  },
+  handler: async (ctx: MutationCtx, args) => {
     await ctx.db.patch(args.userId, { passwordHash: args.passwordHash });
   },
 });

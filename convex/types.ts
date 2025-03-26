@@ -3,50 +3,61 @@ import { DataModel } from "./_generated/dataModel";
 import { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 
-// Define extended context types with schema-specific database access
-export type ActionCtxWithAuth = GenericActionCtx<DataModel>;
-export type QueryCtxWithAuth = GenericQueryCtx<DataModel>;
-export type MutationCtxWithAuth = GenericMutationCtx<DataModel>;
+// Common context types
+export type ActionCtx = GenericActionCtx<DataModel>;
+export type QueryCtx = GenericQueryCtx<DataModel>;
+export type MutationCtx = GenericMutationCtx<DataModel>;
 
-// Define interface for internal auth actions/mutations with specific types
-export interface InternalAuthActions {
-  createSession: {
-    args: {
-      userId: Id<"users">;
-      token: string;
-      expiresAt: number;
-      createdAt: number;
-    };
-    returns: void; // or v.id("sessions") if you want to return the session ID
+// User-related types
+export type UserRole = "admin" | "user" | "representative";
+export type AuthProvider = "email" | "oauth";
+
+export interface UserDoc {
+  _id: Id<"users">;
+  email: string;
+  name: string;
+  passwordHash?: string;
+  role: UserRole;
+  authProvider: AuthProvider;
+  metadata: {
+    firstName?: string;
+    lastName?: string;
   };
-  updateLastLogin: {
-    args: {
-      userId: Id<"users">;
-    };
-    returns: void;
+  createdAt: number;
+  lastLoginAt?: number;
+}
+
+// Profile-related types
+export type GovernmentLevel = "federal" | "state" | "county" | "municipal" | "other";
+
+export interface ProfileDoc {
+  _id: Id<"profiles">;
+  email: string;
+  displayname: string;
+  governmentLevel: GovernmentLevel;
+  jurisdiction: string;
+  district?: string;
+  party?: string;
+  position?: string;
+  termStart?: number;
+  termEnd?: number;
+  role?: string;
+  metadata: {
+    firstName: string;
+    lastName: string;
+    employmentType?: string;
   };
-  updatePassword: {
-    args: {
-      userId: Id<"users">;
-      passwordHash: string;
-    };
-    returns: void;
-  };
-  hashPassword: {
-    args: {
-      password: string;
-    };
-    returns: string;
-  };
-  verifyPassword: {
-    args: {
-      password: string;
-      hash: string;
-    };
-    returns: boolean;
-  };
-  generateToken: {
-    args: Record<string, never>; // Empty object for no args
-    returns: string;
+  createdAt: number;
+  userId?: Id<"users">;
+}
+
+// Auth-related types
+export interface AuthResponse {
+  token: string;
+  user: {
+    _id: Id<"users">;
+    email: string;
+    name: string;
+    role: UserRole;
   };
 }

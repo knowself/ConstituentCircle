@@ -1,5 +1,5 @@
 {
-"compilerOptions": {
+  "compilerOptions": {
     "target": "es5",
     "lib": [
       "dom",
@@ -23,12 +23,15 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@convex/*": [
+        "./convex/*"
       ]
     },
-    "baseUrl": ".",
     "typeRoots": [
       "./node_modules/@types",
       "./types"

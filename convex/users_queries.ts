@@ -1,64 +1,59 @@
-import { query } from "./_generated/server";
+import { QueryCtx, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Get user role
-export const getUserRole = query({
-  args: {
-    userId: v.id("users")
-  },
-  returns: v.union(v.string(), v.null()),
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    return user?.role;
-  },
-});
+const userRoles = v.union(
+  v.literal("admin"),
+  v.literal("user"),
+  v.literal("representative"),
+  v.literal("company_admin"),
+  v.literal("constituent")
+);
 
-// Get user details
-export const getUser = query({
+export const listUsers = query({
   args: {
-    userId: v.id("users")
+    role: v.optional(userRoles),
+    search: v.optional(v.string())
   },
-  returns: v.union(
+  returns: v.array(
     v.object({
       _id: v.id("users"),
-      name: v.string(),
+      _creationTime: v.number(),
       email: v.string(),
-      role: v.optional(v.string())
-    }),
-    v.null()
+      name: v.string(),
+      displayname: v.optional(v.string()),
+      role: userRoles,
+      authProvider: v.string(),
+      metadata: v.object({
+        firstName: v.optional(v.string()),
+        lastName: v.optional(v.string()),
+        employmentType: v.optional(v.string())
+      }),
+      createdAt: v.number(),
+      lastLoginAt: v.optional(v.number())
+    })
   ),
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) return null;
-    
-    return {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    };
-  },
-});
+  handler: async (ctx: QueryCtx, args) => {
+    let query = ctx.db.query("users");
 
-// These queries will be used by the actions but won't be directly exposed in Node.js files
-export const getUserByEmail = query({
-  args: {
-    email: v.string()
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
-      .unique();
-  },
-});
+    // Apply role filter if provided
+    if (args.role !== undefined) {
+      query = query.filter(q => q.eq(q.field("role"), args.role));
+    }
 
-export const getAdminUserQuery = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("by_role", (q) => q.eq("role", "admin"))
-      .first();
-  },
+    // Get all users matching the base criteria
+    const users = await query.collect();
+
+    // If search term provided, filter in memory for case-insensitive partial matches
+    if (args.search) {
+      const searchLower = args.search.toLowerCase();
+      return users.filter(user => {
+        const emailMatch = user.email.toLowerCase().includes(searchLower);
+        const nameMatch = user.name.toLowerCase().includes(searchLower);
+        const displaynameMatch = user.displayname?.toLowerCase().includes(searchLower) ?? false;
+        return emailMatch || nameMatch || displaynameMatch;
+      });
+    }
+
+    return users;
+  }
 });

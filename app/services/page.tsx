@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Header from '../../components/Header';
+import SimpleHeader from '../components/SimpleHeader';
 
 /**
  * Feature interface defining the structure of each feature card
@@ -185,7 +185,8 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <SimpleHeader />
+
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-center mb-12 text-foreground">Our Technical Services</h1>
         

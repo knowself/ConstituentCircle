@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -8,7 +10,6 @@ interface User {
   _id: Id<"users">;
   name: string;
   email: string;
-  // Add other user properties as needed
 }
 
 interface AuthContextType {
@@ -22,7 +23,7 @@ interface AuthContextType {
 }
 
 // Create the context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Create a provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -106,4 +107,14 @@ export function useAuth() {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+}
+
+import { AuthProvider } from "./AuthContext";
+
+export default function AuthContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <AuthProvider>{children}</AuthProvider>;
 }

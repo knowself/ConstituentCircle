@@ -12,10 +12,6 @@ interface State {
   error: Error | null;
 }
 
-/**
- * Error boundary component that catches errors from Convex hooks
- * and displays a fallback UI instead of crashing the entire app
- */
 export class ConvexErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -27,20 +23,22 @@ export class ConvexErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('ConvexErrorBoundary caught an error:', error, errorInfo);
+    console.error('ConvexErrorBoundary caught an error:', error);
+    // You can add error reporting service here
   }
 
   render(): ReactNode {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return this.props.fallback || (
         <div className="p-4 bg-red-50 text-red-800 rounded-md">
-          <h2 className="text-lg font-semibold">Something went wrong with Convex</h2>
+          <h2 className="text-lg font-semibold">Connection Error</h2>
           <p className="mt-2">{this.state.error?.message}</p>
-          <p className="mt-4 text-sm text-gray-600">
-            This is likely due to a Convex client initialization issue. 
-            Please check your console for more details.
-          </p>
+          <button 
+            className="mt-4 px-4 py-2 bg-red-100 hover:bg-red-200 rounded"
+            onClick={() => window.location.reload()}
+          >
+            Retry Connection
+          </button>
         </div>
       );
     }

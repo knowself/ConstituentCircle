@@ -26,6 +26,44 @@ We combine artificial intelligence (AI) and natural language processing (NLP) to
 - **Convex**: ^1.20.0
 - **Next.js**: ^15.2.0
 
+## Convex Configuration
+
+Constituent Circle uses Convex as its backend service, providing database storage, real-time data synchronization, and serverless functions.
+
+### Schema Design
+
+Our database schema is defined in `convex/schema.ts` and includes the following tables:
+
+- **Users**: Stores user accounts with authentication information
+- **Sessions**: Manages authentication sessions
+- **Profiles**: Contains extended user profile information
+- **Communications**: Tracks communications between representatives and constituents
+- **Constituents**: Stores constituent-specific information
+
+### Function Organization
+
+Convex functions are organized by domain and type:
+
+- **Queries**: Read-only functions that fetch data
+- **Mutations**: Functions that modify data
+- **Actions**: Functions that can perform side effects like calling external APIs
+
+### Authentication System
+
+The authentication system implements a dual-path login strategy:
+
+1. **Admin Login** (`/admin/login`): Restricted to users with the 'admin' role
+2. **Main Login** (`/login`): Primary login path for all non-admin users
+
+### Best Practices
+
+- Use appropriate validators for all function arguments and return types
+- Organize functions by domain in separate files
+- Use indexes for efficient queries
+- Implement proper error handling
+
+For detailed documentation on our Convex implementation, see the [Convex Configuration Documentation](memorybank/convexConfiguration.md).
+
 ## Examples
 
 Our tools help representatives have more meaningful conversations with their constituents. For example, when discussing climate change:
