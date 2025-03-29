@@ -1,7 +1,7 @@
 'use client';
 
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import ConvexTest from "../../components/ConvexTest";
+import ConvexTest from "src/components/ConvexTest";
 
 export default function TestWrapperPage() {
   // Create a new client instance for this page only

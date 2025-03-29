@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Id } from "../../convex/_generated/dataModel";
+import type { Id } from "../../convex/_generated/dataModel";
 
 // Define types for our context
 interface User {
@@ -30,14 +30,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // TODO: Fix proper API typing - temporary workaround
+  const typedApi = api as any;
+  
   // Fetch the current user using Convex query
-  const currentUser = useQuery(api.auth.getCurrentUser);
+  const currentUser = useQuery(typedApi.auth.getCurrentUser);
   
   // Convex mutations
-  const login = useMutation(api.auth.login);
-  const register = useMutation(api.auth.register);
-  const logoutMutation = useMutation(api.auth.logout);
-  const updateProfileMutation = useMutation(api.auth.updateProfile);
+  const login = useMutation(typedApi.auth.login);
+  const signup = useMutation(typedApi.auth.signup);
+  const logoutMutation = useMutation(typedApi.auth.logout);
+  const updateProfileMutation = useMutation(typedApi.auth.updateProfile);
 
   // Update user state when currentUser changes
   useEffect(() => {
@@ -61,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleRegister = async (name: string, email: string, password: string) => {
     try {
-      await register({ name, email, password });
+      await signup({ email, password, name });
     } catch (error) {
       console.error("Registration failed:", error);
       throw error;
@@ -109,7 +112,6 @@ export function useAuth() {
   return context;
 }
 
-import { AuthProvider } from "./AuthContext";
 
 export default function AuthContextProvider({
   children,

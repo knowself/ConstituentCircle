@@ -11,7 +11,7 @@ interface ConvexCommunication {
   _id: Id<"communications">;
   _creationTime: number;
   createdAt: number;
-  representativeId: Id<"representatives">;
+  representativeId: Id<"users">;
   constituentId: Id<"constituents">;
   messageType: string;
   content: string;

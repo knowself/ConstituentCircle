@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import ConvexTest from "../../components/ConvexTest";
-import ConvexDebug from "../../components/ConvexDebug";
+import ConvexTest from "src/components/ConvexTest";
+import ConvexDebug from "src/components/ConvexDebug";
 
 export default function ConvexTestPage() {
   const [envInfo, setEnvInfo] = useState<any>(null);

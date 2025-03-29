@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import type { ConstituentGroup } from '../../../../lib/types/groups';
-import GroupComposer from '../../../../components/groups/GroupComposer';
+import GroupComposer from 'src/components/groups/GroupComposer';
 
 export default function GroupsPage() {
   const { user } = useAuth();

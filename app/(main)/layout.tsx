@@ -1,12 +1,12 @@
 'use client';
 
 import { ReactNode } from 'react';
-import Header from '../../components/Header';
+import Navigation from '@/components/Navigation';
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
-      <Header />
+      <Navigation />
       
       {/* Main content */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">

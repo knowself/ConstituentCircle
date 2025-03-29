@@ -2,9 +2,9 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 // Replace Supabase with Convex
 import { useQuery } from "convex/react";
-import { api } from '../../convex/_generated/api';
+import { api } from '../../../convex/_generated/api';
 import { useAuth } from '../../context/AuthContext';
-import { Id } from '../../convex/_generated/dataModel';
+import { Id } from '../../../convex/_generated/dataModel';
 import Loading from '../Loading';
 
 // Define a proper interface for the user object
@@ -18,7 +18,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user: authUser, loading: authLoading } = useAuth();
+  const { user: authUser, isLoading: authLoading } = useAuth();
   // Better typing for the user state
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);

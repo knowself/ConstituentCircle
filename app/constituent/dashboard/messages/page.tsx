@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
-import ConstituentDashboardLayout from '../../../../components/constituent/ConstituentDashboardLayout';
+import ConstituentDashboardLayout from 'src/components/constituent/ConstituentDashboardLayout';
 import { 
   PaperAirplaneIcon, 
   FolderIcon,

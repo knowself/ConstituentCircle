@@ -5,7 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline';
-import Header from '../../../components/Header';
+// Removed Header import - using Navigation from root layout
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -98,30 +98,24 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Header showMobileMenu={true} />
-      
-      <div className="flex flex-grow flex-col justify-center py-12 sm:px-6 lg:px-8 pt-4">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="flex justify-center">
-            <ShieldCheckIcon className="h-12 w-12 text-indigo-600 dark:text-blue-500" />
-          </div>
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+    <div className="min-h-screen flex flex-col bg-white">
+      <div className="flex flex-grow flex-col justify-center py-8 px-4">
+        <div className="mx-auto w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
+            <p className="text-gray-600">
               Only Constituent Circle admins can access this area
             </p>
           </div>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            <Link href="/signin" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-500 dark:hover:text-blue-400 inline-flex items-center">
-              <UserIcon className="h-4 w-4 mr-1" />
+          <p className="text-center text-sm text-gray-600 mb-8">
+            <Link href="/signin" className="font-medium text-blue-600 hover:text-blue-500">
               Normal Sign In
             </Link>
           </p>
         </div>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="mx-auto w-full max-w-md">
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
             <form className="space-y-6" onSubmit={handleLogin}>
               {error && (
                 <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">

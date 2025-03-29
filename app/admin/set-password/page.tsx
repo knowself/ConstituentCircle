@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import Header from '../../../components/Header';
+// Removed Header import - using Navigation from root layout
 
 export default function SetAdminPassword() {
   const [email, setEmail] = useState('joe@derivativegenius.com');
@@ -53,7 +53,7 @@ export default function SetAdminPassword() {
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Header showMobileMenu={true} />
+      {/* Navigation is provided by the root layout */}
       
       <div className="flex flex-grow items-center justify-center py-12 px-4 sm:px-6 lg:px-8 pt-4">
         <div className="max-w-md w-full space-y-8">

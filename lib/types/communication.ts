@@ -4,15 +4,7 @@ export type CommunicationChannel = 'email' | 'sms' | 'whatsapp' | 'facebook' | '
 export type CommunicationDirection = 'inbound' | 'outbound';
 
 export interface SocialEngagement {
-  type: 'reaction' | 'share' | 'comment' | 'post';
-  platform: string;
-  analytics: {
-    likes: number;
-    shares: number;
-    comments: number;
-    reach: number;
-  };
-  metadata?: Record<string, any>;
+  timestamp: string;
 }
 
 export interface Communication {

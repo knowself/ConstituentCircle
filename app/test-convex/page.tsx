@@ -1,6 +1,6 @@
 'use client';
 
-import ConvexTest from "../../components/ConvexTest";
+import ConvexTest from "src/components/ConvexTest";
 
 export default function TestConvexPage() {
   return (

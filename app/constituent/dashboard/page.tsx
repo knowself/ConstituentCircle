@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import ConstituentDashboardLayout from '../../../components/constituent/ConstituentDashboardLayout';
+import ConstituentDashboardLayout from 'src/components/constituent/ConstituentDashboardLayout';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { 
@@ -67,7 +67,7 @@ export default function ConstituentDashboard() {
         {/* Welcome section */}
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome back, {user?.metadata?.firstName || 'Constituent'}
+            Welcome back, {user?.name || 'Constituent'}
           </h2>
           <p className="text-gray-600 dark:text-gray-300">
             Stay connected with your representative and make your voice heard on issues that matter to you.
