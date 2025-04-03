@@ -1,16 +1,14 @@
-import { useRouter } from 'next/router';
+'use client';
+
+import { useRouter } from 'next/navigation'; // Use next/navigation for App Router
 import { useEffect, useState } from 'react';
 // Replace Supabase with Convex
 import { useQuery } from "convex/react";
-import { api } from '../../../convex/_generated/api';
-import { useAuth } from '../../context/AuthContext';
+import { api } from "@convex/_generated/api"; // Use alias
+import { useAuth } from '@/context/AuthContext'; // Use alias
+import type { User } from '@/hooks/useAuth'; // Import correct User type
 import { Id } from '../../../convex/_generated/dataModel';
 import Loading from '../Loading';
-
-// Define a proper interface for the user object
-interface User {
-  _id: Id<"users">;
-}
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -19,13 +17,7 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user: authUser, isLoading: authLoading } = useAuth();
-  // Better typing for the user state
-  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Replace Supabase client with Convex query
-  const userRole = useQuery(api.users.getUserRole, 
-    authUser ? { userId: authUser._id } : "skip"
-  );
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -39,53 +31,40 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     if (!mounted) return;
     
     const handleAuth = async () => {
-      try {
-        if (!authLoading) {
-          if (authUser) {
-            setUser(authUser);
-            
-            // Check role if required
-            if (requiredRole) {
-              // Use Convex query result instead of Supabase
-              if (userRole === undefined) {
-                // Still loading
-                return;
-              }
-              
-              if (userRole === null) {
-                console.error('Role check error');
-                setError('Failed to verify user role');
-                router.push('/unauthorized');
-                return;
-              }
-
-              if (userRole !== requiredRole) {
-                console.log(`User role ${userRole} does not match required role ${requiredRole}`);
-                setError('Unauthorized: Insufficient permissions');
-                router.push('/unauthorized');
-                return;
-              }
+      if (!authLoading) {
+        if (authUser) {
+          // Check role if required
+          if (requiredRole) {
+            // Check user role from the user object directly now
+            if (!authUser.role) { 
+              console.error('Role check error: User object missing role property.');
+              setError('Failed to verify user role');
+              router.push('/unauthorized');
+              return;
             }
-            
-            setLoading(false);
-            setError(null);
-          } else {
-            // No authenticated user, redirect to sign in
-            console.log('No authenticated user, redirecting to sign in');
-            setError('Please sign in to access this page');
-            router.push('/auth/signin');
-            setLoading(false);
+
+            if (authUser.role !== requiredRole) { 
+              console.log(`User role ${authUser.role} does not match required role ${requiredRole}`);
+              setError('Unauthorized: Insufficient permissions');
+              router.push('/unauthorized');
+              return;
+            }
           }
+            
+          setLoading(false);
+          setError(null);
+        } else {
+          // No authenticated user, redirect to sign in
+          console.log('No authenticated user, redirecting to sign in');
+          setError('Please sign in to access this page');
+          router.push('/auth/signin'); // TODO: Make signin path configurable?
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Authentication error:', error);
-        setError('An error occurred while checking authentication');
-        setLoading(false);
-      }
+      } 
     };
 
     handleAuth();
-  }, [authUser, authLoading, mounted, requiredRole, router, userRole]);
+  }, [authUser, authLoading, mounted, requiredRole, router]);
 
   // During server-side rendering or before mounting, return a minimal placeholder
   // to prevent hydration mismatch
@@ -101,7 +80,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     return <div className="text-red-600">{error}</div>;
   }
 
-  if (!user) {
+  if (!authUser) { 
     return <Loading size="medium" message="Redirecting to login..." />;
   }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
+import { api } from '../lib/convex/api';
 
 interface TableRow {
   [key: string]: any; // Or define specific properties if known

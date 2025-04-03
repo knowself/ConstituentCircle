@@ -1,8 +1,11 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import dynamic from 'next/dynamic'; // Import dynamic
 import { useAuth } from '../../context/AuthContext';  // Updated to use Supabase auth context
-import ProtectedRoute from '../auth/ProtectedRoute';
+
+// Dynamically import ProtectedRoute only on the client-side
+const ProtectedRoute = dynamic(() => import('../auth/ProtectedRoute'), { ssr: false });
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -114,15 +117,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="border-t border-indigo-800 p-4">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <img
-                  className="h-8 w-8 rounded-full"
-                  src={mounted && user?.metadata?.avatar_url ? user.metadata.avatar_url : 'https://via.placeholder.com/40'}
-                  alt={mounted && user?.email ? user.email : 'User'}
-                />
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt="User avatar" className="mr-3 h-8 w-8 rounded-full" />
+                ) : (
+                  <span className="mr-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500">
+                    <span className="text-xs font-medium leading-none text-white">
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`
+                        : user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </span>
+                )}
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-white">
-                  {mounted && user?.email ? user.email : 'User'}
+                  {user?.firstName && user?.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user?.name || user?.email || 'User'}
                 </p>
                 <button
                   onClick={handleSignOut}

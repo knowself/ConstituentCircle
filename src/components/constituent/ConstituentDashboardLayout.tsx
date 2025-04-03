@@ -4,7 +4,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-import ProtectedRoute from '../auth/ProtectedRoute';
+import dynamic from 'next/dynamic'; // Import dynamic
 import { 
   HomeIcon, 
   ChatBubbleLeftRightIcon, 
@@ -17,6 +17,9 @@ import {
   ArrowRightOnRectangleIcon,
   UserCircleIcon
 } from '@heroicons/react/24/outline';
+
+// Dynamically import ProtectedRoute only on the client-side
+const ProtectedRoute = dynamic(() => import('../auth/ProtectedRoute'), { ssr: false });
 
 interface ConstituentDashboardLayoutProps {
   children: ReactNode;
@@ -145,24 +148,31 @@ export default function ConstituentDashboardLayout({ children }: ConstituentDash
             </nav>
         
             {/* User profile */}
-            <div className="border-t border-blue-800 p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
-                    {user?.email?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                </div>
-                <div className="ml-3 overflow-hidden">
+            <div className="mt-auto p-4 border-t border-blue-600 dark:border-blue-800">
+              <Link href="/constituent/dashboard/profile" className="group -m-2 flex items-center rounded-md p-2">
+                {/* Use avatar_url or initials */}
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt="User avatar" className="mr-3 h-8 w-8 rounded-full" />
+                ) : (
+                  <span className="mr-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 dark:bg-blue-700">
+                    <span className="text-xs font-medium leading-none text-white">
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`
+                        : user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </span>
+                )}
+                <div className="flex-1 overflow-hidden">
                   <p className="text-sm font-medium text-white truncate">
-                    {user?.email || 'Constituent'}
+                    {user?.firstName && user?.lastName 
+                      ? `${user.firstName} ${user.lastName}`
+                      : user?.name || 'Your Account'}
                   </p>
                   <p className="text-xs text-blue-200 truncate">
-                    {user?.metadata?.firstName && user?.metadata?.lastName 
-                      ? `${user.metadata.firstName} ${user.metadata.lastName}` 
-                      : 'Your Account'}
+                    {user?.email || 'Loading...'}
                   </p>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>

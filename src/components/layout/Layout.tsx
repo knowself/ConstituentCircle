@@ -17,7 +17,7 @@ import {
 import Navigation from '../Navigation';
 import TestNavigation from '../TestNavigation';
 import Footer from '../Footer';
-import { User } from '../../types';
+import { UserDoc } from '../../../convex/types';
 
 interface LayoutProps {
   children: ReactNode;
@@ -56,7 +56,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   // Type the user properly when logging
-  console.log('Auth state:', { user: user as User | null, isAuthenticated: !!user });
+  console.log('Auth state:', { user: user as UserDoc | null, isAuthenticated: !!user });
 
   const handleLogout = async () => {
     try {

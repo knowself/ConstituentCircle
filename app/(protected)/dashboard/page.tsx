@@ -1,8 +1,12 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import { DatabaseService } from '../../../lib/database/service';
+import { useAuth } from '@/context/AuthContext';
+import { DatabaseService } from '@root/lib/database/service'; // Use @root alias for root lib
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Communication, CommunicationType, CommunicationDirection, CommunicationChannel } from '../../../lib/types/communication';
 import { Id } from '../../../convex/_generated/dataModel';
 
@@ -20,147 +24,191 @@ interface ConvexCommunication {
   sentAt: number;
 }
 
-export default function DashboardPage() {
-  const { user } = useAuth();
+// --- New Nested Client Component --- 
+function DashboardContent() { 
+  // --- Hooks --- 
+  const { user, isLoading: authLoading, logout } = useAuth();
+
+  // --- State for Data --- 
   const [recentCommunications, setRecentCommunications] = useState<Communication[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(false); // Start as false, set true when fetching
+  const [error, setError] = useState<string | null>(null);
 
+  // --- Effects for Data Fetching --- 
   useEffect(() => {
-    // If we're in a server environment, don't do anything
-    if (typeof window === 'undefined') return;
-
-    async function loadData() {
-      if (user) {
-        console.log('Loading dashboard data for user:', user._id);
-
-        // Load recent communications
-        const communicationService = new DatabaseService('communications');
-        try {
-          // First, get the raw results
-          const rawResults = await communicationService.query({
-            representativeId: user._id,
-            _limit: 5
-          });
-
-          console.log("Results from getRecentCommunications:", rawResults);
-          
-          // Then cast them to the correct type
-          const results = rawResults as unknown as ConvexCommunication[];
-
-          // Map the Convex data structure to the expected Communication interface
-          const communications = results.map(result => ({
+    // Fetch data only if auth is *done loading* and user exists
+    if (!authLoading && user?._id) { 
+      setIsLoadingData(true); // Set loading true before fetch starts
+      const dbService = new DatabaseService('communications');
+      // Explicitly provide FilterType and ResultType generics
+      dbService.query<{ representativeId: Id<"users">; limit: number }, ConvexCommunication>({ 
+          representativeId: user._id as Id<"users">, 
+          limit: 3 
+        })
+        .then(rawResults => {
+          // Map Convex results to the Communication type used in the component
+          const mappedComms = rawResults.map((result: ConvexCommunication) => ({
             id: String(result._id),
-            subject: result.messageType || "", // Use messageType as subject
+            subject: result.messageType || "", 
             content: result.content || "",
             type: (result.messageType as CommunicationType) || "direct",
-            direction: "outbound" as CommunicationDirection, // Default to outbound
-            channel: (result.channel as CommunicationChannel) || "email",
-            visibility: "public" as "public" | "private" | "group", // Default to public
-            status: (result.status as "draft" | "sent" | "delivered" | "read") || "sent",
-            createdAt: new Date(result.createdAt),
-            updatedAt: new Date(result._creationTime)
+            direction: "outbound" as CommunicationDirection, 
+            channel: (result.channel as CommunicationChannel) || "email", 
+            visibility: "public" as "public" | "private" | "group", 
+            status: (result.status as "draft" | "sent" | "delivered" | "read") || "sent", 
+            sentAt: result._creationTime, 
+            createdAt: new Date(result._creationTime),
+            updatedAt: new Date(result._creationTime) 
           }));
-          
-          setRecentCommunications(communications);
-        } catch (error) {
-          console.error("Error fetching communications:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
+          // Sort by date descending (already limited to 3 by query)
+          const sortedData = mappedComms.sort((a, b) => b.sentAt - a.sentAt);
+          setRecentCommunications(sortedData);
+          console.log('DashboardContent: Fetched Communications:', sortedData);
+        })
+        .catch(err => {
+          console.error('DashboardContent: Error fetching communications:', err);
+          setError(err instanceof Error ? err.message : 'Failed to load recent communications');
+        })
+        .finally(() => {
+          setIsLoadingData(false);
+        });
+    } else if (!authLoading && !user) {
+      // If auth is done loading but there's no user, clear data and don't fetch
+      setRecentCommunications([]);
+      setIsLoadingData(false);
+      console.log("DashboardContent: Auth loaded, no user, skipping data fetch.")
     }
+    // If auth is still loading, do nothing, wait for it.
+  }, [authLoading, user]); // Depend on auth loading state and user object
 
-    loadData();
-  }, [user]);
-
-  // If still loading, show loading indicator
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
-        <p>Loading dashboard data...</p>
-      </div>
-    );
+  // --- Loading State Handling --- 
+  if (authLoading) {
+    // Still waiting for the auth context itself to load
+    console.log("DashboardContent: Waiting for auth initialization...");
+    return <DashboardSkeleton showDataSections={false} />; 
   }
 
+  // Auth is done loading, but no user object. Middleware *should* prevent this state
+  // during initial load, but it might occur after logout.
+  if (!user) {
+    console.warn("DashboardContent: Auth loaded but no user object found.");
+    // Render a logged-out state or potentially trigger a redirect if needed (though logout button might handle this)
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p>You are logged out or your session is invalid.</p>
+        {/* Optionally add a button to go to login */}
+      </div>
+    ); 
+  }
+
+  // --- Render Main Content --- 
+  const welcomeMessage = user?.name ? `Welcome back, ${user.name}!` : 'Welcome to your Dashboard!';
+  
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Welcome, {user?.displayname || 'User'}!</h2>
-        <p className="text-gray-600 dark:text-gray-300">
-          This is your dashboard where you can manage all your constituent communications and analyze engagement data.
-        </p>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{welcomeMessage}</h1>
+        <Button onClick={logout} variant="outline">Logout</Button>
       </div>
-      
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Recent Communications</h3>
-        {recentCommunications.length > 0 ? (
-          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              {recentCommunications.map(communication => (
-                <li key={communication.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-lg font-medium text-gray-900 dark:text-white">{communication.subject}</h4>
-                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{communication.content}</p>
-                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        {communication.createdAt?.toLocaleDateString() || 'Unknown date'} • {communication.channel} • {communication.status}
-                      </p>
-                    </div>
-                    <div className="ml-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${communication.status === 'sent' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}`}>
-                        {communication.status}
-                      </span>
-                    </div>
-                  </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardHeader><CardTitle>Total Messages</CardTitle></CardHeader>
+          <CardContent><p className="text-3xl font-semibold text-gray-900 dark:text-white">0</p></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Response Rate</CardTitle></CardHeader>
+          <CardContent><p className="text-3xl font-semibold text-gray-900 dark:text-white">0%</p></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-gray-600 dark:text-gray-300">No recent activity</p></CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle>Recent Communications</CardTitle></CardHeader>
+        <CardContent>
+          {/* Show skeleton only while data is loading, *after* auth is confirmed */}
+          {isLoadingData ? (
+            <CommunicationsSkeleton />
+          ) : error ? (
+            <p className="text-red-500">Error: {error}</p>
+          ) : recentCommunications.length > 0 ? (
+            <ul className="space-y-2">
+              {recentCommunications.map((comm) => (
+                <li key={comm.id} className="text-sm text-gray-600 dark:text-gray-300">
+                  {/* Display communication details, handle potential undefined date */}
+                  {comm.channel?.toUpperCase()}: {comm.subject || 'No Subject'} - 
+                  {comm.createdAt ? new Date(comm.createdAt).toLocaleDateString() : 'Unknown date'}
                 </li>
               ))}
             </ul>
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md p-6 text-center">
-            <p className="text-gray-600 dark:text-gray-300">No recent communications found.</p>
-            <button className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Create New Message
-            </button>
-          </div>
-        )}
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Quick Stats</h3>
-            <dl className="mt-5 grid grid-cols-1 gap-5">
-              <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Messages</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">0</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Response Rate</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">0%</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
+          ) : (
+            <p>No recent communications found.</p>
+          )
+          }
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
-        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Upcoming Tasks</h3>
-            <ul className="mt-4 space-y-2">
-              <li className="text-sm text-gray-600 dark:text-gray-300">No upcoming tasks</li>
-            </ul>
-          </div>
-        </div>
+// --- Original Page Component (Now simpler) ---
+export default function DashboardPage() { 
+  // This component is now extremely simple and doesn't call problematic hooks directly.
+  console.log("Rendering DashboardPage (outer shell)");
+  return <DashboardContent />;
+}
 
-        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h3>
-            <ul className="mt-4 space-y-2">
-              <li className="text-sm text-gray-600 dark:text-gray-300">No recent activity</li>
-            </ul>
-          </div>
-        </div>
+// --- Skeleton Component --- 
+// Updated skeleton to optionally hide data sections during initial auth load
+function DashboardSkeleton({ showDataSections = true }: { showDataSections?: boolean }) {
+  console.log(`Rendering DashboardSkeleton (showDataSections: ${showDataSections})`);
+  return (
+    <div className="container mx-auto px-4 py-8 animate-pulse">
+      <div className="flex justify-between items-center mb-6">
+        <Skeleton className="h-8 w-1/4" />
+        <Skeleton className="h-10 w-24" />
       </div>
+
+      {/* Stats Cards Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+          <CardContent><Skeleton className="h-8 w-1/2" /></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+          <CardContent><Skeleton className="h-8 w-1/2" /></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+          <CardContent><Skeleton className="h-8 w-1/2" /></CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Communications Card Skeleton (conditionally rendered) */}
+      {showDataSections && (
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+          <CardContent>
+             <CommunicationsSkeleton />
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// Specific skeleton for the communications list content
+function CommunicationsSkeleton() {
+  return (
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-5/6" />
+      <Skeleton className="h-4 w-full" />
     </div>
   );
 }

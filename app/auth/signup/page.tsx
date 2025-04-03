@@ -4,53 +4,45 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
-import AuthInput from '../../../components/auth/AuthInput';
 import { PlusIcon } from '@heroicons/react/24/outline';
-// Removed Header import - using Navigation from root layout
 import { Role } from '../../../lib/types/roles';
 
 type UserType = 'constituent' | 'representative';
 type RepresentativeLevel = 'federal' | 'state' | 'county' | 'city' | 'judge' | 'other';
 
-export default function SignUp() {
+// Inner component containing the signup form logic and useAuth hook
+const SignUpForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [userType, setUserType] = useState<UserType>('constituent');
-  
+
   // Constituent fields
   const [city, setCity] = useState('');
   const [county, setCounty] = useState('');
   const [state, setState] = useState('');
-  
+
   // Representative fields
   const [representativeLevel, setRepresentativeLevel] = useState<RepresentativeLevel>('federal');
   const [district, setDistrict] = useState('');
   const [officeType, setOfficeType] = useState('State Representative');
   const [party, setParty] = useState('');
   
-  const [mounted, setMounted] = useState(false);
-  const { signUp, error: authError, loading } = useAuth();
+  const [success, setSuccess] = useState(false);
+  const { signUp, error: authError, isLoading } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    setMounted(true);
-    return () => {
-      setMounted(false);
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
+      // Consider adding user feedback here
       return;
     }
 
     try {
-      // Create metadata based on user type
       const metadata = {
         firstName,
         lastName,
@@ -68,395 +60,358 @@ export default function SignUp() {
         })
       };
 
-      // Call the signUp method with appropriate parameters
-      await signUp(email, password, userType as Role, metadata);
-      router.push('/dashboard');
+      await signUp(email, password, userType as Role, metadata); // Ensure userType is cast to Role if necessary
+      setSuccess(true);
+      setTimeout(() => router.push('/dashboard'), 2000); // Redirect after success
     } catch (err) {
       console.error('Sign up error:', err);
+      // Consider showing a generic error message to the user
     }
   };
 
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <div className="flex flex-grow flex-col justify-center py-8 px-4">
-        <div className="mx-auto w-full max-w-md">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Are you a Constituent or a Representative?
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Or{' '}
-              <Link href="/signin" className="font-medium text-blue-600 hover:text-blue-500">
-                Sign In to Your Account
-              </Link>
-            </p>
-          </div>
+    <div className="sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="text-center">
+        <h2 className="text-3xl font-extrabold text-gray-900">
+          Create your account
+        </h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Or{' '}
+          <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            sign in to your existing account
+          </Link>
+        </p>
+      </div>
 
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            {authError && (
-              <div className="bg-red-50 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-md mb-4" role="alert">
-                <span className="block sm:inline">{authError}</span>
+      {success ? (
+        <div className="mt-8 bg-white py-8 px-4 shadow rounded-lg sm:px-10 text-center">
+          <div className="rounded-md bg-green-50 p-4">
+            <div className="flex">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800">
+                  Account created successfully! Redirecting to dashboard...
+                </h3>
               </div>
-            )}
-            
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* User Type Selection */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio h-5 w-5 text-indigo-600 dark:text-blue-500"
-                      name="userType"
-                      value="constituent"
-                      checked={userType === 'constituent'}
-                      onChange={() => setUserType('constituent')}
-                    />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">Constituent</span>
-                  </label>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">I am a private citizen</p>
-                </div>
-                <div>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio h-5 w-5 text-indigo-600 dark:text-blue-500"
-                      name="userType"
-                      value="representative"
-                      checked={userType === 'representative'}
-                      onChange={() => setUserType('representative')}
-                    />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">Representative</span>
-                  </label>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">I hold public office</p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                {/* Common Fields */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                    required
-                  />
-                  {confirmPassword && password !== confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">Passwords do not match</p>
-                  )}
-                </div>
-                
-                {/* Conditional Fields Based on User Type */}
-                {userType === 'constituent' ? (
-                  <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Location Information</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">This helps us connect you with your elected representatives.</p>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        City/Town
-                      </label>
-                      <input
-                        type="text"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        County
-                      </label>
-                      <input
-                        type="text"
-                        value={county}
-                        onChange={(e) => setCounty(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        State
-                      </label>
-                      <select
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                        required
-                      >
-                        <option value="">Select a state</option>
-                        <option value="AL">Alabama</option>
-                        <option value="AK">Alaska</option>
-                        <option value="AZ">Arizona</option>
-                        <option value="AR">Arkansas</option>
-                        <option value="CA">California</option>
-                        <option value="CO">Colorado</option>
-                        <option value="CT">Connecticut</option>
-                        <option value="DE">Delaware</option>
-                        <option value="DC">District of Columbia</option>
-                        <option value="FL">Florida</option>
-                        <option value="GA">Georgia</option>
-                        <option value="HI">Hawaii</option>
-                        <option value="ID">Idaho</option>
-                        <option value="IL">Illinois</option>
-                        <option value="IN">Indiana</option>
-                        <option value="IA">Iowa</option>
-                        <option value="KS">Kansas</option>
-                        <option value="KY">Kentucky</option>
-                        <option value="LA">Louisiana</option>
-                        <option value="ME">Maine</option>
-                        <option value="MD">Maryland</option>
-                        <option value="MA">Massachusetts</option>
-                        <option value="MI">Michigan</option>
-                        <option value="MN">Minnesota</option>
-                        <option value="MS">Mississippi</option>
-                        <option value="MO">Missouri</option>
-                        <option value="MT">Montana</option>
-                        <option value="NE">Nebraska</option>
-                        <option value="NV">Nevada</option>
-                        <option value="NH">New Hampshire</option>
-                        <option value="NJ">New Jersey</option>
-                        <option value="NM">New Mexico</option>
-                        <option value="NY">New York</option>
-                        <option value="NC">North Carolina</option>
-                        <option value="ND">North Dakota</option>
-                        <option value="OH">Ohio</option>
-                        <option value="OK">Oklahoma</option>
-                        <option value="OR">Oregon</option>
-                        <option value="PA">Pennsylvania</option>
-                        <option value="RI">Rhode Island</option>
-                        <option value="SC">South Carolina</option>
-                        <option value="SD">South Dakota</option>
-                        <option value="TN">Tennessee</option>
-                        <option value="TX">Texas</option>
-                        <option value="UT">Utah</option>
-                        <option value="VT">Vermont</option>
-                        <option value="VA">Virginia</option>
-                        <option value="WA">Washington</option>
-                        <option value="WV">West Virginia</option>
-                        <option value="WI">Wisconsin</option>
-                        <option value="WY">Wyoming</option>
-                      </select>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Office Information</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Tell us about the office you hold.</p>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Government Level
-                      </label>
-                      <select
-                        value={representativeLevel}
-                        onChange={(e) => setRepresentativeLevel(e.target.value as RepresentativeLevel)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                        required
-                      >
-                        <option value="federal">Federal</option>
-                        <option value="state">State</option>
-                        <option value="county">County</option>
-                        <option value="city">City/Local</option>
-                        <option value="judge">Judicial</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Office Type
-                      </label>
-                      <select
-                        value={officeType}
-                        onChange={(e) => setOfficeType(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                        required
-                      >
-                        {representativeLevel === 'federal' && (
-                          <>
-                            <option value="Senator">U.S. Senator</option>
-                            <option value="Representative">U.S. Representative</option>
-                          </>
-                        )}
-                        {representativeLevel === 'state' && (
-                          <>
-                            <option value="Governor">Governor</option>
-                            <option value="State Senator">State Senator</option>
-                            <option value="State Representative">State Representative</option>
-                            <option value="Attorney General">Attorney General</option>
-                            <option value="Secretary of State">Secretary of State</option>
-                          </>
-                        )}
-                        {representativeLevel === 'county' && (
-                          <>
-                            <option value="County Executive">County Executive</option>
-                            <option value="County Commissioner">County Commissioner</option>
-                            <option value="County Clerk">County Clerk</option>
-                            <option value="Sheriff">Sheriff</option>
-                          </>
-                        )}
-                        {representativeLevel === 'city' && (
-                          <>
-                            <option value="Mayor">Mayor</option>
-                            <option value="City Council">City Council Member</option>
-                            <option value="Alderman">Alderman</option>
-                            <option value="City Manager">City Manager</option>
-                          </>
-                        )}
-                        {representativeLevel === 'judge' && (
-                          <>
-                            <option value="Supreme Court Justice">Supreme Court Justice</option>
-                            <option value="Appeals Court Judge">Appeals Court Judge</option>
-                            <option value="District Court Judge">District Court Judge</option>
-                            <option value="Probate Judge">Probate Judge</option>
-                          </>
-                        )}
-                        {representativeLevel === 'other' && (
-                          <>
-                            <option value="School Board">School Board Member</option>
-                            <option value="Special District">Special District Official</option>
-                            <option value="Other">Other Elected Position</option>
-                          </>
-                        )}
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        District or Jurisdiction
-                      </label>
-                      <input
-                        type="text"
-                        value={district}
-                        onChange={(e) => setDistrict(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                        placeholder={representativeLevel === 'city' ? 'City name' : 'District number or area'}
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Party Affiliation
-                      </label>
-                      <select
-                        value={party}
-                        onChange={(e) => setParty(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                      >
-                        <option value="">Select party (optional)</option>
-                        <option value="Democratic">Democratic</option>
-                        <option value="Republican">Republican</option>
-                        <option value="Independent">Independent</option>
-                        <option value="Libertarian">Libertarian</option>
-                        <option value="Green">Green</option>
-                        <option value="Other">Other</option>
-                        <option value="Nonpartisan">Nonpartisan</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div>
-                <button
-                  type="submit"
-                  disabled={loading || password !== confirmPassword}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 dark:bg-blue-600 hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Creating account...' : 'Create account'}
-                </button>
-              </div>
-            </form>
-
-            <div className="mt-6 text-sm text-center text-gray-600 dark:text-gray-400">
-              By signing up, you agree to our{' '}
-              <Link href="/terms" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-500 dark:hover:text-blue-400">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="font-medium text-indigo-600 dark:text-blue-500 hover:text-indigo-500 dark:hover:text-blue-400">
-                Privacy Policy
-              </Link>
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-base text-gray-500 dark:text-gray-300">
-            &copy; {new Date().getFullYear()} Constituent Circle, LLC. All rights reserved.
-          </p>
+      ) : (
+        <div className="mt-8 bg-white py-8 px-4 shadow rounded-lg sm:px-10">
+          {authError && (
+            <div className="rounded-md bg-red-50 p-4 mb-6">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">{authError}</h3>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                  First Name
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                  Last Name
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  minLength={8} // Basic password strength indicator
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${password !== confirmPassword ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`}
+                />
+              </div>
+              {password !== confirmPassword && confirmPassword !== '' && (
+                <p className="mt-2 text-sm text-red-600">Passwords do not match.</p>
+              )}
+            </div>
+
+            <fieldset className="mt-6">
+              <legend className="block text-sm font-medium text-gray-700">Account Type</legend>
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center">
+                  <input
+                    id="constituent"
+                    name="userType"
+                    type="radio"
+                    value="constituent"
+                    checked={userType === 'constituent'}
+                    onChange={() => setUserType('constituent')}
+                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label htmlFor="constituent" className="ml-3 block text-sm text-gray-700">
+                    I am a Constituent
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="representative"
+                    name="userType"
+                    type="radio"
+                    value="representative"
+                    checked={userType === 'representative'}
+                    onChange={() => setUserType('representative')}
+                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label htmlFor="representative" className="ml-3 block text-sm text-gray-700">
+                    I am an Elected Representative / Staff
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+
+            {/* Conditional Fields */}
+            <div className="mt-6 space-y-6">
+              {userType === 'constituent' && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">City</label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">County</label>
+                    <input
+                      type="text"
+                      value={county}
+                      onChange={(e) => setCounty(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">State</label>
+                    <select
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      required
+                    >
+                      <option value="">Select State</option>
+                      {/* Add all US states here - truncated for brevity */}
+                      <option value="AL">Alabama</option>
+                      <option value="AK">Alaska</option>
+                      <option value="AZ">Arizona</option>
+                      <option value="AR">Arkansas</option>
+                      <option value="CA">California</option>
+                      {/* ... other states ... */}
+                      <option value="WY">Wyoming</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {userType === 'representative' && (
+                <div className="space-y-6">
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700">Level of Government</label>
+                      <select
+                        value={representativeLevel}
+                        onChange={(e) => setRepresentativeLevel(e.target.value as RepresentativeLevel)}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        required
+                      >
+                        <option value="federal">Federal (e.g., US Senator, US Representative)</option>
+                        <option value="state">State (e.g., Governor, State Senator/Rep)</option>
+                        <option value="county">County (e.g., Commissioner, Sheriff)</option>
+                        <option value="city">City/Municipal (e.g., Mayor, Council Member)</option>
+                        <option value="judge">Judicial</option>
+                        <option value="other">Other (e.g., School Board)</option>
+                      </select>
+                    </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Office / Position Title
+                    </label>
+                    <input 
+                      type="text"
+                      value={officeType}
+                      onChange={(e) => setOfficeType(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder="e.g., State Representative, Mayor, Judge"
+                      required
+                    />
+                  </div>
+
+                  {/* Show different placeholder text based on level */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      District or Jurisdiction
+                    </label>
+                    <input
+                      type="text"
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder={representativeLevel === 'city' ? 'City name' : (representativeLevel === 'county' ? 'County name' : (representativeLevel === 'federal' || representativeLevel === 'state' ? 'District number' : 'Area of Jurisdiction'))}
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Party Affiliation
+                    </label>
+                    <select
+                      value={party}
+                      onChange={(e) => setParty(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Select party (optional)</option>
+                      <option value="Democratic">Democratic</option>
+                      <option value="Republican">Republican</option>
+                      <option value="Independent">Independent</option>
+                      <option value="Libertarian">Libertarian</option>
+                      <option value="Green">Green</option>
+                      <option value="Other">Other</option>
+                      <option value="Nonpartisan">Nonpartisan</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading || password !== confirmPassword}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating account...
+                  </span>
+                ) : (
+                  'Create account'
+                )}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6 text-sm text-center text-gray-600">
+            By signing up, you agree to our{' '}
+            <Link href="/terms" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
-      </footer>
+      )}
+    </div>
+  );
+};
+
+// Main SignUp page component
+export default function SignUp() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // No cleanup needed here as we rely on mounted state
+  }, []);
+
+  if (!mounted) {
+    // Render a placeholder or null during SSR/initial load
+    // Or a more sophisticated loading skeleton
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50 justify-center items-center">
+        <p>Loading signup form...</p>
+      </div>
+    );
+  }
+
+  // Render the form component only when mounted on the client
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="flex flex-grow flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <SignUpForm />
+      </div>
     </div>
   );
 }

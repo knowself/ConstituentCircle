@@ -66,9 +66,8 @@ export default function Layout({ children }: LayoutProps) {
       console.error('Logout error:', error);
     }
   };
-  // Update user photo and display name references
-  // Update user metadata access with proper type checking
-  const userAvatar = user?.metadata?.avatar_url ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email ?? 'User')}`;
+  // Generate avatar URL from user email
+  const userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email ?? 'User')}`;
   const userDisplayName = user?.email || 'User';
   
   // Initialize component

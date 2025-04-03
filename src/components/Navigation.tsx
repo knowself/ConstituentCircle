@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
-import { useTheme, ThemeToggle } from './ThemeProvider';
+import { ThemeToggle } from './ThemeProvider';
 import './Navbar.css';
 
 const Navigation = ({

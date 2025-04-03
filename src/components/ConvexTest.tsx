@@ -1,17 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useConvexAuth } from 'convex/react';
 import { useAuth } from '../context/AuthContext';
 
 export default function ConvexTest() {
-  const { isAuthenticated, isLoading } = useConvexAuth();
   const auth = useAuth();
   const [convexState, setConvexState] = useState<any>(null);
   
   useEffect(() => {
     console.log('ConvexTest component mounted');
-    console.log('ConvexAuth state:', { isAuthenticated, isLoading });
     console.log('AuthContext state:', auth);
     
     // Check for window.__CONVEX_STATE
@@ -29,7 +26,7 @@ export default function ConvexTest() {
         setConvexState({ error: String(e) });
       }
     }
-  }, [isAuthenticated, isLoading, auth]);
+  }, [auth]);
 
   return (
     <div className="p-4 border rounded bg-white shadow-sm">
@@ -37,36 +34,18 @@ export default function ConvexTest() {
       
       <div className="space-y-4">
         <div>
-          <h3 className="font-medium text-gray-700">ConvexAuth Hook</h3>
+          <h3 className="font-medium text-gray-700">AuthContext</h3>
           <ul className="mt-1 space-y-1 text-sm">
             <li className="flex">
-              <span className="font-medium w-32">Is Loading:</span>
-              <span className={isLoading ? 'text-yellow-600' : 'text-green-600'}>
-                {isLoading ? 'Yes' : 'No'}
+              <span className="font-medium w-32">Loading:</span>
+              <span className={auth.isLoading ? 'text-yellow-600' : 'text-green-600'}>
+                {auth.isLoading ? 'Yes' : 'No'}
               </span>
             </li>
             <li className="flex">
               <span className="font-medium w-32">Is Authenticated:</span>
-              <span className={isAuthenticated ? 'text-green-600' : 'text-red-600'}>
-                {isAuthenticated ? 'Yes' : 'No'}
-              </span>
-            </li>
-          </ul>
-        </div>
-        
-        <div>
-          <h3 className="font-medium text-gray-700">AuthContext</h3>
-          <ul className="mt-1 space-y-1 text-sm">
-            <li className="flex">
-              <span className="font-medium w-32">Convex Available:</span>
-              <span className={auth.convexAvailable ? 'text-green-600' : 'text-red-600'}>
-                {auth.convexAvailable ? 'Yes' : 'No'}
-              </span>
-            </li>
-            <li className="flex">
-              <span className="font-medium w-32">Loading:</span>
-              <span className={auth.loading ? 'text-yellow-600' : 'text-green-600'}>
-                {auth.loading ? 'Yes' : 'No'}
+              <span className={auth.isAuthenticated ? 'text-green-600' : 'text-red-600'}>
+                {auth.isAuthenticated ? 'Yes' : 'No'}
               </span>
             </li>
             <li className="flex">
@@ -75,12 +54,6 @@ export default function ConvexTest() {
                 {auth.user ? auth.user.email : 'Not logged in'}
               </span>
             </li>
-            {auth.error && (
-              <li className="flex">
-                <span className="font-medium w-32">Error:</span>
-                <span className="text-red-600">{auth.error}</span>
-              </li>
-            )}
           </ul>
         </div>
         

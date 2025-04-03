@@ -1,16 +1,32 @@
 "use client"
 
-import { ConvexProvider, ConvexReactClient } from "convex/react"
-import { AuthProvider } from '@/context/AuthProvider'
+import { ClientSideAuthProviderWrapper } from './ClientSideAuthProviderWrapper'; 
+import { ThemeProvider } from '@/components/ThemeProvider'
+import { ConvexProvider, ConvexReactClient } from 'convex/react'
+import { getConvexReactClient } from '@root/lib/convex/client'
+import { ErrorBoundary } from '../ErrorBoundary'
+import React, { useMemo } from 'react'
 
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!); 
 
-export function ClientProviders({ children }: { children: React.ReactNode }) {
+interface ClientProvidersProps {
+  children: React.ReactNode;
+}
+
+export function ClientProviders({ children }: ClientProvidersProps) {
+  console.log('ClientProviders rendering');
+
+  const convexClient = useMemo(() => convex, []);
+
   return (
-    <ConvexProvider client={convex}>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </ConvexProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ConvexProvider client={convexClient}>
+          <ClientSideAuthProviderWrapper>
+            {children}
+          </ClientSideAuthProviderWrapper>
+        </ConvexProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }

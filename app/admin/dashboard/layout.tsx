@@ -3,7 +3,7 @@
 import React from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import Loading from 'src/components/Loading';
+import Loading from '@/components/Loading';
 import AdminSidebar from 'src/components/admin/AdminSidebar';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 

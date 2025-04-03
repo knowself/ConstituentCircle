@@ -1,69 +1,60 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext'; // Import the context hook
+import type { User } from '@/hooks/useAuth'; // Import the User type separately
 
-export default function CheckAdminUser() {
-  const [email, setEmail] = useState('joe@derivativegenius.com');
-  const [result, setResult] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  
-  // Use the checkUser mutation
-  const checkUser = useMutation(api.checkUser.checkUser);
-  
-  const handleCheck = async () => {
-    setLoading(true);
-    try {
-      const checkResult = await checkUser({ email });
-      setResult(checkResult);
-    } catch (error: any) {
-      console.error('Error checking user:', error);
-      setResult({ error: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
+export const dynamic = 'force-dynamic'; 
+ 
+// This page checks the logged-in user's role and redirects
+export default function CheckAdminPage() {
+  // Hooks are now safe to call
+  const { 
+    user, 
+    isLoading: authLoading, 
+    logout 
+  } = useAuth(); 
+  const router = useRouter();
+   
   useEffect(() => {
-    // Check on load
-    handleCheck();
-  }, []);
-  
+    console.log(`CheckAdminPage Effect: authLoading=${authLoading}, userExists=${!!user}`);
+ 
+    // Wait for Auth context to initialize
+    if (authLoading) { 
+      console.log('CheckAdminPage: Waiting for AuthContext initialization...');
+      return; // Wait until initialization is complete
+    } else {
+        // If Auth is initialized but there's no user, redirect to login
+        if (!user) {
+          console.log('CheckAdminPage: Not authenticated, redirecting to login.');
+          router.push('/login');
+          return; // Important to return after push
+        }
+ 
+        // If user exists (i.e., authenticated), check the role
+        console.log('CheckAdminPage: User authenticated', user);
+        if (user && user.role === 'admin') { // Added extra user check for safety
+          console.log('CheckAdminPage: User is admin, redirecting to admin dashboard.');
+          router.push('/admin/dashboard');
+        } else {
+          console.log('CheckAdminPage: User is not admin, redirecting to constituent dashboard.');
+          router.push('/constituent/dashboard');
+        }
+        // Redirect happens above, no need for further action here
+    }
+ 
+  }, [authLoading, user, router]); // Dependencies are auth state and router
+ 
+  // Loading state while Auth context is loading/initializing
+  if (authLoading) {
+    return <div className="flex justify-center items-center min-h-screen">Checking authentication status...</div>;
+  }
+ 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Check Admin User</h1>
-        
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Email
-          </label>
-          <div className="flex">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 rounded-l-md border border-gray-300 dark:border-gray-700 px-3 py-2 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-indigo-500 dark:focus:ring-blue-500 focus:border-indigo-500 dark:focus:border-blue-500"
-            />
-            <button
-              onClick={handleCheck}
-              disabled={loading}
-              className="bg-indigo-600 dark:bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-500 disabled:opacity-50"
-            >
-              {loading ? 'Checking...' : 'Check'}
-            </button>
-          </div>
-        </div>
-        
-        {result && (
-          <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-4 overflow-auto">
-            <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">User Check Results:</h2>
-            <pre className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-              {JSON.stringify(result, null, 2)}
-            </pre>
-          </div>
-        )}
         
         <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-4">
           <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Debugging Tips:</h2>

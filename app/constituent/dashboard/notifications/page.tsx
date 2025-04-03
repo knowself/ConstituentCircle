@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import ConstituentDashboardLayout from 'src/components/constituent/ConstituentDashboardLayout';
 import Link from 'next/link';
 import { 
@@ -19,8 +19,10 @@ import {
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
+export const dynamic = 'force-dynamic';
+
 export default function NotificationsPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [showPreferences, setShowPreferences] = useState(false);
@@ -118,6 +120,17 @@ export default function NotificationsPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Show loading indicator while authentication state is resolving
+  if (isLoading) {
+    return (
+      <ConstituentDashboardLayout>
+        <div className="flex items-center justify-center py-10">
+          Loading Notifications...
+        </div>
+      </ConstituentDashboardLayout>
+    );
+  }
 
   const filteredNotifications = notifications.filter(notification => {
     if (activeFilter === 'unread' && notification.isRead) {

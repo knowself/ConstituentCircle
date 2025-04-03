@@ -388,6 +388,61 @@ const { internal } = await import("./_generated/api");
 const result = await ctx.runQuery(internal.users_queries.getUserByEmail, { email: args.email });
 ```
 
+#### 5. Production Build Issues with Convex Auth in Next.js SSR/Edge Environments
+
+**Error Pattern**: Production builds (`next build`) fail or runtime errors occur in server-side rendered pages or edge functions when using Convex authentication hooks (`useAuth`, `useQuery` with identity) directly without proper server-side handling.
+
+**Solution**: Implement authentication checks using idiomatic Next.js patterns like Middleware or API Route Handlers to protect routes and manage sessions on the server side first. Use Convex authentication hooks primarily within client components (`'use client'`) after server-side validation.
+
+```typescript
+// Example: Using Next.js Middleware for auth check
+// File: middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  const sessionToken = request.cookies.get('sessionToken')?.value;
+
+  // Pseudocode: Validate session token (e.g., via an API route or external service)
+  const isValidSession = await validateSession(sessionToken);
+
+  if (!isValidSession && !request.nextUrl.pathname.startsWith('/login')) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - login
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|login).*)',
+  ],
+}
+
+// Within Client Components, Convex hooks can then be used safely
+// File: components/UserProfile.tsx
+'use client';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+
+export default function UserProfile() {
+  // Assumes user is already authenticated via Middleware/server-side check
+  const currentUser = useQuery(api.users.getCurrentUser);
+
+  if (!currentUser) return <div>Loading...</div>;
+
+  return <div>Welcome, {currentUser.name}</div>;
+}
+```
+
 ### Debugging Tips
 
 1. **Temporary Type Checking Bypass**: Use `--typecheck=disable` to temporarily bypass TypeScript errors during development

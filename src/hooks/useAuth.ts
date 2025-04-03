@@ -1,11 +1,14 @@
 import { useQuery } from "convex/react";
-import { api } from "../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 
 export interface User {
   _id: string;
+  name?: string;
   email: string;
   role: string;
-  name?: string;
+  firstName?: string;
+  lastName?: string;
+  avatar_url?: string;
 }
 
 export function useAuth() {

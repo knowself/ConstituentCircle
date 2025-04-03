@@ -137,6 +137,17 @@ This document tracks the development progress of the Constituent Circle applicat
 
 **Status:** In progress, targeted for completion in v0.6.0
 
+### Challenge: Production Build Failures due to Authentication Handling
+**Description:** Initial attempts at production builds encountered failures, particularly related to authentication logic within Convex components when running in server-side rendering (SSR) or edge function environments. The client-centric nature of the initial Convex authentication approach wasn't fully compatible with Next.js's build and runtime model.
+
+**Solution:**
+- Refactored authentication logic to align with idiomatic Next.js patterns.
+- Leveraged Next.js middleware and/or API route handlers to manage authentication state and protect routes on the server-side before rendering.
+- Ensured Convex authentication (`useAuth`, `useQuery` with `viewerIdentity`) is primarily used within client components (`'use client'`) after the initial server-side checks are complete.
+- This approach resolved build conflicts and ensures authentication works correctly across different Next.js rendering strategies.
+
+**Status:** Resolved (April 2025)
+
 ## Performance Metrics
 
 ### User Growth
@@ -183,4 +194,4 @@ This document tracks the development progress of the Constituent Circle applicat
 
 ---
 
-*Last Updated: March 25, 2025*
+*Last Updated: April 2, 2025*

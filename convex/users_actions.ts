@@ -3,13 +3,18 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { ConvexError } from "convex/values";
 
+interface InviteUserResponse {
+  userId: string;
+  tempPassword: string;
+}
+
 export const inviteUser = action({
   args: {
     email: v.string(),
     role: v.union(v.literal("admin"), v.literal("user"), v.literal("representative")),
     name: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<InviteUserResponse> => {
     const normalizedEmail = args.email.toLowerCase().trim();
     
     // Check if user already exists
@@ -50,11 +55,16 @@ export const inviteUser = action({
   },
 });
 
+interface ResetPasswordResponse {
+  success: boolean;
+  tempPassword: string;
+}
+
 export const resetPassword = action({
   args: {
     email: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<ResetPasswordResponse> => {
     const normalizedEmail = args.email.toLowerCase().trim();
     
     // Find user

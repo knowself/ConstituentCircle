@@ -2,15 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-
-// Define types for our context
-interface User {
-  _id: Id<"users">;
-  name: string;
-  email: string;
-}
+import type { User } from "@/hooks/useAuth";
 
 interface AuthContextType {
   user: User | null;
@@ -22,27 +16,21 @@ interface AuthContextType {
   updateProfile: (userData: Partial<User>) => Promise<void>;
 }
 
-// Create the context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create a provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // TODO: Fix proper API typing - temporary workaround
   const typedApi = api as any;
   
-  // Fetch the current user using Convex query
   const currentUser = useQuery(typedApi.auth.getCurrentUser);
   
-  // Convex mutations
   const login = useMutation(typedApi.auth.login);
   const signup = useMutation(typedApi.auth.signup);
   const logoutMutation = useMutation(typedApi.auth.logout);
   const updateProfileMutation = useMutation(typedApi.auth.updateProfile);
 
-  // Update user state when currentUser changes
   useEffect(() => {
     if (currentUser === undefined) {
       setIsLoading(true);
@@ -52,7 +40,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentUser]);
 
-  // Auth methods
   const handleLogin = async (email: string, password: string) => {
     try {
       await login({ email, password });
@@ -83,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleUpdateProfile = async (userData: Partial<User>) => {
     try {
-      await updateProfileMutation(userData);
+      await updateProfileMutation({ updates: userData });
     } catch (error) {
       console.error("Profile update failed:", error);
       throw error;
@@ -103,7 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Create a hook to use the auth context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -111,7 +97,6 @@ export function useAuth() {
   }
   return context;
 }
-
 
 export default function AuthContextProvider({
   children,

@@ -5,7 +5,7 @@ import {
   useContext,
   useState,
   ReactNode } from 'react';
-import { LoadingOverlay } from '../components/Loading';
+import LoadingOverlay from '@/components/Loading';
 
 interface LoadingContextType {
   isLoading: boolean;

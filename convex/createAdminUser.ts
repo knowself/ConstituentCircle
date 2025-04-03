@@ -58,15 +58,28 @@ export const createAdminUser = internalAction({
     message: v.string(),
     userId: v.optional(v.id("users")),
   }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{
+    success: boolean;
+    message: string;
+    userId?: Id<"users">;
+  }> => {
     // Hash the password using bcrypt
     const hashedPassword = await bcrypt.hash(args.password, 10);
     
     // Create the user with admin role using the internal mutation
-    const userId = await ctx.runMutation(internal.createUserAndProfile, {
-      email: args.email,
-      passwordHash: hashedPassword,
-    });
+    let userId: Id<"users">;
+    try {
+      userId = await ctx.runMutation(internal.createUserAndProfile, {
+        email: args.email,
+        passwordHash: hashedPassword,
+      });
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Failed to create admin user",
+        userId: undefined
+      };
+    }
     
     return {
       success: true,

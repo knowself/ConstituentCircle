@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext'; // Use context hook
+import type { User } from '@/hooks/useAuth'; // Import User type
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline';
@@ -16,7 +17,7 @@ export default function AdminLogin() {
   const [mounted, setMounted] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
-  const { signIn, user } = useAuth();
+  const { user, login, isLoading: authIsLoading } = useAuth(); // Changed signIn to login
 
   useEffect(() => {
     setMounted(true);
@@ -50,7 +51,7 @@ export default function AdminLogin() {
         }
         
         // If still loading auth state, wait
-        if (loading) return;
+        if (authIsLoading) return; // Use the isLoading state from useAuth
         
         // If user is already authenticated and is an admin, redirect to dashboard
         // Only redirect if we have a valid session token in localStorage
@@ -66,7 +67,7 @@ export default function AdminLogin() {
     };
     
     checkAuthStatus();
-  }, [user, mounted, router, isRedirecting, loading]);
+  }, [user, authIsLoading, mounted, router, isRedirecting]); // Add authIsLoading to dependency array
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -75,8 +76,8 @@ export default function AdminLogin() {
     setSuccessMessage(null);
     
     try {
-      // Call the signIn function with email and password
-      const result = await signIn(email, password);
+      // Call the login function with email and password
+      await login(email, password);
       
       // If we get here, login was successful
       console.log('Login successful, redirecting to dashboard');
@@ -93,7 +94,8 @@ export default function AdminLogin() {
     }
   };
 
-  if (!mounted) {
+  // Wait for both component mount and auth state initialization
+  if (!mounted || authIsLoading) {
     return null;
   }
 

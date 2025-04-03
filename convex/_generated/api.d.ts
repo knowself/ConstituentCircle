@@ -17,7 +17,6 @@ import type * as admin_queries from "../admin_queries.js";
 import type * as api_ from "../api.js";
 import type * as auth from "../auth.js";
 import type * as authInternal from "../authInternal.js";
-import type * as checkUser from "../checkUser.js";
 import type * as cleanupProfiles from "../cleanupProfiles.js";
 import type * as communications from "../communications.js";
 import type * as constituents from "../constituents.js";
@@ -57,7 +56,6 @@ declare const fullApi: ApiFromModules<{
   api: typeof api_;
   auth: typeof auth;
   authInternal: typeof authInternal;
-  checkUser: typeof checkUser;
   cleanupProfiles: typeof cleanupProfiles;
   communications: typeof communications;
   constituents: typeof constituents;

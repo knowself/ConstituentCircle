@@ -1,6 +1,8 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../../context/AuthContext';
 import ConstituentDashboardLayout from 'src/components/constituent/ConstituentDashboardLayout';
 import Link from 'next/link';
@@ -15,12 +17,22 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
-export default function IssuesPage() {
-  const { user } = useAuth();
-  const [mounted, setMounted] = useState(false);
+// Inner component that uses the auth context
+const IssuesPageContent = () => {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
+  // Return loading state if auth is still loading (after mount)
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
+        <p>Loading user data...</p> 
+      </div>
+    );
+  }
+
   // Mock data - in a real app, this would come from Convex
   const issues: Issue[] = [
     {
@@ -96,160 +108,79 @@ export default function IssuesPage() {
     {
       id: '3',
       title: 'Need more funding for local library',
-      description: 'Our local library is facing budget cuts that will reduce hours and services. This is a vital community resource that needs more funding, not less.',
-      category: 'Education',
+      description: 'The Springfield Public Library is facing budget cuts and needs additional funding to maintain its current programs and services.',
+      category: 'Community Development',
       status: 'resolved',
-      priority: 'medium',
-      createdAt: new Date('2025-02-15').getTime(),
-      updatedAt: new Date('2025-03-08').getTime(),
-      location: 'Springfield Public Library, Springfield, IL',
-      assignedTo: 'Education Committee',
+      priority: 'low',
+      createdAt: new Date('2025-03-10').getTime(),
+      updatedAt: new Date('2025-03-20').getTime(),
+      location: '456 Library Ave, Springfield, IL',
+      assignedTo: 'City Council',
       updates: [
         {
           id: '3a',
           content: 'Issue submitted',
-          timestamp: new Date('2025-02-15').getTime(),
+          timestamp: new Date('2025-03-10').getTime(),
           author: 'You',
           authorRole: 'constituent'
         },
         {
           id: '3b',
-          content: 'Issue has been reviewed and added to the agenda for the next Education Committee meeting',
-          timestamp: new Date('2025-02-20').getTime(),
-          author: 'Rep. Jane Smith',
+          content: 'Issue brought up at the last City Council meeting',
+          timestamp: new Date('2025-03-15').getTime(),
+          author: 'Rep. John Doe',
           authorRole: 'representative'
         },
         {
           id: '3c',
-          content: 'Education Committee has approved additional funding for the library in the next budget cycle',
-          timestamp: new Date('2025-03-05').getTime(),
-          author: 'Rep. Jane Smith',
-          authorRole: 'representative'
-        },
-        {
-          id: '3d',
-          content: 'Budget amendment has been passed, securing funding for the library for the next fiscal year',
-          timestamp: new Date('2025-03-08').getTime(),
-          author: 'Rep. Jane Smith',
-          authorRole: 'representative'
-        }
-      ]
-    },
-    {
-      id: '4',
-      title: 'Noise complaint about construction',
-      description: 'Construction on the new apartment building on Elm Street is starting at 6:00 AM, which is earlier than the city ordinance allows. This has been disrupting sleep for many residents.',
-      category: 'Noise',
-      status: 'open',
-      priority: 'low',
-      createdAt: new Date('2025-03-14').getTime(),
-      updatedAt: new Date('2025-03-14').getTime(),
-      location: 'Elm Street Construction Site, Springfield, IL',
-      assignedTo: 'Unassigned',
-      updates: [
-        {
-          id: '4a',
-          content: 'Issue submitted',
-          timestamp: new Date('2025-03-14').getTime(),
-          author: 'You',
-          authorRole: 'constituent'
-        }
-      ]
-    },
-    {
-      id: '5',
-      title: 'Need crosswalk at busy intersection',
-      description: 'The intersection of Maple Avenue and Oak Street is very busy and dangerous for pedestrians. We need a crosswalk with signals to ensure safety, especially for children walking to school.',
-      category: 'Infrastructure',
-      status: 'in_progress',
-      priority: 'high',
-      createdAt: new Date('2025-02-28').getTime(),
-      updatedAt: new Date('2025-03-15').getTime(),
-      location: 'Intersection of Maple Avenue and Oak Street, Springfield, IL',
-      assignedTo: 'Transportation Department',
-      updates: [
-        {
-          id: '5a',
-          content: 'Issue submitted',
-          timestamp: new Date('2025-02-28').getTime(),
-          author: 'You',
-          authorRole: 'constituent'
-        },
-        {
-          id: '5b',
-          content: 'Issue has been reviewed and forwarded to the Transportation Department',
-          timestamp: new Date('2025-03-02').getTime(),
-          author: 'Rep. Jane Smith',
-          authorRole: 'representative'
-        },
-        {
-          id: '5c',
-          content: 'Transportation Department has conducted a traffic study and confirmed the need for a crosswalk',
-          timestamp: new Date('2025-03-10').getTime(),
-          author: 'Rep. Jane Smith',
-          authorRole: 'representative'
-        },
-        {
-          id: '5d',
-          content: 'Funding has been approved for the crosswalk installation. Construction will begin next month.',
-          timestamp: new Date('2025-03-15').getTime(),
-          author: 'Rep. Jane Smith',
+          content: 'City Council voted to allocate additional funds to the library',
+          timestamp: new Date('2025-03-20').getTime(),
+          author: 'Rep. John Doe',
           authorRole: 'representative'
         }
       ]
     }
   ];
-  
-  // Handle hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const filteredIssues = issues.filter(issue => {
-    // Filter by status
-    if (activeFilter !== 'all' && issue.status !== activeFilter) {
-      return false;
-    }
-    
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        issue.title.toLowerCase().includes(query) ||
-        issue.description.toLowerCase().includes(query) ||
-        issue.category.toLowerCase().includes(query) ||
-        issue.location.toLowerCase().includes(query)
-      );
-    }
-    
-    return true;
+    const matchesFilter = activeFilter === 'all' || issue.status === activeFilter;
+    const matchesSearch = 
+      issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      issue.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      issue.id.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'open':
         return (
-          <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-            <ExclamationTriangleIcon className="mr-1 h-3 w-3" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+            <ExclamationTriangleIcon className="-ml-0.5 mr-1.5 h-3 w-3 text-red-400" aria-hidden="true" />
             Open
           </span>
         );
       case 'in_progress':
         return (
-          <span className="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-            <ArrowPathIcon className="mr-1 h-3 w-3" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+            <ArrowPathIcon className="-ml-0.5 mr-1.5 h-3 w-3 text-yellow-400" aria-hidden="true" />
             In Progress
           </span>
         );
       case 'resolved':
         return (
-          <span className="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
-            <CheckCircleIcon className="mr-1 h-3 w-3" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            <CheckCircleIcon className="-ml-0.5 mr-1.5 h-3 w-3 text-green-400" aria-hidden="true" />
             Resolved
           </span>
         );
       default:
-        return null;
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+            <ClockIcon className="-ml-0.5 mr-1.5 h-3 w-3 text-gray-400" aria-hidden="true" />
+            Unknown
+          </span>
+        );
     }
   };
 
@@ -257,185 +188,143 @@ export default function IssuesPage() {
     switch (priority) {
       case 'high':
         return (
-          <span className="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-200">
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
             High
           </span>
         );
       case 'medium':
         return (
-          <span className="inline-flex items-center rounded-md bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
             Medium
           </span>
         );
       case 'low':
         return (
-          <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
             Low
           </span>
         );
       default:
-        return null;
+        return (
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+            Unknown
+          </span>
+        );
     }
   };
 
-  if (!mounted) {
-    return null;
-  }
-
   return (
     <ConstituentDashboardLayout>
-      <div className="h-full flex flex-col">
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                My Issues
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Track and manage issues you've submitted to your representative.
-              </p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Your Reported Issues</h1>
+          <Link 
+            href="/constituent/dashboard/issues/new"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            Report New Issue
+          </Link>
+        </div>
+
+        {/* Filter and Search Controls */}
+        <div className="mb-6 bg-white dark:bg-gray-800 shadow rounded-lg p-4 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="flex items-center space-x-2">
+            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by status:</span>
+            <div className="flex space-x-2">
+              {[ 'all', 'open', 'in_progress', 'resolved' ].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${activeFilter === filter ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'}`}
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
+              ))}
             </div>
-            <Link
-              href="/constituent/dashboard/issues/new"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-800"
-            >
-              <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-              New Issue
-            </Link>
+          </div>
+          <div className="relative flex-grow max-w-xs w-full sm:w-auto">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            </div>
+            <input
+              type="text"
+              name="search"
+              id="search"
+              className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+              placeholder="Search issues..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
-        
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-          {/* Filters and search */}
-          <div className="border-b border-gray-200 dark:border-gray-700 p-4 sm:flex sm:items-center sm:justify-between">
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setActiveFilter('all')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md ${activeFilter === 'all' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'}`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setActiveFilter('open')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md ${activeFilter === 'open' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'}`}
-              >
-                Open
-              </button>
-              <button
-                onClick={() => setActiveFilter('in_progress')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md ${activeFilter === 'in_progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'}`}
-              >
-                In Progress
-              </button>
-              <button
-                onClick={() => setActiveFilter('resolved')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md ${activeFilter === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'}`}
-              >
-                Resolved
-              </button>
-            </div>
-            <div className="mt-3 sm:mt-0">
-              <div className="relative rounded-md shadow-sm">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                </div>
-                <input
-                  type="text"
-                  className="block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 dark:bg-gray-700 dark:text-white dark:ring-gray-600 dark:placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                  placeholder="Search issues"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Issues list */}
-          <div className="overflow-x-auto">
+
+        {/* Issues List */}
+        <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+          <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredIssues.length > 0 ? (
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-900">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                      Issue
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                      Category
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                      Priority
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                      Last Updated
-                    </th>
-                    <th scope="col" className="relative px-6 py-3">
-                      <span className="sr-only">View</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                  {filteredIssues.map((issue) => (
-                    <tr key={issue.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {issue.title}
-                            </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
-                              {issue.location}
-                            </div>
-                          </div>
+              filteredIssues.map((issue) => (
+                <li key={issue.id}>
+                  <Link href={`/constituent/dashboard/issues/${issue.id}`} className="block hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <div className="px-4 py-4 sm:px-6">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
+                          {issue.title}
+                        </p>
+                        <div className="ml-2 flex-shrink-0 flex space-x-2">
+                          {getStatusBadge(issue.status)}
+                          {getPriorityBadge(issue.priority)}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-white">{issue.category}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(issue.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getPriorityBadge(issue.priority)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(issue.updatedAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link href={`/constituent/dashboard/issues/${issue.id}`} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                          View
-                          <ChevronRightIcon className="ml-1 h-4 w-4 inline" aria-hidden="true" />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                      <div className="mt-2 sm:flex sm:justify-between">
+                        <div className="sm:flex">
+                          <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                            </svg>
+                            Opened on {new Date(issue.createdAt).toLocaleDateString()}
+                          </p>
+                          <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
+                            <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                            </svg>
+                            {issue.location || 'Location not specified'}
+                          </p>
+                          <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
+                            <ClockIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                            Last updated: {new Date(issue.updatedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
+                          <ChevronRightIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              ))
             ) : (
-              <div className="p-8 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-                  <ExclamationTriangleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400" aria-hidden="true" />
-                </div>
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No issues found</h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {searchQuery ? 'Try adjusting your search or filter criteria.' : 'Get started by creating a new issue.'}
-                </p>
-                {!searchQuery && (
+              <li className="px-4 py-4 sm:px-6">
+                <div className="text-center py-12">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No issues found</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by reporting a new issue.</p>
                   <div className="mt-6">
-                    <Link
+                    <Link 
                       href="/constituent/dashboard/issues/new"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-800"
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                       New Issue
                     </Link>
                   </div>
-                )}
-              </div>
+                </div>
+              </li>
             )}
-          </div>
+          </ul>
           
           {/* Pagination */}
           {filteredIssues.length > 0 && (
@@ -480,6 +369,27 @@ export default function IssuesPage() {
       </div>
     </ConstituentDashboardLayout>
   );
+};
+
+// Main page component
+export default function IssuesPage() {
+  // State for client-side mounting check (prevents hydration errors with useEffect)
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  // Return loading state until component is mounted
+  if (!isMounted) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
+        <p>Loading issues...</p> 
+      </div>
+    );
+  }
+
+  // Render the actual content only after mounting
+  return <IssuesPageContent />;
 }
 
 // Types
