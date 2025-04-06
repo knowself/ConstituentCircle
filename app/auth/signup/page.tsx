@@ -3,15 +3,41 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { Role } from '../../../lib/types/roles';
+import { Role } from '@/lib/types/roles';
 
 type UserType = 'constituent' | 'representative';
 type RepresentativeLevel = 'federal' | 'state' | 'county' | 'city' | 'judge' | 'other';
 
 // Inner component containing the signup form logic and useAuth hook
 const SignUpForm = () => {
+  console.log("SignUpForm rendering...");
+  let authContextValue;
+  let authHookError = null;
+
+  try {
+    authContextValue = useAuth();
+    console.log("Successfully called useAuth. isLoading:", authContextValue?.isLoading);
+  } catch (error) {
+    console.error("Error calling useAuth inside SignUpForm:", error);
+    authHookError = error;
+    // We might want to render an error state here if the hook fails
+  }
+
+  // If the hook failed, we can't proceed. Render an error message.
+  if (authHookError) {
+    return (
+      <div className="text-red-600">
+        <p>Error initializing authentication context:</p>
+        <pre>{authHookError instanceof Error ? authHookError.message : String(authHookError)}</pre>
+      </div>
+    );
+  }
+
+  // Destructure AFTER the try-catch and error check
+  const { signUp, error: authError, isLoading } = authContextValue!;
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,7 +57,6 @@ const SignUpForm = () => {
   const [party, setParty] = useState('');
   
   const [success, setSuccess] = useState(false);
-  const { signUp, error: authError, isLoading } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -410,8 +435,34 @@ export default function SignUp() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <div className="flex flex-grow flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <SignUpForm />
+        <SignUpForm /> {/* Restore original form */}
       </div>
     </div>
   );
 }
+
+// --- Minimal Test Component ---
+const AuthStatusDisplay = () => {
+  console.log("AuthStatusDisplay rendering, attempting useAuth...");
+  try {
+    const { isLoading, isAuthenticated, user } = useAuth();
+    console.log("AuthStatusDisplay: useAuth SUCCESS", { isLoading, isAuthenticated, userId: user?._id });
+    return (
+      <div className="p-4 border rounded bg-green-100 text-green-800">
+        <p>Auth Context Loaded Successfully!</p>
+        <p>Is Loading: {String(isLoading)}</p>
+        <p>Is Authenticated: {String(isAuthenticated)}</p>
+        <p>User ID: {user?._id || 'N/A'}</p>
+      </div>
+    );
+  } catch (error) {
+    console.error("AuthStatusDisplay: useAuth FAILED", error);
+    return (
+      <div className="p-4 border rounded bg-red-100 text-red-800">
+        <p>Auth Context FAILED to load:</p>
+        <pre>{error instanceof Error ? error.message : String(error)}</pre>
+      </div>
+    );
+  }
+};
+// --- End Minimal Test Component ---

@@ -14,7 +14,7 @@ We combine artificial intelligence (AI) and natural language processing (NLP) to
 
 - **Frontend**: Next.js with TypeScript and Tailwind CSS
 - **Backend**: Convex for database and real-time data synchronization
-- **Authentication**: Convex Auth
+- **Authentication**: Clerk (integrated with Convex)
 - **Deployment**: Vercel
 
 ## Tech Stack Versions

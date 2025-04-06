@@ -4,20 +4,27 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ThemeProvider';
-import { UserIcon, PlusCircleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
-import '../header.css';
+import { 
+  ShieldCheckIcon,
+  UserIcon
+} from '@heroicons/react/24/outline'; 
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'; 
 
-export default function Navigation() { // Renamed component
+export default function Navigation() { 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
-  // Initialize component
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Toggle mobile menu visibility
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -29,28 +36,23 @@ export default function Navigation() { // Renamed component
     { href: '/contact', label: 'Contact' }
   ];
 
-  const authLinks = [
-    { href: '/login', label: 'Sign In', icon: <UserIcon className="h-5 w-5 mr-1" /> },
-    { href: '/signup', label: 'Create Account', icon: <PlusCircleIcon className="h-5 w-5 mr-1" /> },
-    { href: '/admin', label: 'Admin', icon: <ShieldCheckIcon className="h-5 w-5 mr-1" /> }
-  ];
+  const adminLink = { href: '/admin', label: 'Admin', icon: <ShieldCheckIcon className="h-5 w-5 mr-1" /> };
 
-  // Prevent hydration mismatch by only rendering content after mount
   if (!mounted) {
-    return <header className="header h-[130px]"></header>; // Basic loader - Increased height
+    return <header className="header h-[130px]"></header>; 
   }
 
   return (
-    <header className="header h-[130px] bg-background dark:bg-background-dark shadow-sm py-2 w-full z-50"> {/* Increased height for larger logo */}
+    <header className="header h-[130px] bg-background dark:bg-background-dark shadow-sm py-2 w-full z-50"> 
       <div className="header-container h-full">
-        {/* Desktop Navigation - hidden on mobile */}
+        {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center justify-between w-full h-full">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img
               src="/constituent-circle-logo.png"
               alt="Constituent Circle"
-              className="h-[120px] w-auto py-[5px]" // Set to specific size of 120px as requested
+              className="h-[120px] w-auto py-[5px]" 
             />
           </Link>
           
@@ -73,40 +75,60 @@ export default function Navigation() { // Renamed component
           
           {/* Auth Links and Theme Toggle for Desktop */}
           <div className="flex items-center space-x-4">
-            {authLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
+            <Link
+              href="/sign-in"
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <UserIcon className="h-5 w-5 mr-1" />
+              Login
+            </Link>
+
+            <Link
+                key={adminLink.href}
+                href={adminLink.href}
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                {link.icon}
-                {link.label}
+                {adminLink.icon}
+                {adminLink.label}
               </Link>
-            ))}
+
+            <SignedOut>
+              <div className="flex items-center space-x-2">
+                <SignInButton mode="modal">
+                    <button className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700">Sign In</button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                    <button className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-white bg-primary hover:bg-primary/90">Sign Up</button>
+                </SignUpButton>
+              </div>
+            </SignedOut>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
             <ThemeToggle />
           </div>
         </div>
         
-        {/* Mobile header with logo and menu button */}
+        {/* Mobile header */}
         <div className="lg:hidden flex justify-between items-center w-full">
+          {/* Mobile Logo */}
           <Link href="/" className="flex items-center">
             <img
               src="/constituent-circle-logo.png"
               alt="Constituent Circle"
-              className="h-[102px] w-auto py-[5px]" // Set to proportional size of 102px
+              className="h-[102px] w-auto py-[5px]" 
             />
           </Link>
           
           <div className="flex items-center space-x-2">
-            {/* Theme Toggle for Mobile */}
             <ThemeToggle />
-            
-            {/* Mobile menu button */}
+            {/* Mobile Menu Button */}
             <button
               onClick={toggleMobileMenu}
               className="mobile-menu-button text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               aria-label="Toggle mobile menu"
             >
+              {/* SVG Icon */}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
               </svg>
@@ -117,8 +139,9 @@ export default function Navigation() { // Renamed component
       
       {/* Mobile menu panel */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed top-[130px] left-0 right-0 bg-background dark:bg-background-dark shadow-lg z-50 px-4 py-2 border-t border-gray-200 dark:border-gray-700"> {/* Updated top position */}
+        <div className="lg:hidden fixed top-[130px] left-0 right-0 bg-background dark:bg-background-dark shadow-lg z-50 px-4 py-2 border-t border-gray-200 dark:border-gray-700"> 
           <div className="space-y-1">
+            {/* Mobile Navigation Links */}
             {links.map((link) => (
               <Link
                 key={link.href}
@@ -134,18 +157,39 @@ export default function Navigation() { // Renamed component
               </Link>
             ))}
             
-            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-              {authLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
+            {/* Mobile Auth Links */}
+            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+              <Link
+                  href="/sign-in"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  {link.icon}
-                  {link.label}
-                </Link>
-              ))}
+              >
+                  <UserIcon className="h-5 w-5 mr-1" />
+                  Login
+              </Link>
+
+              <Link
+                  key={adminLink.href}
+                  href={adminLink.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                  {adminLink.icon}
+                  {adminLink.label}
+              </Link>
+              <SignedOut>
+                  <SignInButton mode="modal">
+                      <button onClick={() => setIsMobileMenuOpen(false)} className="w-full text-left flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700">Sign In</button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                      <button onClick={() => setIsMobileMenuOpen(false)} className="w-full text-left flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700">Sign Up</button>
+                  </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                 <Link href="/user-profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
+                     Profile
+                 </Link>
+              </SignedIn>
             </div>
           </div>
         </div>
