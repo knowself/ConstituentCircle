@@ -29,24 +29,24 @@ To create AI-enabled tools that facilitate meaningful, goal-oriented communicati
   - Component-based architecture for reusability
 
 #### Backend Infrastructure
-- **Serverless Architecture**
-  - AWS Lambda for event-driven processing
-  - Google Cloud Functions for specialized AI operations
-  - Automatic scaling based on demand
+- **Replit Infrastructure**
+  - Replit Database for persistent data storage
+  - Key-value based data management
+  - Automatic scaling and reliability
   - Cost-efficient resource utilization
 
 #### Database Layer
 - **Primary Storage**
-  - Convex for real-time data synchronization and management
+  - Replit Database for data persistence
   - Redis for caching and session management
-  - Structured data organization for constituent profiles
+  - Structured key patterns for data organization
 
 ### Database Schema
 
 Our PostgreSQL database schema is designed to support the core functionality of the platform with the following key tables:
 
 #### Core Tables
-- **profiles**: Links to Convex Auth users and stores role information
+- **profiles**: Links to Replit Auth users and stores role information
 - **representatives**: Stores information about elected officials and their offices
 - **constituents**: Manages constituent data and preferences
 - **communications**: Tracks all interactions between representatives and constituents
@@ -57,14 +57,13 @@ Our PostgreSQL database schema is designed to support the core functionality of 
 #### Security Features
 - Row-level security (RLS) policies to ensure data access control
 - Role-based permissions for representatives and constituents
-- Secure authentication integration with Convex Auth
+- Secure authentication integration with Replit Auth
 
 #### Technical Implementation
 - UUID primary keys for enhanced security and distribution
 - JSONB fields for flexible data storage (preferences, metadata, analytics)
 - Proper indexing for performance optimization
 - Timestamp tracking for auditing and analytics
-
 - Efficient query optimization with PostgreSQL
 
 #### Security Framework

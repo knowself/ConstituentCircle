@@ -1,4 +1,3 @@
-
 # ConstituentCircle - Single Source of Truth (SST)
 
 *Last Updated: March 30, 2025*
@@ -31,8 +30,8 @@ To transform democratic engagement by enabling representatives to conduct effect
 | Requirement | Details | Status | Notes |
 |-------------|---------|--------|-------|
 | Next.js | Frontend framework | ✅ Implemented | Using TypeScript |
-| Convex | Database & Backend | ✅ Implemented | Real-time functionality |
-| Clerk | Authentication system | ✅ Implemented | Multi-factor support |
+| Replit Database | Database & Backend | ✅ Implemented | Key-value storage |
+| Replit Auth | Authentication system | ✅ Implemented | Secure auth |
 | Tailwind CSS | Styling framework | ✅ Implemented | Responsive design |
 
 ### 2. Core Features
@@ -67,7 +66,7 @@ To transform democratic engagement by enabling representatives to conduct effect
 
 | Requirement | Details | Status | Notes |
 |-------------|---------|--------|-------|
-| Authentication | Multi-factor auth | ✅ Implemented | Using Clerk |
+| Authentication | Multi-factor auth | ✅ Implemented | Using Replit Auth |
 | Data Encryption | End-to-end encryption | ✅ Implemented | For sensitive data |
 | Role-based Access | Permission system | ✅ Implemented | Core roles defined |
 | Audit Logging | Activity tracking | ⚠️ Partial | Basic logging implemented |
