@@ -1,9 +1,10 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
     const cspHeader = `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://brief-earwig-35.clerk.accounts.dev;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://auth.util.repl.co;
       style-src 'self' 'unsafe-inline';
       img-src 'self' blob: data:;
       font-src 'self';
