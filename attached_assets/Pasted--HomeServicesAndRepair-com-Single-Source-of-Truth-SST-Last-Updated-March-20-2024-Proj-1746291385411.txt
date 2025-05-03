@@ -1,0 +1,120 @@
+
+# HomeServicesAndRepair.com - Single Source of Truth (SST)
+
+*Last Updated: March 20, 2024*
+
+## Project Overview
+
+HomeServicesAndRepair.com is a comprehensive digital platform connecting homeowners with trusted service providers. The platform offers hyper-local service matching, real-time availability, and AI-powered service recommendations.
+
+## Vision Statement
+
+To become the definitive platform for home services, leveraging technology to create seamless connections between homeowners and service providers while maintaining a strong focus on local markets and community trust.
+
+## Target Audience
+
+- **Homeowners**: Seeking reliable home service professionals
+- **Service Providers**: Local businesses looking to expand their customer base
+
+## Revenue Model
+
+- Premium provider listings (tiered subscriptions)
+- Transaction fees from service bookings
+- Value-added services for providers
+- Emergency service premiums
+
+## Key Requirements and Status
+
+### 1. Technology Stack
+
+| Requirement | Details | Status | Notes |
+|-------------|---------|--------|-------|
+| Next.js 14 | Frontend framework | ✅ Implemented | Using TypeScript |
+| Replit Database | Primary data storage | ✅ Implemented | Migration from Supabase complete |
+| Next-Auth | Authentication system | ✅ Implemented | User authentication working |
+| Tailwind CSS | Styling framework | ✅ Implemented | Responsive design implemented |
+
+### 2. Core Features
+
+| Requirement | Details | Status | Notes |
+|-------------|---------|--------|-------|
+| Service Directory | Categorized listings | ✅ Implemented | Basic structure complete |
+| Provider Profiles | Business information | ⚠️ Partial | Basic profiles created |
+| Booking System | Real-time scheduling | ❌ Not Started | Priority for next phase |
+| Reviews System | User feedback | ⚠️ Partial | Basic structure implemented |
+| Search Function | Location-based search | ⚠️ Partial | Basic search working |
+
+### 3. User Experience
+
+| Requirement | Details | Status | Notes |
+|-------------|---------|--------|-------|
+| Responsive Design | Mobile-first approach | ✅ Implemented | Using Tailwind CSS |
+| Dark Mode | Theme switching | ✅ Implemented | Context-based implementation |
+| Accessibility | WCAG compliance | ⚠️ Partial | Basic features implemented |
+| Loading States | User feedback | ⚠️ Partial | Basic implementation |
+
+### 4. Data Management
+
+| Requirement | Details | Status | Notes |
+|-------------|---------|--------|-------|
+| Service Categories | Hierarchical structure | ✅ Implemented | Core categories defined |
+| Provider Data | Business profiles | ⚠️ Partial | Basic structure created |
+| User Profiles | Customer accounts | ⚠️ Partial | Basic profiles working |
+| Reviews & Ratings | Feedback system | ⚠️ Partial | Basic structure in place |
+
+### 5. Security
+
+| Requirement | Details | Status | Notes |
+|-------------|---------|--------|-------|
+| Authentication | User login system | ✅ Implemented | Using Next-Auth |
+| Data Encryption | Secure storage | ✅ Implemented | Database encryption |
+| API Security | Protected endpoints | ⚠️ Partial | Basic protection in place |
+| Rate Limiting | Request throttling | ❌ Not Started | To be implemented |
+
+## Development Priorities
+
+1. **Immediate Next Steps** (High Priority)
+   - Complete booking system implementation
+   - Enhance provider profiles
+   - Implement advanced search features
+   - Add payment processing
+
+2. **Secondary Priorities** (Medium Priority)
+   - Emergency service booking
+   - Provider analytics dashboard
+   - Enhanced review system
+   - Service area mapping
+
+3. **Future Enhancements** (Low Priority)
+   - AI-powered recommendations
+   - Mobile app development
+   - Provider mobile app
+   - Advanced analytics
+
+## Testing Strategy
+
+| Requirement | Details | Status | Notes |
+|-------------|---------|--------|-------|
+| Unit Tests | Core functionality | ❌ Not Started | To be implemented |
+| Integration Tests | API endpoints | ❌ Not Started | Priority for stability |
+| E2E Testing | User flows | ❌ Not Started | To be implemented |
+| Performance Tests | Load testing | ❌ Not Started | Post-MVP priority |
+
+## Monitoring & Analytics
+
+| Requirement | Details | Status | Notes |
+|-------------|---------|--------|-------|
+| Error Tracking | System monitoring | ❌ Not Started | To be implemented |
+| User Analytics | Behavior tracking | ❌ Not Started | Post-MVP feature |
+| Performance | Resource monitoring | ❌ Not Started | To be implemented |
+| SEO Metrics | Search performance | ❌ Not Started | Marketing priority |
+
+## Status Legend
+
+- ✅ Implemented: Feature is complete and working
+- ⚠️ Partial/In Progress: Work has started but is not complete
+- ❌ Not Started: Feature has not yet been implemented
+
+This document will be updated regularly to reflect the current project status and priorities.
+
+
