@@ -1,33 +1,29 @@
 
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // Get user info from Replit Auth
-  const protocol = request.headers.get('x-forwarded-proto') || 'http'
-  const host = request.headers.get('host') || ''
-  const authUrl = `${protocol}://${host}/__replauthuser`
-  
-  try {
-    const userResponse = await fetch(authUrl, {
-      headers: { 
-        Cookie: request.headers.get('cookie') || '',
-        Host: host
-      }
-    });
-    
-    const user = userResponse.ok ? await userResponse.json() : null;
-    
-    // Protected routes that require authentication
-    const protectedPaths = ['/dashboard', '/admin', '/constituent'];
-    const isProtectedRoute = protectedPaths.some(path => 
-      request.nextUrl.pathname.startsWith(path)
-    );
+  const publicPaths = ['/', '/blog', '/contact', '/services', '/faq'];
+  const isPublicPath = publicPaths.some(path => 
+    request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith('/api/')
+  );
 
-    if (isProtectedRoute && !user) {
-      const loginUrl = new URL('/auth/login', request.url);
-      loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
+  if (isPublicPath) {
+    return NextResponse.next();
+  }
+
+  try {
+    const response = await fetch(new URL('/__replauthuser', request.url), {
+      headers: {
+        Cookie: request.headers.get('cookie') || '',
+        Host: request.headers.get('host') || '',
+      },
+    });
+
+    const user = response.ok ? await response.json() : null;
+
+    if (!user && !request.nextUrl.pathname.startsWith('/auth/')) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
     return NextResponse.next();
