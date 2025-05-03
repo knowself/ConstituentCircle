@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Get user info from Replit Auth
-  const userResponse = await fetch('/__replauthuser', {
+  // Get user info from Replit Auth with absolute URL
+  const authUrl = new URL('/__replauthuser', request.url).toString();
+  const userResponse = await fetch(authUrl, {
     headers: { Cookie: request.headers.get('cookie') || '' }
   });
   
