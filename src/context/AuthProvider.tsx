@@ -1,68 +1,92 @@
+
 "use client"
 
-import { createContext, useContext, useState } from "react"
-import { useQuery, useMutation } from "convex/react"
-import { api } from "../../convex/_generated/api"
-import type { User, AuthContextType } from "./types"
+import { createContext, useContext, useState, useEffect } from "react"
+import { useRouter } from 'next/navigation'
+
+type User = {
+  id: string;
+  name: string;
+  profileImage?: string;
+  roles?: string[];
+}
+
+type AuthContextType = {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: () => void;
+  logout: () => void;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isInitialized, setIsInitialized] = useState(false)
-  const user = useQuery(api.auth.getCurrentUser)
-  const isLoading = !isInitialized
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
-  // Mutations
-  const loginMutation = useMutation(api.auth.login)
-  const registerMutation = useMutation(api.auth.register)
-  const logoutMutation = useMutation(api.auth.logout)
-  const updateProfileMutation = useMutation(api.auth.updateProfile)
-
-  // Auth handlers
-  const handleLogin = async (email: string, password: string) => {
+  const fetchUser = async () => {
     try {
-      await loginMutation({ email, password })
+      const res = await fetch('/__replauthuser')
+      if (res.ok) {
+        const userData = await res.json()
+        setUser({
+          id: userData.id,
+          name: userData.name,
+          profileImage: userData.profileImage,
+          roles: userData.roles
+        })
+      } else {
+        setUser(null)
+      }
     } catch (error) {
-      console.error("Login failed:", error)
-      throw error
+      console.error('Error fetching user:', error)
+      setUser(null)
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleRegister = async (name: string, email: string, password: string) => {
-    try {
-      await registerMutation({ name, email, password })
-    } catch (error) {
-      console.error("Registration failed:", error)
-      throw error
+  useEffect(() => {
+    fetchUser()
+  }, [])
+
+  const login = () => {
+    window.addEventListener("message", authComplete)
+    const h = 500
+    const w = 350
+    const left = screen.width / 2 - w / 2
+    const top = screen.height / 2 - h / 2
+
+    const authWindow = window.open(
+      `https://replit.com/auth_with_repl_site?domain=${location.host}`,
+      "_blank",
+      `modal=yes,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,copyhistory=no,width=${w},height=${h},top=${top},left=${left}`
+    )
+
+    function authComplete(e: MessageEvent) {
+      if (e.data !== "auth_complete") return
+      window.removeEventListener("message", authComplete)
+      authWindow?.close()
+      fetchUser()
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await logoutMutation()
-    } catch (error) {
-      console.error("Logout failed:", error)
-      throw error
-    }
-  }
-
-  const handleUpdateProfile = async (userData: Partial<User>) => {
-    try {
-      await updateProfileMutation(userData)
-    } catch (error) {
-      console.error("Profile update failed:", error)
-      throw error
+  const logout = async () => {
+    const res = await fetch('/__replauthlogout')
+    if (res.ok) {
+      setUser(null)
+      router.push('/')
     }
   }
 
   const value = {
-    user: user ?? null,
+    user,
     isLoading,
     isAuthenticated: !!user,
-    login: handleLogin,
-    register: handleRegister,
-    logout: handleLogout,
-    updateProfile: handleUpdateProfile,
+    login,
+    logout
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
