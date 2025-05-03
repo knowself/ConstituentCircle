@@ -11,14 +11,14 @@ const Navigation = ({
   isMobile?: boolean
 }) => {
   const pathname = usePathname();
-  
+
   const links = [
     { href: '/', label: 'Home' },
     { href: '/services', label: 'Services' },
     { href: '/blog', label: 'Blog' },
     { href: '/contact', label: 'Contact' }
   ];
-  
+
   // Mobile navigation
   if (isMobile) {
     return (
@@ -36,13 +36,13 @@ const Navigation = ({
             {link.label}
           </Link>
         ))}
-        
+
         {/* Dark/Light mode toggle for mobile */}
         <div className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
           <span className="mr-2">Theme</span>
           <ThemeToggle />
         </div>
-        
+
         {/* Auth links for mobile */}
         <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center px-3">
@@ -71,7 +71,7 @@ const Navigation = ({
       </div>
     );
   }
-  
+
   // Desktop navigation
   return (
     <div className="container mx-auto">
@@ -85,7 +85,7 @@ const Navigation = ({
             />
           </Link>
         </div>
-        
+
         <div className="flex items-center space-x-8">
           {links.map((link) => (
             <Link
@@ -100,9 +100,9 @@ const Navigation = ({
               {link.label}
             </Link>
           ))}
-          
+
           <ThemeToggle />
-          
+
           <div className="flex items-center space-x-4">
             <Link
               href="/signin"
