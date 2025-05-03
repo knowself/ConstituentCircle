@@ -1,6 +1,7 @@
-import { authMiddleware } from "@clerk/nextjs";
 
-export default authMiddleware({
+import { createMiddleware } from "@clerk/nextjs/server";
+
+export default createMiddleware({
   publicRoutes: ["/", "/blog", "/contact", "/services", "/faq"]
 });
 
