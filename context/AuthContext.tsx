@@ -1,9 +1,11 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { api } from '../convex/_generated/api';
-import { useQuery, useAction } from 'convex/react';
+//import { api } from '../convex/_generated/api'; //Removed Convex API import
+import { useQuery, useAction } from 'convex/react'; //Keeping this for now, might need removal later
 import type { User } from '@/types/auth';
+import { DatabaseService } from "../lib/database/service"; // Added Replit DB service
+
 
 interface AuthContextType {
   user: User | null;
@@ -28,16 +30,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const validateSession = useAction(api.auth.validateSession);
-  const signUpAction = useAction(api.auth.signup);
+  //const validateSession = useAction(api.auth.validateSession); // Removed Convex action
+  const databaseService = new DatabaseService(); // Initialize Replit DB service
 
   const initializeAuth = useCallback(async () => {
     try {
       if (typeof window === 'undefined') return;
-      
+
       const token = localStorage.getItem('authToken');
       if (token) {
-        const validUser = await validateSession({ token });
+        //const validUser = await validateSession({ token }); // Removed Convex validation
+        // Replace with Replit DB user validation
+        const validUser = await databaseService.validateSession(token);
         if (validUser) {
           setUser(validUser);
         } else {
@@ -51,18 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [validateSession]);
+  }, [databaseService]);
 
   useEffect(() => {
-    // Initialize auth state on mount only on the client
     if (typeof window !== 'undefined') {
       console.log("AuthProvider useEffect: Running on client, calling initializeAuth");
       initializeAuth();
     } else {
-      // On the server, ensure we are marked as loading but not initialized yet
-      // This state should be consistent until client-side hydration takes over
       console.log("AuthProvider useEffect: Running on server, skipping initializeAuth");
-      // State defaults (isLoading: true, isInitialized: false) are already set
     }
   }, []);
 
@@ -71,7 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       setError(null);
-      // Login implementation
+      // Replace with Replit DB login
+      const user = await databaseService.login(email, password);
+      setUser(user);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -80,11 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    // Removed isInitialized check, API route is independent
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/auth/login', { // Use the API route
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,24 +93,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json(); // Attempt to parse JSON regardless of status
+      const data = await response.json();
 
       if (!response.ok) {
-        // Use error message from API response if available, otherwise generic message
         const errorMessage = data?.error || `Sign in failed with status: ${response.status}`;
         console.error("Sign in error from API:", errorMessage);
         throw new Error(errorMessage);
       }
 
-      // Sign-in successful! Cookie is set by the API route.
       console.log("Sign in successful via API route. User ID:", data?.userId);
-
-      // Clear potentially stale user data. Assume redirect/refresh handles fetching new data.
-      setUser(null);
+      setUser(null); //Assume refresh handles fetching new data
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign in failed due to an unexpected error.');
-      // Re-throw the error so the calling component can potentially handle it too
       throw err;
     } finally {
       setIsLoading(false);
@@ -121,13 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await signUpAction({
-        email,
-        password,
-        name: `${metadata.firstName} ${metadata.lastName}`,
-        metadata
-      });
-      setUser(result.user);
+      // Replace with Replit DB signup
+      const user = await databaseService.signUp(email, password, role, metadata);
+      setUser(user);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign up failed');
       throw err;
@@ -138,7 +130,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     if (!isInitialized) return;
-    // Logout implementation
+    // Replace with Replit DB logout
+    databaseService.logout();
+    setUser(null);
+    localStorage.removeItem('authToken');
   };
 
   const value: AuthContextType = {

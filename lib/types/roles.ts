@@ -51,3 +51,14 @@ export type EmploymentType =
   | 'campaign'
   | 'seasonal'
   | 'volunteer';
+
+export type UserRole = 'admin' | 'representative' | 'constituent';
+
+export interface UserRoles {
+  userId: string;
+  roles: UserRole[];
+}
+
+export const isValidRole = (role: string): role is UserRole => {
+  return ['admin', 'representative', 'constituent'].includes(role);
+};
