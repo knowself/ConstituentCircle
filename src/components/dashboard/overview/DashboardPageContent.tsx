@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Communication } from "@root/lib/types/communication";
 

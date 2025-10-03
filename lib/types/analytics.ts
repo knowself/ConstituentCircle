@@ -28,7 +28,7 @@ export interface Analytics {
     peakEngagementTimes: string[];
   };
   timestamp: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AnalyticsFilter {

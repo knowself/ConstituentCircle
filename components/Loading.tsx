@@ -1,30 +1,29 @@
-"use client"
+"use client";
 
-import React, { FC } from 'react'
+import type { FC } from "react";
 
 interface LoadingOverlayProps {
-  className?: string
-  size?: 'small' | 'medium' | 'large'
-  message?: string
+  size?: "small" | "medium" | "large";
+  message?: string;
 }
 
-const LoadingOverlay: FC<LoadingOverlayProps> = ({ size = 'medium', message, className }) => {
-  const spinnerSize = {
-    small: 'h-8 w-8',
-    medium: 'h-12 w-12', 
-    large: 'h-16 w-16'
-  }[size]
+const sizeMap: Record<NonNullable<LoadingOverlayProps["size"]>, string> = {
+  small: "h-8 w-8",
+  medium: "h-12 w-12",
+  large: "h-16 w-16",
+};
+
+const LoadingOverlay: FC<LoadingOverlayProps> = ({ size = "medium", message }) => {
+  const spinnerSize = sizeMap[size];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="flex flex-col items-center gap-4">
-        <div className={`animate-spin rounded-full ${spinnerSize} border-t-2 border-b-2 border-white`}></div>
-        {message && (
-          <p className="text-white text-lg">{message}</p>
-        )}
+        <div className={`animate-spin rounded-full border-t-2 border-b-2 border-white ${spinnerSize}`} />
+        {message ? <p className="text-lg text-white">{message}</p> : null}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoadingOverlay
+export default LoadingOverlay;

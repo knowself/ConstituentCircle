@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import { SignedOut, SignInButton } from "@clerk/nextjs";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -1,39 +1,38 @@
-'use client';
+"use client";
 
-import { Inter } from 'next/font/google';
-import '../../styles/globals.css';
-import { ReactNode } from 'react';
-import AdminSidebar from './components/AdminSidebar';
-import AdminHeader from './components/AdminHeader';
-import { useAuth } from '@/context/AuthContext'; // Use alias
-
-const inter = Inter({ subsets: ['latin'] });
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const isAdmin = user?.role === "admin";
 
-  // Show loading indicator while authentication state is resolving
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-        Loading Admin Area...
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        Loading admin workspace…
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminSidebar />
-      <div className="lg:pl-64 flex flex-col flex-1">
-        <AdminHeader user={user} />
-        <main className={`flex-1 ${inter.className}`}>
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {children}
-            </div>
-          </div>
-        </main>
+  if (!isAuthenticated || !isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background text-center text-foreground">
+        <p className="max-w-md text-sm text-muted-foreground">
+          You need an administrator account to access this area. Please sign in with admin credentials or return to the public site.
+        </p>
+        <div className="flex gap-3">
+          <Link className="rounded-md border px-4 py-2 text-sm" href="/">
+            Back to home
+          </Link>
+          <Link className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground" href="/auth/signin">
+            Admin sign in
+          </Link>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return <div className="min-h-screen bg-background">{children}</div>;
 }

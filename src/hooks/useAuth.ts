@@ -1,6 +1,6 @@
 import { useAuth as useAuthContext } from "@/context/AuthProvider";
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 
 export function useAuth() {
   const auth = useAuthContext();

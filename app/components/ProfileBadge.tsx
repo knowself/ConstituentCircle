@@ -2,11 +2,11 @@
 
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import Link from "next/link";
 
 export default function ProfileBadge() {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, user } = useUser();
   const me = useQuery(api.users.me);
 
   if (!isLoaded) {
