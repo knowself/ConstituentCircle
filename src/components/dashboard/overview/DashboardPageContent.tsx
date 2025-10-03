@@ -1,81 +1,35 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext'; // Use alias
-import { DatabaseService } from '@root/lib/database/service'; // Use @root alias
-import { Communication, CommunicationType, CommunicationDirection, CommunicationChannel } from '@root/lib/types/communication'; // Use @root alias
-import { Id } from '@convex/_generated/dataModel'; // Use @convex alias
-import LoadingSpinner from '@/components/LoadingSpinner'; // Assuming path
-
-// Define the ConvexCommunication interface based on what Convex returns
-interface ConvexCommunication {
-  _id: Id<"communications">;
-  _creationTime: number;
-  createdAt: number;
-  representativeId: Id<"users">;
-  constituentId: Id<"constituents">;
-  messageType: string;
-  content: string;
-  channel: string;
-  status: string;
-  sentAt: number;
-}
+import { useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { Communication } from "@root/lib/types/communication";
 
 export default function DashboardPageContent() {
-  const { user } = useAuth();
-  const [recentCommunications, setRecentCommunications] = useState<Communication[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading: authLoading } = useAuth();
+  const communications = useQuery(api.communications.getByRepresentative, {
+    representativeId: user?._id ?? "skip",
+  });
 
-  useEffect(() => {
-    async function loadData() {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      
-      console.log('Loading dashboard data for user:', user._id);
-      setIsLoading(true);
-      // Load recent communications
-      const communicationService = new DatabaseService('communications');
-      try {
-        // First, get the raw results
-        const rawResults = await communicationService.query({
-          representativeId: user._id,
-          _limit: 5 // Use a known field for limiting, or implement sorting/limiting in Convex query
-        });
+  const recentCommunications = useMemo<Communication[]>(() => {
+    if (!communications) return [];
+    return communications.slice(0, 5).map((item) => ({
+      id: String(item._id),
+      subject: item.subject ?? "",
+      content: item.message,
+      type: "direct",
+      direction: "outbound",
+      channel: "email",
+      visibility: "public",
+      status: (item.status as Communication["status"]) ?? "pending",
+      createdAt: new Date(item.createdAt ?? item._creationTime ?? Date.now()),
+      updatedAt: new Date(item.updatedAt ?? item._creationTime ?? Date.now()),
+    }));
+  }, [communications]);
 
-        console.log("Results from getRecentCommunications:", rawResults);
-        
-        // Then cast them to the correct type
-        const results = rawResults as unknown as ConvexCommunication[];
-
-        // Map the Convex data structure to the expected Communication interface
-        const communications = results.map(result => ({
-          id: String(result._id),
-          subject: result.messageType || "", // Use messageType as subject
-          content: result.content || "",
-          type: (result.messageType as CommunicationType) || "direct",
-          direction: "outbound" as CommunicationDirection, // Default to outbound for now
-          channel: (result.channel as CommunicationChannel) || "email",
-          visibility: "public" as "public" | "private" | "group", // Default to public
-          status: (result.status as "draft" | "sent" | "delivered" | "read") || "sent",
-          createdAt: new Date(result.createdAt), // Use createdAt if available
-          updatedAt: new Date(result._creationTime) // Use _creationTime as fallback
-        }));
-        
-        setRecentCommunications(communications);
-      } catch (error) {
-        console.error("Error fetching communications:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadData();
-  }, [user]);
-
-  // If still loading, show loading indicator
-  if (isLoading) {
+  if (authLoading || communications === undefined) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
         <LoadingSpinner />
@@ -83,33 +37,44 @@ export default function DashboardPageContent() {
     );
   }
 
-  // JSX moved from page.tsx
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Welcome, {user?.name || 'User'}!</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+          Welcome, {user?.name || "User"}!
+        </h2>
         <p className="text-gray-600 dark:text-gray-300">
           This is your dashboard where you can manage all your constituent communications and analyze engagement data.
         </p>
       </div>
-      
+
       <div className="mb-8">
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Recent Communications</h3>
         {recentCommunications.length > 0 ? (
           <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              {recentCommunications.map(communication => (
+              {recentCommunications.map((communication) => (
                 <li key={communication.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-lg font-medium text-gray-900 dark:text-white">{communication.subject}</h4>
-                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{communication.content}</p>
+                      <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+                        {communication.subject || "Untitled"}
+                      </h4>
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                        {communication.content}
+                      </p>
                       <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        {communication.createdAt?.toLocaleDateString() || 'Unknown date'} â€¢ {communication.channel} â€¢ {communication.status}
+                        {communication.createdAt?.toLocaleDateString() ?? "Unknown date"} • {communication.channel} • {communication.status}
                       </p>
                     </div>
                     <div className="ml-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${communication.status === 'sent' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}`}>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          communication.status === "sent"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        }`}
+                      >
                         {communication.status}
                       </span>
                     </div>
@@ -121,15 +86,10 @@ export default function DashboardPageContent() {
         ) : (
           <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md p-6 text-center">
             <p className="text-gray-600 dark:text-gray-300">No recent communications found.</p>
-            {/* Consider linking this button or making it functional */}
-            <button className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Create New Message
-            </button>
           </div>
         )}
       </div>
-      
-      {/* Placeholder Stats/Tasks/Activity - these could fetch data similarly */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -137,11 +97,13 @@ export default function DashboardPageContent() {
             <dl className="mt-5 grid grid-cols-1 gap-5">
               <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Messages</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{/* Placeholder */ recentCommunications.length}</dd>
+                <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">
+                  {recentCommunications.length}
+                </dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Response Rate</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{/* Placeholder */}0%</dd>
+                <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">0%</dd>
               </div>
             </dl>
           </div>

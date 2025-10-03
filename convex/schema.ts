@@ -6,8 +6,9 @@ export type ValidGovernmentLevel = "federal" | "state" | "county" | "municipal" 
 
 export default defineSchema({
   users: defineTable({
-    email: v.string(),
-    name: v.string(),
+    clerkId: v.optional(v.string()),
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
     displayname: v.optional(v.string()),
     passwordHash: v.optional(v.string()),
     role: v.union(
@@ -17,26 +18,29 @@ export default defineSchema({
       v.literal("company_admin"),
       v.literal("constituent")
     ),
-    authProvider: v.string(),
-    metadata: v.object({
-      firstName: v.optional(v.string()),
-      lastName: v.optional(v.string()),
-      employmentType: v.optional(
-        v.union(
-          v.literal("permanent"),
-          v.literal("seasonal"),
-          v.literal("intern"),
-          v.literal("elected"),
-          v.literal("volunteer")
-        )
-      ),
-    }),
+    authProvider: v.optional(v.string()),
+    metadata: v.optional(
+      v.object({
+        firstName: v.optional(v.string()),
+        lastName: v.optional(v.string()),
+        employmentType: v.optional(
+          v.union(
+            v.literal("permanent"),
+            v.literal("seasonal"),
+            v.literal("intern"),
+            v.literal("elected"),
+            v.literal("volunteer")
+          )
+        ),
+      })
+    ),
     createdAt: v.number(),
     lastLoginAt: v.optional(v.number()),
   })
     .index("by_email", ["email"])
     .index("by_role", ["role"])
-    .index("by_name", ["name"]),
+    .index("by_name", ["name"])
+    .index("by_clerkId", ["clerkId"]),
 
   sessions: defineTable({
     userId: v.id("users"),
@@ -61,7 +65,7 @@ export default defineSchema({
       v.literal("company_admin"),
       v.literal("constituent")
     ),
-    governmentLevel: v.optional(  // Made optional
+    governmentLevel: v.optional(
       v.union(
         v.literal("federal"),
         v.literal("state"),

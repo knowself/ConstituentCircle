@@ -1,23 +1,18 @@
+import { useAuth as useAuthContext } from "@/context/AuthProvider";
 import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
-
-export interface User {
-  _id: string;
-  name?: string;
-  email: string;
-  role: string;
-  firstName?: string;
-  lastName?: string;
-  avatar_url?: string;
-}
+import { api } from "@/convex/_generated/api";
 
 export function useAuth() {
-  const user = useQuery(api.auth.getCurrentUser, {});
-  const isLoading = user === undefined;
+  const auth = useAuthContext();
+  const convexUser = useQuery(api.users.me);
+  const isLoading = auth.isLoading || convexUser === undefined;
+  const user = convexUser ?? auth.user;
 
   return {
-    user: user || null,
+    ...auth,
+    user,
+    clerkUser: auth.user,
+    convexUser: convexUser ?? null,
     isLoading,
-    isAuthenticated: !isLoading && user !== null
   };
 }

@@ -123,3 +123,53 @@ export const updateUserProfile = mutation({
     // return await ctx.db.get(userId);
   },
 });
+
+export const ensureUser = mutation({
+  args: {
+    clerkId: v.string(),
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const normalizedClerkId = args.clerkId.trim();
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", normalizedClerkId))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        email: args.email ?? existing.email ?? null,
+        name: args.name ?? existing.name ?? null,
+        authProvider: "clerk",
+        lastLoginAt: Date.now(),
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert("users", {
+      clerkId: normalizedClerkId,
+      email: args.email ?? null,
+      name: args.name ?? null,
+      role: "user",
+      authProvider: "clerk",
+      metadata: undefined,
+      createdAt: Date.now(),
+      lastLoginAt: Date.now(),
+    });
+  },
+});
+
+export const me = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+  },
+});

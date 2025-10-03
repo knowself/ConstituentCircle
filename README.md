@@ -6,55 +6,77 @@ Constituent Circle creates AI-enabled tools for more effective, opinionated, goa
 
 Our vision is to enable representatives to conduct, at scale, effective, opinionated, goal-oriented conversations with thousands, tens of thousands or more individuals and groups. This is our vision of the kinds of super powers representatives in a representative democracy need.
 
-## The Technology
+## Current Technology Stack
 
-We combine artificial intelligence (AI) and natural language processing (NLP) to help representatives craft on-message emails efficiently while maintaining their own voice. Our system analyzes and learns from existing responses to create personalized templates tailored to the user's preference.
+| Layer | What we use | Notes |
+| --- | --- | --- |
+| Frontend | Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS | App Router structure under `app/`, Tailwind for design tokens, client/server components mixed where sensible. |
+| Authentication | [Clerk](https://clerk.com/) | ClerkProvider wraps the app, UI widgets (SignIn, SignUp, UserButton) power all auth flows. |
+| Persistence & APIs | [Convex](https://www.convex.dev/) | Convex hosts schema, queries, mutations, and actions. Clerk identities are synced into Convex tables via `convex/users.ts`. |
+| AI integrations | OpenAI SDK (optional) | `lib/ai-services/openAIClient.ts` bootstraps OpenAI when a key is present. |
+| Mail & notifications | Nodemailer (SMTP) | Configurable via environment variables; used for contact flows. |
+| Hosting & CI/CD | Vercel | `vercel.json` drives deploys, `next build` + `convex codegen` run in CI. |
 
-### Tech Stack
+### Backend Data Model
 
-- **Frontend**: Next.js with TypeScript and Tailwind CSS
-- **Backend**: Replit Database for data storage and management
-- **Authentication**: Replit Auth for secure user authentication
-- **Deployment**: Replit for hosting and deployment
+Convex is the single source of truth. Key tables live in `convex/schema.ts`:
 
-## Tech Stack Versions
+- `users` & `sessions` – user records keyed by Clerk `clerkId`, session tokens for legacy features still required by the app.
+- `profiles`, `communications`, `constituents` – domain entities for representative/constituent data and messaging history.
 
-- **@heroicons/react**: ^2.0.18
-- **@types/nodemailer**: ^6.4.17
-- **@vercel/analytics**: ^1.1.1
-- **ai**: ^4.0.20
-- **Next.js**: ^15.2.0
-- **@replit/database**: ^latest
+Convex helpers:
 
-## Database Configuration
+- `convex/users.ts` – `ensureUser` mutation upserts Clerk users into Convex; `me` query exposes the logged-in user.
+- `convex/auth.ts` – legacy password-based actions slated for removal once all routes are Clerk-only.
 
-Constituent Circle uses Replit Database as its backend service, providing persistent data storage with key-value pair functionality.
+### Auth Flow
 
-### Schema Design
+- `app/layout.tsx` wraps the tree with `ClerkProvider` and project-wide client providers.
+- `app/components/EnsureUserOnLogin.tsx` runs on the client to sync Clerk identities into Convex.
+- Navigation and dashboards rely on `src/hooks/useAuth.ts`, which merges Clerk session state with Convex user documents.
+- Sign-in/up pages live under `app/auth/*` and simply render Clerk components.
 
-Our database structure includes the following key patterns:
+### Development Tooling
 
-- **users:_{id}**: Stores user account information
-- **sessions:_{id}**: Manages authentication sessions
-- **profiles:_{id}**: Contains extended user profile information
-- **communications:_{id}**: Tracks communications between representatives and constituents
-- **constituents:_{id}**: Stores constituent-specific information
+- `npm run dev` – Next.js dev server (ensure `npm install` has run first).
+- `npm run lint` – ESLint with Next.js config.
+- `npm run test` – Jest suite (WIP coverage).
+- `scripts/guard.sh` – CI helper that blocks reintroduction of deprecated Replit/Firebase assets.
 
+### Environment Variables
 
-## Examples
+Copy `.env.example` to `.env.local` and configure:
 
-Our tools help representatives have more meaningful conversations with their constituents. For example, when discussing climate change:
+```dotenv
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
 
-1. The tool asks constituents about their biggest concerns
-2. Provides representatives with relevant information about climate change impacts in their district
-3. Enables representatives to gather constituent input on addressing climate change locally
+# Convex
+NEXT_PUBLIC_CONVEX_URL="https://your-convex-instance.convex.cloud"
+CONVEX_DEPLOYMENT=""
+CONVEX_SITE_URL=""
 
-These tools also help with:
-- Project management
-- Idea development and refinement
-- Schedule and deadline tracking
-- Position improvement and constituent service
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
+# Optional integrations
+OPENAI_API_KEY=""
+SMTP_HOST=""
+SMTP_PORT=587
+SMTP_SECURE=true
+SMTP_USER=""
+SMTP_PASSWORD=""
+CONTACT_EMAIL_TO=""
+CONTACT_EMAIL_FROM=""
+```
+
+Remove any `REPLIT_*` or Firebase Data Connect variables—those systems are no longer used.
+
+### Debugging
+
+- Visit `/debug/me` while signed in to inspect the Convex document linked to your Clerk identity.
+- Convex function logs surface in the Convex dashboard; client-side auth issues appear in the browser console.
 
 ## Getting Started
 
@@ -65,7 +87,21 @@ These tools also help with:
 
 ### Installation
 
-1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/constituent-circle.git
 cd constituent-circle
+npm install
+npm run dev
+```
+
+## Contributing
+
+See `CONTRIBUTING.md` for guardrails. The high points:
+
+- Clerk is the only auth provider. Do not reintroduce custom password flows without approval.
+- Convex is the only persistence layer. Add tables/queries/mutations under `convex/`.
+- Update docs and `.env.example` when adding new configuration.
+
+## License
+
+ISC

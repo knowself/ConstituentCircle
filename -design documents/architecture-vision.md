@@ -1,7 +1,7 @@
 # ConstituentCircle.com - Architecture Vision
 
 ## Executive Summary
-ConstituentCircle.com is an advanced AI-powered communication platform designed to bridge the gap between representatives and their constituents. Our platform leverages cutting-edge artificial intelligence and natural language processing to enable personalized, scalable, and meaningful communications while maintaining authenticity and personal touch. Through intelligent message processing, multi-channel capabilities, and enterprise-grade security, we empower both representatives and constituents to engage in effective, goal-oriented conversations at scale.
+ConstituentCircle.com is an AI-augmented communication platform designed to bridge the gap between representatives and their constituents. The platform combines conversational AI, structured workflows, and human oversight so elected officials and their teams can respond to large volumes of inbound messages without sacrificing authenticity.
 
 ## Core Mission and Values
 
@@ -9,228 +9,80 @@ ConstituentCircle.com is an advanced AI-powered communication platform designed 
 To create AI-enabled tools that facilitate meaningful, goal-oriented communications at scale between representatives and constituents, ensuring both parties are heard and understood in representative democracies around the world.
 
 ### Key Values
-- **Authentic Communication**: Maintain representatives' genuine voice while scaling interactions
-- **Democratic Engagement**: Foster meaningful dialogue between representatives and constituents
-- **Technological Innovation**: Leverage AI to enhance rather than replace human connection
-- **Security and Trust**: Ensure data protection and privacy in all communications
-- **Scalable Impact**: Enable representatives to engage meaningfully with large constituent bases
+- **Authentic Communication**: Maintain representatives' genuine voice while scaling interactions.
+- **Democratic Engagement**: Foster meaningful dialogue between representatives and constituents.
+- **Technical Clarity**: Operate on a transparent, maintainable stack so the team can iterate quickly.
+- **Security and Trust**: Protect constituent data and meet compliance expectations.
+- **Scalable Impact**: Support high message throughput without sacrificing usability.
 
 ## Technical Architecture
 
 ### Platform Foundation
 
-#### Frontend Architecture
-- **Next.js Framework**
-  - Server-side rendering for optimal SEO
-  - Static generation for content-heavy pages
-  - Real-time updates via WebSocket connections
-  - TypeScript integration for enhanced code quality
-  - Tailwind CSS for responsive design
-  - Component-based architecture for reusability
+#### Frontend
+- **Framework**: Next.js 15 (App Router) with React 18 and TypeScript.
+- **Styling**: Tailwind CSS design tokens plus custom components in `app/components` and `src/components`.
+- **Auth UI**: Clerk widgets (SignIn, SignUp, UserButton) rendered via client components.
+- **State**: Lightweight custom hooks built on Clerk + Convex; React state for local UI.
 
-#### Backend Infrastructure
-- **Replit Infrastructure**
-  - Replit Database for persistent data storage
-  - Key-value based data management
-  - Automatic scaling and reliability
-  - Cost-efficient resource utilization
+#### Authentication
+- **Provider**: Clerk handles identity, session cookies, and social logins.
+- **Middleware**: `middleware.ts` delegates route protection to `clerkMiddleware`.
+- **Sync into Data Layer**: `EnsureUserOnLogin` mutation stores Clerk`s `user.id` inside Convex for domain lookups.
 
-#### Database Layer
-- **Primary Storage**
-  - Replit Database for data persistence
-  - Redis for caching and session management
-  - Structured key patterns for data organization
+#### Backend & Persistence
+- **Runtime**: Convex hosts serverless TypeScript functions for queries, mutations, and actions.
+- **Schema**: Defined in `convex/schema.ts`; notable tables include `users`, `sessions`, `profiles`, `communications`, and `constituents`.
+- **APIs**: Frontend calls Convex via generated clients (`convex/_generated/api`) using `convex/react` hooks or `ConvexHttpClient` where server access is needed.
 
-### Database Schema
+#### Hosting & Delivery
+- **Platform**: Vercel builds and hosts the Next.js frontend.
+- **Build Pipeline**: `convex codegen` runs before `next build` (see `vercel.json`).
+- **Static Assets**: Served through Next.js `public/` and Vercel edge network.
 
-Our PostgreSQL database schema is designed to support the core functionality of the platform with the following key tables:
+### Current Data Model Snapshot
 
-#### Core Tables
-- **profiles**: Links to Replit Auth users and stores role information
-- **representatives**: Stores information about elected officials and their offices
-- **constituents**: Manages constituent data and preferences
-- **communications**: Tracks all interactions between representatives and constituents
-- **groups**: Enables segmentation of constituents for targeted communications
-- **group_members**: Junction table for many-to-many relationship between groups and constituents
-- **analytics**: Stores aggregated metrics for reporting and insights
+| Table | Purpose | Key Fields/Indexes |
+| --- | --- | --- |
+| `users` | Canonical user record | `clerkId`, `email`, `role`, `createdAt`; indexed by `clerkId` & `email`. |
+| `sessions` | Legacy session tokens (phasing out) | `userId`, `token`, `expiresAt`. |
+| `profiles` | Representative/constituent details | Role, jurisdiction metadata, government level. |
+| `communications` | Message history | `representativeId`, `constituentId`, `status`, timestamps. |
+| `constituents` | Constituent addresses & districts | `userId`, `district`, structured address object. |
 
-#### Security Features
-- Row-level security (RLS) policies to ensure data access control
-- Role-based permissions for representatives and constituents
-- Secure authentication integration with Replit Auth
+Convex enforces schema types at runtime. Queries run close to the data and stream results to the client via websockets when desired.
 
-#### Technical Implementation
-- UUID primary keys for enhanced security and distribution
-- JSONB fields for flexible data storage (preferences, metadata, analytics)
-- Proper indexing for performance optimization
-- Timestamp tracking for auditing and analytics
-- Efficient query optimization with PostgreSQL
+### AI & Integrations
+- **OpenAI**: `lib/ai-services/openAIClient.ts` lazily initialises an OpenAI client when keys are provided. AI features are optional in environments without credentials.
+- **Email**: Nodemailer is configured (via SMTP environment variables) for contact flows and system notifications.
+- **Redis Stub**: `lib/redis/client.ts` remains available for future queueing/caching but is currently unused.
 
-#### Security Framework
-- **Authentication & Authorization**
-  - Multi-factor authentication support
-  - JWT-based session management
-  - Role-based access control
-  - Bcrypt password hashing
-  - Secure API endpoints
+## Operational Picture
 
-### AI/NLP Integration
+### Development Workflow
+1. Install dependencies (`npm install`).
+2. Run `npm run dev` to start the Next.js dev server and load Convex endpoints.
+3. Update Convex schema/functions, then run `npx convex dev` (or rely on the dev server to restart when files change).
+4. Use `npm run lint` and `npm run test` before push; `scripts/guard.sh` prevents reintroduction of deprecated Replit/Firebase assets.
 
-#### Core AI Components
-- **OpenAI GPT-4 Integration**
-  - Context-aware response generation with representative's voice preservation
-  - Real-time sentiment analysis for constituent feedback
-  - Automated topic classification and routing
-  - Language style matching to maintain authenticity
-  - Policy position analysis and suggestion system
+### Environments
+- **Local**: `.env.local` supplies Clerk + Convex keys; Convex dev server runs alongside `next dev`.
+- **Preview / Production**: Vercel manages environment variables; Convex deployment URL is stored in `NEXT_PUBLIC_CONVEX_URL`.
 
-- **TensorFlow Implementation**
-  - Custom model training on representative's communication style
-  - Constituent engagement pattern recognition
-  - Response effectiveness optimization
-  - Automated constituent concern categorization
-  - Communication volume prediction and resource allocation
+### Monitoring & Debugging
+- **Convex Dashboard**: Inspect logs, function traces, and data.
+- **Clerk Dashboard**: Manage users and monitor auth events.
+- **Debug Route**: `/debug/me` prints the Convex record for the signed-in Clerk user.
 
-- **spaCy NLP Pipeline**
-  - Advanced constituent message processing
-  - Named entity recognition for key issues and stakeholders
-  - Multi-language constituent support
-  - Policy-specific terminology extraction
-  - Constituent intent classification
+## Future Enhancements
 
-#### AI-Powered Features
-1. **Smart Response System**
-   - Message context analysis
-   - Constituent sentiment tracking
-   - Response prioritization
-   - Communication history analysis
-
-2. **Predictive Analytics**
-   - Topic trend analysis
-   - Response effectiveness prediction
-   - Engagement pattern detection
-   - Communication volume forecasting
-
-3. **Quality Assurance**
-   - Message tone verification
-   - Policy compliance checking
-   - Response appropriateness
-   - Issue escalation detection
-
-### Communication Infrastructure
-
-#### Multi-Channel Support
-- Email integration via Nodemailer
-- SMS capabilities
-- Web portal communications
-- API-based integrations
-
-#### Template Management
-- Dynamic template generation
-- Category-based organization
-- Personalization tokens
-- Version control
-
-#### Analytics Engine
-- Response rate tracking
-- Engagement metrics
-- Communication effectiveness
-- Constituent satisfaction monitoring
-
-## Development and Operations
-
-### DevOps Pipeline
-- **Containerization**: Docker for consistent environments
-- **Orchestration**: Kubernetes for deployment management
-- **CI/CD**: GitHub Actions for automated workflows
-- **Monitoring**: Prometheus and Grafana integration
-
-### Cloud Infrastructure
-- **Multi-Cloud Strategy**
-  - AWS for core services
-  - GCP for AI/ML capabilities
-  - Azure for additional redundancy
-
-### Testing Framework
-- Jest for unit and integration testing
-- End-to-end testing automation
-- Performance benchmarking
-- Security vulnerability scanning
-
-## Business Model
-
-### Subscription Tiers
-1. **Basic Plan**
-   - Essential communication features
-   - Limited message volume
-   - Standard templates
-   - Basic support
-
-2. **Professional Plan ($199/month)**
-   - Increased message volume
-   - Advanced AI assistance
-   - Custom templates
-   - Priority support
-   - Basic analytics
-
-3. **Enterprise Plan ($499/month)**
-   - Unlimited messaging
-   - Advanced analytics
-   - Custom AI training
-   - Dedicated support
-   - API access
-
-### Value-Added Services
-- Custom integration development
-- Training and onboarding
-- Communication strategy consulting
-- Advanced analytics packages
-
-## Competitive Advantages
-
-1. **AI-First Approach**
-   - Advanced language models
-   - Intelligent automation
-   - Predictive analytics
-   - Continuous learning
-
-2. **Scalability**
-   - Serverless architecture
-   - Automatic resource scaling
-   - Multi-channel support
-   - Enterprise-grade infrastructure
-
-3. **Security and Compliance**
-   - End-to-end encryption
-   - Role-based access
-   - Audit trails
-   - Data protection
-
-4. **User Experience**
-   - Intuitive interface
-   - Responsive design
-   - Real-time updates
-   - Personalized interactions
-
-## Implementation Roadmap
-
-### Phase 1: Core Platform (Q4 2024)
-- Basic authentication and authorization
-- Email communication infrastructure
-- Template management system
-- Initial AI integration
-
-### Phase 2: Advanced Features (Q1 2025)
-- Multi-channel support
-- Advanced AI capabilities
-- Analytics dashboard
-- API development
-
-### Phase 3: Enterprise Scaling (Q2 2025)
-- Custom integrations
-- Advanced security features
-- Performance optimization
-- Extended AI capabilities
+| Area | Near-term goal |
+| --- | --- |
+| Admin Dashboards | Migrate remaining admin routes from legacy password workflows to pure Clerk auth. |
+| Data Hygiene | Remove obsolete session tokens once all flows read from Clerk IDs. |
+| Testing | Expand Jest + Playwright coverage around auth gating and Convex mutations. |
+| Messaging | Layer in real delivery providers (email/SMS) behind Convex actions. |
+| AI | Harden prompt libraries and add caching when OpenAI usage ramps up. |
 
 ## Conclusion
-ConstituentCircle.com's architecture is designed to deliver a robust, scalable, and intelligent communication platform that serves the unique needs of representative democracy in the digital age. Through careful integration of advanced technologies and a focus on user experience, we aim to transform how representatives and constituents interact, making democratic engagement more effective and meaningful at scale.
+The stack is now intentionally concise: Clerk for identity, Convex for data and business logic, and Next.js on Vercel for delivery. This alignment removes ambiguity from earlier prototypes (Replit DB, Firebase Data Connect) and gives us a clear foundation for iterating on constituent–representative communication tools.
