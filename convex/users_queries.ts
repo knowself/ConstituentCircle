@@ -1,5 +1,6 @@
 import { QueryCtx, query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
 
 const userRoles = v.union(
   v.literal("admin"),
@@ -9,10 +10,27 @@ const userRoles = v.union(
   v.literal("constituent")
 );
 
+const toResponse = (user: Doc<"users">) => ({
+  _id: user._id,
+  _creationTime: user._creationTime,
+  email: user.email ?? "",
+  name: user.name ?? user.email ?? "",
+  displayname: user.displayname ?? undefined,
+  role: user.role,
+  authProvider: user.authProvider ?? "clerk",
+  metadata: {
+    firstName: user.metadata?.firstName,
+    lastName: user.metadata?.lastName,
+    employmentType: user.metadata?.employmentType,
+  },
+  createdAt: user.createdAt,
+  lastLoginAt: user.lastLoginAt,
+});
+
 export const listUsers = query({
   args: {
     role: v.optional(userRoles),
-    search: v.optional(v.string())
+    search: v.optional(v.string()),
   },
   returns: v.array(
     v.object({
@@ -26,27 +44,25 @@ export const listUsers = query({
       metadata: v.object({
         firstName: v.optional(v.string()),
         lastName: v.optional(v.string()),
-        employmentType: v.optional(v.string())
+        employmentType: v.optional(v.string()),
       }),
       createdAt: v.number(),
-      lastLoginAt: v.optional(v.number())
+      lastLoginAt: v.optional(v.number()),
     })
   ),
   handler: async (ctx: QueryCtx, args) => {
-    let query = ctx.db.query("users");
+    let queryBuilder = ctx.db.query("users");
 
-    // Apply role filter if provided
     if (args.role !== undefined) {
-      query = query.filter(q => q.eq(q.field("role"), args.role));
+      queryBuilder = queryBuilder.filter((q) => q.eq(q.field("role"), args.role));
     }
 
-    // Get all users matching the base criteria
-    const users = await query.collect();
+    const docs = await queryBuilder.collect();
+    const users = docs.map(toResponse);
 
-    // If search term provided, filter in memory for case-insensitive partial matches
     if (args.search) {
       const searchLower = args.search.toLowerCase();
-      return users.filter(user => {
+      return users.filter((user) => {
         const emailMatch = user.email.toLowerCase().includes(searchLower);
         const nameMatch = user.name.toLowerCase().includes(searchLower);
         const displaynameMatch = user.displayname?.toLowerCase().includes(searchLower) ?? false;
@@ -55,5 +71,5 @@ export const listUsers = query({
     }
 
     return users;
-  }
+  },
 });

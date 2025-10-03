@@ -1,6 +1,5 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { action, query, internalQuery } from "./_generated/server";
-import { ConvexError } from "convex/values";
 import type { AuthResponse, UserDoc } from "./types";
 import { Id } from "./_generated/dataModel";
 
@@ -11,17 +10,25 @@ export const login = action({
   },
   handler: async (ctx, args): Promise<AuthResponse> => {
     const normalizedEmail = args.email.toLowerCase().trim();
-    
+
     // @ts-ignore // 'internal' is implicitly available at runtime
     const user = await ctx.runQuery(internal.users.getUserByEmail, {
-      email: normalizedEmail
+      email: normalizedEmail,
     });
-    
+
     if (!user || !user._id) {
       throw new ConvexError({
         type: "authentication",
         message: "No user found with this email",
-        status: 401
+        status: 401,
+      });
+    }
+
+    if (!user.email) {
+      throw new ConvexError({
+        type: "authentication",
+        message: "User record is missing an email",
+        status: 401,
       });
     }
 
@@ -42,12 +49,12 @@ export const login = action({
     await ctx.runMutation(internal.authInternal.createSession, {
       userId: user._id,
       token,
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
 
     // @ts-ignore // 'internal' is implicitly available at runtime
     await ctx.runMutation(internal.authInternal.updateLastLogin, {
-      userId: user._id
+      userId: user._id,
     });
 
     return {
@@ -55,7 +62,7 @@ export const login = action({
       user: {
         _id: user._id,
         email: user.email,
-        name: user.name,
+        name: user.name ?? user.email,
         role: user.role,
       },
     };
@@ -66,7 +73,7 @@ export const validateSession = query({
   args: { token: v.string() },
   handler: async (ctx, args): Promise<UserDoc | null> => {
     if (!args.token) return null;
-    
+
     const session = await ctx.db
       .query("sessions")
       .withIndex("by_token", (q) => q.eq("token", args.token))
@@ -74,7 +81,7 @@ export const validateSession = query({
 
     if (!session || session.expiresAt < Date.now()) return null;
 
-    return await ctx.db.get(session.userId) as UserDoc | null;
+    return (await ctx.db.get(session.userId)) as UserDoc | null;
   },
 });
 
@@ -83,24 +90,26 @@ export const signup = action({
     email: v.string(),
     password: v.string(),
     name: v.string(),
-    metadata: v.optional(v.object({
-      firstName: v.optional(v.string()),
-      lastName: v.optional(v.string())
-    }))
+    metadata: v.optional(
+      v.object({
+        firstName: v.optional(v.string()),
+        lastName: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, args): Promise<AuthResponse> => {
     const normalizedEmail = args.email.toLowerCase().trim();
-    
+
     // @ts-ignore // 'internal' is implicitly available at runtime
-    const existingUser = await ctx.runQuery(internal.users.getUserByEmail, {
-      email: normalizedEmail
-    }) as UserDoc | null;
+    const existingUser = (await ctx.runQuery(internal.users.getUserByEmail, {
+      email: normalizedEmail,
+    })) as UserDoc | null;
 
     if (existingUser) throw new ConvexError("User already exists");
 
     // @ts-ignore // 'internal' is implicitly available at runtime
     const passwordHash = await ctx.runAction(internal.authInternal.hashPassword, {
-      password: args.password
+      password: args.password,
     });
 
     // @ts-ignore // 'internal' is implicitly available at runtime
@@ -111,35 +120,35 @@ export const signup = action({
       role: "user",
       authProvider: "email",
       metadata: args.metadata || {},
-      createdAt: Date.now()
+      createdAt: Date.now(),
     });
 
     // @ts-ignore // 'internal' is implicitly available at runtime
     const token = await ctx.runAction(internal.authInternal.generateToken, {
-      userId
+      userId,
     });
 
     // @ts-ignore // 'internal' is implicitly available at runtime
     await ctx.runMutation(internal.authInternal.createSession, {
       userId,
       token,
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
 
     // @ts-ignore // 'internal' is implicitly available at runtime
-    const user = await ctx.runQuery(internal.users.getUser, { userId }) as UserDoc | null;
-    if (!user) throw new ConvexError("Failed to create user");
+    const user = (await ctx.runQuery(internal.users.getUser, { userId })) as UserDoc | null;
+    if (!user || !user.email) throw new ConvexError("Failed to create user");
 
     return {
       token,
       user: {
         _id: user._id,
         email: user.email,
-        name: user.name,
-        role: user.role
-      }
+        name: user.name ?? user.email,
+        role: user.role,
+      },
     };
-  }
+  },
 });
 
 export const getCurrentUser = query({
@@ -160,9 +169,6 @@ type CheckUserActionResult = {
   createdAt: number | null;
 };
 
-/**
- * INTERNAL: Utility to check a user record by email
- */
 export const _checkUserByEmailInternal = internalQuery({
   args: {
     email: v.string(),
@@ -180,7 +186,7 @@ export const _checkUserByEmailInternal = internalQuery({
   handler: async (ctx, args): Promise<CheckUserActionResult> => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase())) // Normalize email
+      .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
       .unique();
 
     if (!user) {
@@ -201,16 +207,13 @@ export const _checkUserByEmailInternal = internalQuery({
       hasPasswordHash: !!user.passwordHash,
       role: user.role,
       id: user._id,
-      email: user.email,
+      email: user.email ?? args.email.toLowerCase(),
       name: user.name ?? null,
       createdAt: user.createdAt,
     };
   },
 });
 
-/**
- * ACTION: Public action to check a user by email, callable from the client.
- */
 export const checkUser = action({
   args: {
     email: v.string(),
@@ -230,9 +233,10 @@ export const checkUser = action({
     console.log(`Action: Checking user with email: ${normalizedEmail}`);
 
     try {
-      // Call the internal query using ctx.runQuery
       // @ts-ignore // Ignore TS error, 'internal' is implicitly available at runtime
-      const result = await ctx.runQuery(internal.auth._checkUserByEmailInternal, { email: normalizedEmail }); // Updated path to internal.auth
+      const result = await ctx.runQuery(internal.auth._checkUserByEmailInternal, {
+        email: normalizedEmail,
+      });
       console.log("Action: Query result:", result);
       return result;
     } catch (error) {

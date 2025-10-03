@@ -1,6 +1,7 @@
-import { query, mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { ConvexError } from "convex/values";
 
 export const getUserByEmail = query({
   args: { email: v.string() },
@@ -44,57 +45,45 @@ export const createUser = mutation({
   }
 });
 
-// New query to get the currently authenticated user's data
 export const getCurrentUser = query({
-  args: {}, // No arguments needed
+  args: {},
   handler: async (ctx) => {
-    // Get the identity of the user calling this query, if authenticated
     const identity = await ctx.auth.getUserIdentity();
 
-    // If the user is not authenticated, identity will be null
     if (!identity) {
       console.log("getCurrentUser: No authenticated identity found.");
       return null;
     }
 
-    // Explicitly check if email exists on the identity
     if (!identity.email) {
       console.warn(`getCurrentUser: Authenticated identity ${identity.subject} is missing an email address.`);
-      return null; // Cannot find user without email if that's the key
-    }
-
-    // Assign to a new const after the check to ensure type narrowing
-    const userEmail = identity.email;
-
-    // Now TypeScript knows userEmail is a string
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", userEmail)) // Use the email from the identity
-      .first(); // Use first() as email should be unique
-
-    if (!user) {
-      // This case should ideally not happen if signup correctly creates a user
-      // record linked to the auth identity, but handle it defensively.
-      console.warn(`getCurrentUser: Authenticated user with email ${userEmail} not found in DB.`);
       return null;
     }
-    
-    console.log(`getCurrentUser: Found user for email ${userEmail}, id: ${user._id}`);
-    return user; // Return the full user document
+
+    const normalizedEmail = identity.email.toLowerCase();
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .first();
+
+    if (!user) {
+      console.warn(`getCurrentUser: Authenticated user with email ${normalizedEmail} not found in DB.`);
+      return null;
+    }
+
+    console.log(`getCurrentUser: Found user for email ${normalizedEmail}, id: ${user._id}`);
+    return user;
   },
 });
 
-// Add updateUserProfile mutation if it doesn't exist already
 export const updateUserProfile = mutation({
   args: {
-    userId: v.id("users"), // Ensure you pass the user's ID
-    updates: v.object({ // Define the fields that can be updated
+    userId: v.id("users"),
+    updates: v.object({
       name: v.optional(v.string()),
-      // Add other updatable fields here, e.g., metadata
       metadata: v.optional(v.object({
         firstName: v.optional(v.string()),
         lastName: v.optional(v.string()),
-        // Add other metadata fields as needed
       }))
     })
   },
@@ -104,23 +93,16 @@ export const updateUserProfile = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Optional: Check if the authenticated user is the one they are trying to update
-    // (or if they have admin privileges)
     const userToUpdate = await ctx.db.get(userId);
     if (!userToUpdate) {
       throw new Error("User not found");
     }
-    // Example check: allow self-update or admin update
-    if (userToUpdate.email !== identity.email /* && !isAdmin(identity) */) {
-       throw new Error("Unauthorized to update this profile");
+
+    if (userToUpdate.email !== identity.email) {
+      throw new Error("Unauthorized to update this profile");
     }
 
-
-    console.log(`Updating profile for user ${userId} with updates:`, updates);
     await ctx.db.patch(userId, updates);
-    console.log(`Profile updated for user ${userId}`);
-    // Optionally return the updated user or just void
-    // return await ctx.db.get(userId);
   },
 });
 
@@ -138,20 +120,43 @@ export const ensureUser = mutation({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", normalizedClerkId))
       .unique();
 
+    const email = args.email?.trim().toLowerCase() ?? existing?.email;
+    if (!email) {
+      throw new ConvexError({
+        message: `Clerk user ${normalizedClerkId} is missing an email address`,
+      });
+    }
+
+    const name = args.name?.trim() || existing?.name || email;
+
     if (existing) {
-      await ctx.db.patch(existing._id, {
-        email: args.email ?? existing.email ?? null,
-        name: args.name ?? existing.name ?? null,
+      const updates: Record<string, unknown> = {
         authProvider: "clerk",
         lastLoginAt: Date.now(),
-      });
+      };
+
+      if (existing.email !== email) {
+        updates.email = email;
+      }
+      if (existing.name !== name) {
+        updates.name = name;
+      }
+      if (!existing.displayname && name) {
+        updates.displayname = name;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await ctx.db.patch(existing._id, updates);
+      }
+
       return existing._id;
     }
 
     return await ctx.db.insert("users", {
       clerkId: normalizedClerkId,
-      email: args.email ?? null,
-      name: args.name ?? null,
+      email,
+      name,
+      displayname: name,
       role: "user",
       authProvider: "clerk",
       metadata: undefined,
